@@ -28,6 +28,20 @@ local function concat_lists(...)
     return list
 end
 
+--- Make a deep copy of an object
+---
+--- @param obj table object to copy
+--- @return table copy of the object
+local function copy(obj, seen)
+    if type(obj) ~= 'table' then return obj end
+    seen = seen or {}
+    if seen[obj] then return seen[obj] end
+    local s = seen
+    local res = {}
+    s[obj] = res
+    for k, v in next, obj do res[copy(k, s)] = copy(v, s) end
+    return setmetatable(res, getmetatable(obj))
+  end
 
 --- Serialize an object
 ---
@@ -67,6 +81,7 @@ end
 return {
     lookup = lookup,
     concat_lists = concat_lists,
+    copy = copy,
     serialize = serialize,
     split = split
 }
