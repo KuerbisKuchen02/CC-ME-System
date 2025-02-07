@@ -41,7 +41,19 @@ local function copy(obj, seen)
     s[obj] = res
     for k, v in next, obj do res[copy(k, s)] = copy(v, s) end
     return setmetatable(res, getmetatable(obj))
-  end
+end
+
+--- Merge two sets
+---
+--- @param set1 table first set
+--- @param set2 table second set
+--- @return table merged set
+local function union(set1, set2)
+    local set = {}
+    for k, v in pairs(set1) do set[k] = v end
+    for k, v in pairs(set2) do set[k] = v end
+    return set
+end
 
 --- Serialize an object
 ---
@@ -82,6 +94,7 @@ return {
     lookup = lookup,
     concat_lists = concat_lists,
     copy = copy,
+    union = union,
     serialize = serialize,
     split = split
 }
