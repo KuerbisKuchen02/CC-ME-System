@@ -25,14 +25,14 @@ local function getItemDetails(self, item)
     if item.details then return end
 
     local start = os.epoch("utc")
-    for i, _ in pairs(item.locations) do
-        local peripheral = self._inventories[i]
+    for peripheralName, _ in pairs(item.locations) do
+        local peripheral = self.peripherals[peripheralName]
         assert(peripheral, "Peripheral listed as source but not present")
 
         local index
-        for j, content in pairs(peripheral.content) do
+        for i, content in pairs(peripheral.content) do
             if content.hash == item.hash then
-                index = j
+                index = i
                 break
             end
         end
@@ -87,7 +87,7 @@ end
 --- @param index number The index in the content table from the given peripheral
 --- @param change number The value to increase or decrease the count by
 local function updateItemCount(self, item, peripheralName, index, change)
-    local peripheral = self.inventory[peripheralName]
+    local peripheral = self.peripherals[peripheralName]
     local slot = peripheral.content[index]
     slot.count = slot.count + change
 
@@ -112,11 +112,11 @@ end
 --- Function is called in a background thread by @Items:loadPeripheral
 --- Uses `list()` or `items()` to get the content of the peripheral and update all internal item counts.
 --- 
---- @param self Items
---- @param peripheralName string
+--- @param self Items The current items instance
+--- @param peripheralName string The name of the peripheral
 local function indexInventory(self, peripheralName)
     local start = os.epoch("utc")
-    local peripheral = self._inventories[peripheralName]
+    local peripheral = self.peripherals[peripheralName]
     local existingItems = peripheral.content
     local newItems
     if peripheral.type == "inventory" then
@@ -152,7 +152,6 @@ local function indexInventory(self, peripheralName)
                     end
                 -- item changed
                 else
-                    -- remove old item
                     local it = self:getItem(existingItem.hash)
                     updateItemCount(self, it, peripheralName, i, -existingItem.count)
                     dirty[it] = true
@@ -166,9 +165,9 @@ local function indexInventory(self, peripheralName)
             end
         end
     end
-    self._context.mediator:publish("items.inventory_change", peripheralName)
+    self._context.mediator:publish("items.peripheral_change", peripheralName)
     self._context.mediator:publish("items.item_change", dirty)
-    log.info("Indexed Peripheral %s in %.2fs", peripheralName, (os.epoch("utc") - start) * 1e-3)
+    log.info("Indexed peripheral %s in %.2fs", peripheralName, (os.epoch("utc") - start) * 1e-3)
 end
 
 --- Method to load a peripheral into the system.
@@ -183,7 +182,7 @@ end
 function Items:loadPeripheral(peripheralName)
     expect(1, peripheralName, "string")
 
-    if not self._inventories[peripheralName] then
+    if not self.peripherals[peripheralName] then
         local peripheral = peripheral.wrap(peripheralName)
         if not peripheral then
             log.error("Peripheral not found: %s", peripheralName)
@@ -191,20 +190,24 @@ function Items:loadPeripheral(peripheralName)
         end
         local peripheralType = peripheral.getType(peripheralName)
         if peripheralType ~= "inventory" and peripheralType ~= "item_storage" then
-            log.error("The provied peripheral has a unkown type. The system only supports the inventory and item_storage type!")
+            error("The provied peripheral has a unkown type. The system only supports the inventory and item_storage type!")
         end
         local size
         if peripheral.size then
             size = peripheral.size()
         end
-        self._inventories[peripheralName] = {
+        self.peripherals[peripheralName] = {
+            name = peripheralName,
             type = peripheralType,
             priority = 0,
             size = size,
             remote = peripheral,
+            content = {},
+            itemTypes = false,
+            modifciationSeq = 0,
+            lastScan = 0,
         }
     end
-    self._context.mediator:publish("peripheral_loaded", peripheralName)
     self._taskPool.spawn(function () indexInventory(self, peripheralName) end)
 end
 
@@ -212,18 +215,93 @@ end
 ---
 --- You should unload a peripheral properly before disconnecting it from the system.
 --- This will remove all items from the system item list and stop all queued tasks for that peripheral.
+---
+---@param peripheralName string The name of the peripheral
 function Items:unloadPeripheral(peripheralName)
     expect(1, peripheralName, "string")
-
-    local peripheral = self._inventories[peripheralName]
+    local start = os.epoch("utc")
+    local peripheral = self.peripherals[peripheralName]
+    -- If the inventory was never loaded, abort
     if not peripheral then return end
 
-    for _, item in pairs(peripheral.content) do
-        local savedItem = self._items[item.name]
-        savedItem.count = savedItem.count - item.count
-        savedItem.locations[peripheralName] = nil
+    local dirty = {}
+    for i, content in pairs(peripheral.content) do
+        local item = self:getItem(content.hash)
+        updateItemCount(self, item, peripheralName, i, -content.count)
+        dirty[item] = true
     end
-    self._inventories[peripheralName] = nil
+    self.peripherals[peripheralName] = nil
+    self._context.mediator:publish("items.peripheral_change", peripheralName)
+    self._context.mediator:publish("items.item_change", dirty)
+    log.info("Unloaded peripheral %s in %.2fs", peripheralName, (os.epoch("utc") - start) * 1e-3)
+end
+
+--- Method to sort the locations by there priority.
+---
+--- @param self Items The current items instance
+--- @param peripherals table The locations to sort
+local function sortPeripherals(self, peripherals)
+    local sorted = {}
+    for name, _ in pairs(peripherals) do
+        table.insert(sorted, self.peripherals[name])
+    end
+    table.sort(sorted, function (a, b) return a.priority > b.priority end)
+    return sorted
+end
+
+--- Method to insert an item into a peripheral.
+---
+--- @self Items The current items instance
+--- @from string The name of the peripheral to insert the item from
+--- @fromSlot number The slot of the item in the peripheral
+--- @limit number The max number of items to insert
+--- @peripheral string The name of the peripheral to insert the item to
+--- @hash string The hash of the item to insert
+local function insert_into(self, from, fromSlot, limit, peripheral, hash)
+    if peripheral.itemTypes and not peripheral.itemTypes[hash] then return 0 end
+
+    peripheral.modifciationSeq = peripheral.modifciationSeq + 1
+    local success, count
+    if peripheral.type == "inventory" then
+        success, count = pcall(peripheral.remote.pullItems, from, fromSlot, limit)
+    else -- item_storage
+        success, count = pcall(peripheral.remote.pullItems, from, fromSlot, unhashItem(hash), limit)
+    end
+    if not success then
+        log.error("Failed to insert %d x %s into %s: %s", limit, hash, peripheral.name, count)
+        return 0
+    end
+    if count > 0 and peripheral.lastScan < peripheral.modifciationSeq then
+        peripheral.lastScan = peripheral.modifciationSeq
+        self._taskPool.spawn(function () indexInventory(self, peripheral.name) end)
+    end
+    return count
+end
+
+local function insertItemInternal(self, from, fromSlot, hash, limit)
+    if limit <= 0 then return end
+
+    log.debug("Inserting %d x %s from %s (slot %s)", limit, hash, from, fromSlot)
+    local start, tried = os.epoch("utc"), 0
+    local remaining = limit
+    -- If the hash is known, try to place it into an existing stack
+    if hash then
+        local item = self:getItem(hash)
+        for _, peripheral in pairs(sortPeripherals(self, item.locations)) do
+            if remaining <= 0 then break end
+            remaining = remaining - insert_into(self, from, fromSlot, remaining, peripheral, hash)
+        end
+    end
+    -- If the hash is unknown, just put it anywhere
+    for _, peripheral in pairs(sortPeripherals(self, self.peripherals)) do
+        if remaining <= 0 then break end
+        remaining = remaining - insert_into(self, from, fromSlot, remaining, peripheral, hash)
+    end
+    if remaining > 0 then
+        log.warning("Storage full, could not insert %d x %s", remaining, hash)
+        self._context.mediator:publish("items.storage_full")
+    end
+    log.info("Inserted %d x %s in %.2fs", limit - remaining, hash, (os.epoch("utc") - start) * 1e-3)
 end
 
 --- This method will insert an item into the system.
@@ -231,11 +309,23 @@ end
 --- The system will determine the best inventory and move the item to that inventory.
 --- The item will also be added to the system item list.
 ---
----@param peripheralName string The name of the peripheral
----@param slot number The slot containing the item
----@param count number Number of items to insert
-function Items:insertItem(peripheralName, slot, count)
+---@param from string The name of the peripheral
+---@param fromSlot number The slot containing the item
+---@param item table|number { name = string, count = number, nbt? = string }|number The item we're pulling. This should either be a slot from `list()` or `getItemDetails()`, or a simple limit if the item is unknown.
+function Items:insertItem(from, fromSlot, item)
+    expect(1, from, "string")
+    expect(2, fromSlot, "number")
+    expect(3, item, "table", "number")
 
+    local hash, limit
+    if (type(item) == "table") then
+        hash = hashItem(item.name, item.nbt)
+        limit = item.count
+    else
+        limit = item
+    end
+
+    self._taskPool:spawn(function () insertItemInternal(self, from, fromSlot, hash, limit) end)
 end
 
 --- This method will extract an item from the system.
@@ -254,7 +344,7 @@ end
 --- @param context Context
 function Items:constructor(context)
     self.items = {}
-    self.inventories = {}
+    self.peripherals = {}
 
     self._context = context
     self._taskPool = context._peripheralPool
