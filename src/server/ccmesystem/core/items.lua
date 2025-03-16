@@ -257,7 +257,7 @@ end
 --- @limit number The max number of items to insert
 --- @peripheral string The name of the peripheral to insert the item to
 --- @hash string The hash of the item to insert
-local function insert_into(self, from, fromSlot, limit, peripheral, hash)
+local function insertInto(self, from, fromSlot, limit, peripheral, hash)
     if peripheral.itemTypes and not peripheral.itemTypes[hash] then return 0 end
 
     peripheral.modifciationSeq = peripheral.modifciationSeq + 1
@@ -289,13 +289,13 @@ local function insertItemInternal(self, from, fromSlot, hash, limit)
         local item = self:getItem(hash)
         for _, peripheral in pairs(sortPeripherals(self, item.locations)) do
             if remaining <= 0 then break end
-            remaining = remaining - insert_into(self, from, fromSlot, remaining, peripheral, hash)
+            remaining = remaining - insertInto(self, from, fromSlot, remaining, peripheral, hash)
         end
     end
     -- If the hash is unknown, just put it anywhere
     for _, peripheral in pairs(sortPeripherals(self, self.peripherals)) do
         if remaining <= 0 then break end
-        remaining = remaining - insert_into(self, from, fromSlot, remaining, peripheral, hash)
+        remaining = remaining - insertInto(self, from, fromSlot, remaining, peripheral, hash)
     end
     if remaining > 0 then
         log.warning("Storage full, could not insert %d x %s", remaining, hash)
@@ -318,7 +318,7 @@ function Items:insertItem(from, fromSlot, item)
     expect(3, item, "table", "number")
 
     local hash, limit
-    if (type(item) == "table") then
+    if type(item) == "table" then
         hash = hashItem(item.name, item.nbt)
         limit = item.count
     else
@@ -328,16 +328,146 @@ function Items:insertItem(from, fromSlot, item)
     self._taskPool:spawn(function () insertItemInternal(self, from, fromSlot, hash, limit) end)
 end
 
+-- Check the peripheral and the slot is the same. Might happen if we detach and attach a peripheral.
+local function checkExtract(self, hash, name, peripheral, slot, slot_idx, detail)
+    expect(2, hash, "string")
+    expect(3, name, "string")
+    expect(4, peripheral, "table")
+    expect(5, slot, "table")
+    expect(6, slot_idx, "number")
+    expect(7, detail, "string")
+
+    local newPeripheral = self.peripherals[name]
+    if newPeripheral ~= peripheral then
+      log.warning("Peripheral %s changed during transfer %s from slot #%d. %s", name, hash, slot_idx, detail)
+      return false
+    end
+
+    assert(peripheral.content[slot_idx] == slot, "Peripheral slots have changed unknowingly")
+
+    if slot.hash ~= hash then
+      log.warning("Slot %s[%d] has changed for unknown reasons (did something external change the peripheral?). %s", name, slot_idx, detail)
+      return false
+    end
+
+    return true
+  end
+
+
 --- This method will extract an item from the system.
 ---
 --- The system will find the desired item amount and move it to the peripheral.
 --- The items will be removed from the system item list.
 ---
---- @param peripheralName string The name of the peripheral to extract the item to
---- @param slot number The Slot where the item should be extracted to
---- @param count number The number of items to extract
---- @param itemName string The name of the item to extract
-function Items:extractItem(peripheralName, slot, count, itemName)
+--- @param toPeripheral string The peripheral to push to
+--- @param hash string The hash of the item we're pushing
+--- @param count number The number of items to push
+function Items:extractItem(toPeripheral, hash, count, done)
+    expect(1, toPeripheral, "string")
+    expect(2, hash, "string")
+    expect(3, count, "number")
+    done = done or function () end;
+
+    log.info("Extracting %d x %s to %s", count, hash, toPeripheral)
+
+    local item = self.items[hash]
+    if count <= 0 or not item or item.count == 0 then return done(0) end
+
+    local tasks, transferred = 0, 0
+    local function finishedJob(val)
+        tasks = tasks - 1;
+        transferred = transferred + val
+        if tasks == 0 then done(transferred) end
+    end
+
+    for _, name in sortPeripherals(self, item.peripherals) do
+        local peripheral = self.peripherals[name]
+
+        if peripheral.type == "inventory" then
+            for i, slot in pairs(peripheral.content) do
+                if slot.hash == hash and slot.count > slot.reserved then
+                    local toExtract = math.min(count, slot.count - slot.reserved)
+                    slot.reserved = slot.reserved + toExtract
+                    count = count - toExtract
+
+                    tasks = tasks + 1
+                    self._context:spawnPeripheral(function ()
+                        if not checkExtract(self, hash, name, peripheral, slot, i,
+                        "Skipping extract.") then
+                            return finishedJob(0)
+                        end
+
+                        local success, extracted = pcall(peripheral.remote.pushItems, toPeripheral, i, toExtract)
+
+                        if not checkExtract(self, hash, name, peripheral, slot, i,
+                        "Extract has happened, but not clear how to handle this!") then
+                            return finishedJob(0)
+                        end
+
+                        slot.reserved = slot.reserved - toExtract
+
+                        if not success then
+                            log.error("%s.pushItems(...): %s", name, extracted)
+                            return finishedJob(0)
+                        elseif extracted == nil then
+                            return finishedJob(0)
+                        end
+
+                        if extracted ~= 0 then
+                            updateItemCount(self, item, name, i, -extracted)
+                            self._context.mediator.publish("items.item_change", {[item] = true})
+                        end
+
+                        finishedJob(extracted)
+                    end)
+                    if count <= 0 then break end
+                end
+            end
+        else
+            for i, slot in pairs(peripheral.content) do
+                if slot.hash == hash and slot.count > slot.reserved then
+                    while slot.count - slot.reserved > 0 do
+                        local toExtract = math.min(count, slot.count - slot.reserved, 128)
+                        slot.reserved = slot.reserved + toExtract
+                        count = count - toExtract
+                        tasks = tasks + 1
+                        self._context:spawnPeripheral(function ()
+                            if not checkExtract(self, hash, name, peripheral, slot, i,
+                            "Skipping extract.") then
+                                return finishedJob(0)
+                            end
+    
+                            local success, extracted = pcall(peripheral.remote.pushItems, toPeripheral, i, toExtract)
+    
+                            if not checkExtract(self, hash, name, peripheral, slot, i,
+                            "Extract has happened, but not clear how to handle this!") then
+                                return finishedJob(0)
+                            end
+    
+                            slot.reserved = slot.reserved - toExtract
+    
+                            if not success then
+                                log.error("%s.pushItems(...): %s", name, extracted)
+                                return finishedJob(0)
+                            elseif extracted == nil then
+                                return finishedJob(0)
+                            end
+    
+                            if extracted ~= 0 then
+                                updateItemCount(self, item, name, i, -extracted)
+                                self._context.mediator.publish("items.item_change", {[item] = true})
+                            end
+    
+                            finishedJob(extracted)
+                        end)
+                        if count <= 0 then break end 
+                    end
+                end
+            end
+        end
+        if count <= 0 then break end
+    end
+    if tasks == 0 then return done(0) end
 end
 
 
