@@ -11,6 +11,10 @@ local function hashItem(name, nbt)
     if nbt then return name .. "@" .. nbt else return name end
 end
 
+--- Converts a hash back into a name and nbt hash.
+--- @param hash string hash of an item
+--- @return string name name of the item
+--- @return string? nbt nbt hash (optional)
 local function unhashItem(hash)
     local name, nbt = hash:match("^([^@]+)@?(.*)$")
     if name then return name, nbt else return hash end
@@ -265,7 +269,7 @@ local function insertInto(self, from, fromSlot, limit, peripheral, hash)
     if peripheral.type == "inventory" then
         success, count = pcall(peripheral.remote.pullItems, from, fromSlot, limit)
     else -- item_storage
-        success, count = pcall(peripheral.remote.pullItems, from, fromSlot, unhashItem(hash), limit)
+        success, count = pcall(peripheral.remote.pullItems, from, unhashItem(hash), limit)
     end
     if not success then
         log.error("Failed to insert %d x %s into %s: %s", limit, hash, peripheral.name, count)
@@ -383,22 +387,24 @@ function Items:extractItem(toPeripheral, hash, count, done)
     for _, name in sortPeripherals(self, item.peripherals) do
         local peripheral = self.peripherals[name]
 
-        if peripheral.type == "inventory" then
-            for i, slot in pairs(peripheral.content) do
-                if slot.hash == hash and slot.count > slot.reserved then
-                    local toExtract = math.min(count, slot.count - slot.reserved)
+        for i, slot in pairs(peripheral.content) do
+            if slot.hash == hash and slot.count > slot.reserved then
+                while slot.count - slot.reserved > 0 do
+                    local toExtract = math.min(count, slot.count - slot.reserved, 128)
                     slot.reserved = slot.reserved + toExtract
                     count = count - toExtract
-
                     tasks = tasks + 1
                     self._context:spawnPeripheral(function ()
                         if not checkExtract(self, hash, name, peripheral, slot, i,
                         "Skipping extract.") then
                             return finishedJob(0)
                         end
-
-                        local success, extracted = pcall(peripheral.remote.pushItems, toPeripheral, i, toExtract)
-
+                        local success, extracted
+                        if peripheral.type == "inventory" then
+                            success, extracted = pcall(peripheral.remote.pushItems, toPeripheral, i, toExtract)
+                        else -- item_storage
+                            success, extracted = pcall(peripheral.remote.pushItems, toPeripheral, unhashItem(hash), toExtract)
+                        end
                         if not checkExtract(self, hash, name, peripheral, slot, i,
                         "Extract has happened, but not clear how to handle this!") then
                             return finishedJob(0)
@@ -421,47 +427,6 @@ function Items:extractItem(toPeripheral, hash, count, done)
                         finishedJob(extracted)
                     end)
                     if count <= 0 then break end
-                end
-            end
-        else
-            for i, slot in pairs(peripheral.content) do
-                if slot.hash == hash and slot.count > slot.reserved then
-                    while slot.count - slot.reserved > 0 do
-                        local toExtract = math.min(count, slot.count - slot.reserved, 128)
-                        slot.reserved = slot.reserved + toExtract
-                        count = count - toExtract
-                        tasks = tasks + 1
-                        self._context:spawnPeripheral(function ()
-                            if not checkExtract(self, hash, name, peripheral, slot, i,
-                            "Skipping extract.") then
-                                return finishedJob(0)
-                            end
-    
-                            local success, extracted = pcall(peripheral.remote.pushItems, toPeripheral, i, toExtract)
-    
-                            if not checkExtract(self, hash, name, peripheral, slot, i,
-                            "Extract has happened, but not clear how to handle this!") then
-                                return finishedJob(0)
-                            end
-    
-                            slot.reserved = slot.reserved - toExtract
-    
-                            if not success then
-                                log.error("%s.pushItems(...): %s", name, extracted)
-                                return finishedJob(0)
-                            elseif extracted == nil then
-                                return finishedJob(0)
-                            end
-    
-                            if extracted ~= 0 then
-                                updateItemCount(self, item, name, i, -extracted)
-                                self._context.mediator.publish("items.item_change", {[item] = true})
-                            end
-    
-                            finishedJob(extracted)
-                        end)
-                        if count <= 0 then break end 
-                    end
                 end
             end
         end

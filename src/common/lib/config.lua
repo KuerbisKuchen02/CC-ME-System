@@ -200,4 +200,6 @@ Config.schema = {
   end,
 }
 
+Config.sides = sides
+
 return Config
