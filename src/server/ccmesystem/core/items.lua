@@ -282,7 +282,7 @@ local function insertInto(self, from, fromSlot, limit, peripheral, hash)
     return count
 end
 
-local function insertItemInternal(self, from, fromSlot, hash, limit)
+local function insertInternal(self, from, fromSlot, hash, limit)
     if limit <= 0 then return end
 
     log.debug("Inserting %d x %s from %s (slot %s)", limit, hash, from, fromSlot)
@@ -316,7 +316,7 @@ end
 ---@param from string The name of the peripheral
 ---@param fromSlot number The slot containing the item
 ---@param item table|number { name = string, count = number, nbt? = string }|number The item we're pulling. This should either be a slot from `list()` or `getItemDetails()`, or a simple limit if the item is unknown.
-function Items:insertItem(from, fromSlot, item)
+function Items:insert(from, fromSlot, item)
     expect(1, from, "string")
     expect(2, fromSlot, "number")
     expect(3, item, "table", "number")
@@ -329,7 +329,7 @@ function Items:insertItem(from, fromSlot, item)
         limit = item
     end
 
-    self._taskPool:spawn(function () insertItemInternal(self, from, fromSlot, hash, limit) end)
+    self._taskPool:spawn(function () insertInternal(self, from, fromSlot, hash, limit) end)
 end
 
 -- Check the peripheral and the slot is the same. Might happen if we detach and attach a peripheral.
@@ -366,7 +366,7 @@ local function checkExtract(self, hash, name, peripheral, slot, slot_idx, detail
 --- @param toPeripheral string The peripheral to push to
 --- @param hash string The hash of the item we're pushing
 --- @param count number The number of items to push
-function Items:extractItem(toPeripheral, hash, count, done)
+function Items:extract(toPeripheral, hash, count, done)
     expect(1, toPeripheral, "string")
     expect(2, hash, "string")
     expect(3, count, "number")
