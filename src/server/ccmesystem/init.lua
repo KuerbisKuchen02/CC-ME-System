@@ -4,6 +4,7 @@ return function ()
     context:require("ccmesystem.modules.items")
     context:require("ccmesystem.modules.peripherals")
     context:require("ccmesystem.modules.dropoff")
+    context:require("ccmesystem.modules.rednet")
 
     return context
 end

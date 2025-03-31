@@ -24,7 +24,7 @@ end
 --- @param object table the object
 --- @param methodName? string|nil the method name
 --- @param ...? any the arguments for the method (optional)
---- @return any values the return values of the method
+--- @return ... values the return values of the method
 local function super (object, methodName, ...)
     assert(type(object) == "table", "Object must be a table")
     if methodName == nil then
