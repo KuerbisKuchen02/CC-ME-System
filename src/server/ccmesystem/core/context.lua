@@ -31,16 +31,22 @@ end
 --- @return table instance The module instance
 function Context:require(module)
     expect(1, module, "string", "table")
-
+    log.debug("Require module %s", module)
     if type(module) == "string" then
         module = require(module)
+        if module == true then
+            log.error("Module should return a class or function", module)
+            error("Module should return a class or function", 2)
+        end
     end
 
     local instance = self._modules[module]
     if instance == sentinel then
+        log.error("Circular dependency detected: %s", module)
         error("Circular dependency detected: " .. module, 2)
     elseif instance == nil then
         self._modules[module] = sentinel
+        log.info("Loading module %s", module)
         instance = module(self)
         self._modules[module] = instance or true
     end
@@ -73,7 +79,7 @@ function Context:run()
 
     local ok, err = pcall(self._mainPool.runUntilDone)
     if not ok then
-        log.error("Error: %s", err)
+        log.fatal("Error: %s", err)
         error(err)
     end
 

@@ -1,10 +1,11 @@
 local log = {}
 
 log.level = "debug"
-log.outfile = nil
+log.outfile = "ccmesystem.log"
 log.usecolor = true
 
 local modes = {
+    {name = "trace", color = colors.gray},
     {name = "debug", color = colors.blue},
     {name = "info", color = colors.white},
     {name = "warn", color = colors.yellow},
@@ -41,6 +42,9 @@ for i, x in ipairs(modes) do
                             lineinfo,
                             msg)
         if log.outfile then
+            if fs.getSize(log.outfile) > 100000 then
+                fs.delete(log.outfile)
+            end
             local file = fs.open(log.outfile, "a")
             file.writeLine(msg)
             file.close()

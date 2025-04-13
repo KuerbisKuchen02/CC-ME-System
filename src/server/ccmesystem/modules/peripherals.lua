@@ -11,11 +11,6 @@ local log = require("ccmesystem.lib.log")
 local schema = require("ccmesystem.lib.config").schema
 local sides = require("ccmesystem.lib.config").sides
 
-local ALLOWED_PERIPHERAL_TYPES = {
-    ["inventory"] = true,
-    ["item_storage"] = true,
-}
-
 local Peripherals = class.class()
 
 function Peripherals:constructor(context)
@@ -32,12 +27,14 @@ function Peripherals:constructor(context)
 
     self.ignoredNames = util.lookup(config.ignoredNames)
     self.ignoredTypes = util.lookup(config.ignoredTypes)
-
+    log.debug("Ignored names: %s", util.serialize(self.ignoredNames))
+    log.debug("Ignored types: %s", util.serialize(self.ignoredTypes))
     context:spawn(function ()
         -- Load all peripheral. Done in a task (rather than during init)
         -- so that other modules can ignore specific types/ names.
         for _, name in ipairs(peripheral.getNames()) do
-            if self.enabled(name) then
+            if self:enabled(name) then
+                log.info("Loading %s due to startup", name)
                 items:loadPeripheral(name)
             end
         end
@@ -54,8 +51,8 @@ function Peripherals:constructor(context)
                 log.info("Unloading %s due to peripheral_detach event", arg)
                 items:unloadPeripheral(arg)
             elseif event == "timer" and arg == timer then
-                if items.peripheral[name] then
-                    name = next(items.peripheral, name)
+                if items.peripherals[name] then
+                    name = next(items.peripherals, name)
                 else
                     name = nil
                 end
@@ -84,14 +81,15 @@ function Peripherals:constructor(context)
         expect(1, name, "string")
         if sides[name] or self.ignoredNames[name] then return false end
 
-        local types, isAllowed = { peripheral.getType }, false
+        local types, isAllowed = { peripheral.getType(name) }, false
         for _, t in ipairs(types) do
             if self.ignoredTypes[t] then return false end
-            if ALLOWED_PERIPHERAL_TYPES[t] then isAllowed = true end
+            if items.ALLOWED_PERIPHERAL_TYPES[t] then isAllowed = true end
         end
 
         return isAllowed
     end
 end
 
+log.info("Loaded peripherals module")
 return Peripherals

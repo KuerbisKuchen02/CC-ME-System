@@ -31,10 +31,10 @@ function Group:constructor(underlying, name, path, comment)
   self.child_names = {}
 
   self.entries = setmetatable({}, {
-    __newindex = function() error("Cannot modify config data") end,
+    __newindex = function() error("Cannot modify config data", 2) end,
     __index = function(_, name)
       local item = self.child_names[name]
-      if not item then error("No such config key '" .. tostring(name) .. "'") end
+      if not item then error("No such config key '" .. tostring(name) .. "'", 2) end
 
       if getmetatable(item) == Group then
         return item.entries
@@ -44,7 +44,7 @@ function Group:constructor(underlying, name, path, comment)
           data = item.default
         else
           local ok, err = item.validate(concatPath(self.path, name), data)
-          if not ok then error("Bad config option " .. err, 0) end
+          if not ok then error("Bad config option " .. err, 2) end
         end
 
         return item.transform(data)
@@ -111,7 +111,7 @@ local function saveGroup(group, underlying, file, indent)
     if i > 1 then file:write("\n") end
 
     local child = group.child_list[i]
-    if child.comment then file.write(("%s-- %s\n"):format(indent, child.comment)) end
+    if child.comment then file:write(("%s-- %s\n"):format(indent, child.comment)) end
 
     local name, value = child.name, underlying[child.name]
     if keywords[name] then name = ("[%q]"):format(name) end

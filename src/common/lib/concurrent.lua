@@ -1,4 +1,6 @@
 local expect = require("cc.expect").expect
+local log = require("ccmesystem.lib.log")
+local util = require("ccmesystem.lib.util")
 
 local exception_mt = {
     __name = "exception",
@@ -68,6 +70,7 @@ local function createRunner (max_size)
             addedPrope = true
             os.queueEvent("concurrent_probe")
         end
+        log.debug("Spawned coroutine %d", queueCount)
     end
 
     --- Check if there are any coroutines running or waiting to run.
@@ -78,6 +81,8 @@ local function createRunner (max_size)
     --- Run all coroutines until they are all done.
     local function runUntilDone ()
         while true do
+            log.trace("%d active threads: %s", activeCount, util.serialize(active))
+            log.trace("%d queued threads: %s", queueCount, util.serialize(queue))
             while activeCount < max_size and queueCount > 0 do
                 local task = table.remove(queue, 1)
                 queueCount = queueCount - 1
@@ -119,7 +124,7 @@ local function createRunner (max_size)
         while true do
             runUntilDone()
             os.pullEvent("concurrent_probe")
-            addedPrope = true
+            addedPrope = false
         end
     end
 

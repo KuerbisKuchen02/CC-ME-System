@@ -1,3 +1,5 @@
+local expect = require("cc.expect").expect
+
 --- Class system for Lua
 
 --- Create a new object of a class
@@ -6,7 +8,7 @@
 --- @param ...? any the arguments for the constructor (optional)
 --- @return table object the new object
 local function new (c, ...)
-    assert(type(c) == "table", "Class must be a table")
+    expect(1, c, "table")
 
     local o = {}
     setmetatable(o, c)
@@ -26,7 +28,9 @@ end
 --- @param ...? any the arguments for the method (optional)
 --- @return ... values the return values of the method
 local function super (object, methodName, ...)
-    assert(type(object) == "table", "Object must be a table")
+    expect(1, object, "table")
+    expect(2, methodName, "string", "nil")
+
     if methodName == nil then
         methodName = "constructor"
     end
@@ -68,8 +72,8 @@ end
 --- @param class table the class to check against
 --- @return boolean isInstance true if the object is an instance of the class
 local function instanceOf (object, class)
-    assert(type(object) == "table", "Object must be a table")
-    assert(type(class) == "table", "Class must be a table")
+    expect(1, object, "table")
+    expect(2, class, "table")
 
     local c = getmetatable(object).__index
     while c do 

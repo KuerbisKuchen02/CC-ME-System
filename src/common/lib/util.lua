@@ -1,3 +1,5 @@
+local expect = require("cc.expect").expect
+
 --- Auxilary functions for other modules
 
 --- Convert a list to a lookup table. Allow you to easily check,
@@ -6,7 +8,7 @@
 --- @param list table List which should be converted
 --- @return table lookup with the provided items
 local function lookup(list)
-    assert(type(list) == "table", "List must be a table")
+    expect(1, list, "table")
 
     local set = {}
     for _, l in ipairs(list) do set[l] = true end
@@ -49,6 +51,10 @@ end
 --- @param set2 table second set
 --- @return table merged set
 local function union(set1, set2)
+    expect(1, set1, "table")
+    expect(2, set2, "table")
+    if set1 == set2 then return set1 end
+
     local set = {}
     for k, v in pairs(set1) do set[k] = v end
     for k, v in pairs(set2) do set[k] = v end
@@ -70,6 +76,8 @@ local function serialize(obj)
             string = string .. "[" .. serialize(k) .. "]=" .. serialize(v) .. ","
         end
         return string .. "}"
+    elseif type(obj) == "thread" then
+        return "thread("..coroutine.status(obj)..")"
     else
         error("cannot serialize a " .. type(obj))
     end
@@ -82,6 +90,9 @@ end
 --- @param sep? string separator
 --- @return table list list of strings
 local function split(str, sep)
+    expect(1, str, "string")
+    expect(2, sep, "string", "nil")
+
     local sep, fields = sep or " ", {}
     local pattern = string.format("([^%s]+)", sep)
     local _ = str:gsub(pattern, function(c) table.insert(fields, c) end)
