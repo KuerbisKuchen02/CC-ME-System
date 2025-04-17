@@ -15,6 +15,8 @@ local gui = {}
 --- @class gui.UiElementClacData
 --- @field width number
 --- @field height number
+--- @field minWidth number
+--- @field minHeight number
 --- @field x number
 --- @field y number
 
@@ -30,7 +32,7 @@ local gui = {}
 
 --- @class gui.UiElement
 --- @field package parent gui.UiElement
---- @field package children table
+--- @field package children gui.UiElement[]
 --- @field package _data gui.UiElementClacData
 --- @field layoutDirection gui.LayoutDirection
 --- @field sizing gui.UiElementSizing
@@ -64,7 +66,7 @@ gui.Sizing = {}
 --- Fixed sizing
 --- @param n number
 --- @return gui.Sizing.FixedSizing
-function gui.Sizing.FIXED(n) return {n, type=gui._SizingType.FIXED} end
+function gui.Sizing.FIXED(n) return {n, type=gui._SizingType.FIXED, min=n} end
 
 --- @class gui.Sizing.FitSizing
 --- @field type gui.Sizing.Types
@@ -75,7 +77,7 @@ function gui.Sizing.FIXED(n) return {n, type=gui._SizingType.FIXED} end
 --- @param min number?
 --- @param max number?
 --- @return gui.Sizing.FitSizing
-function gui.Sizing.FIT(min, max) return {type=gui._SizingType.FIT, min=min, max=max} end
+function gui.Sizing.FIT(n, min, max) return {n, type=gui._SizingType.FIT, min=min, max=max} end
 
 --- @class gui.Sizing.GrowSizing
 --- @field type gui.Sizing.Types
@@ -86,7 +88,7 @@ function gui.Sizing.FIT(min, max) return {type=gui._SizingType.FIT, min=min, max
 --- @param min number?
 --- @param max number?
 --- @return gui.Sizing.GrowSizing
-function gui.Sizing.GROW(min, max) return {type=gui._SizingType.GROW, min=min, max=max} end
+function gui.Sizing.GROW(min, max) return {min, type=gui._SizingType.GROW, min=min, max=max} end
 
 --- @class gui.Sizing.PercentSizing
 --- @field type gui.Sizing.Types
@@ -204,7 +206,7 @@ function gui.UiElement:constructor(config)
 
     self.parent = nil
     self.children = {}
-    self._data = {width=0, height=0, x=0, y=0}
+    self._data = {width=0, height=0, minWidth=0, minHeight=0, x=0, y=0}
 
     self.backgroundColor = field(config, "backgroundColor", "number", "nil") or colors.black
     log.trace("Created UiElement: %s", util.serialize(self))
@@ -220,43 +222,107 @@ function gui.UiElement:addChildren(...)
 end
 
 --- @param root gui.UiElement
-function gui.fitSizing(root)
-    for node in tree.depthFirstIter(root, tree.DepthFirstOrder.POST_ORDER) do
-        local padding = node.padding
-        node._data.width = node._data.width + padding.left + padding.right
-        node._data.height = node._data.height + padding.top + padding.bottom
+--- @param dimension "width"|"height"
+function gui.fitSizing(root, dimension)
+    local isWidth = dimension == "width"
+    local layoutDir = isWidth and gui.LayoutDirection.LEFT_TO_RIGHT or gui.LayoutDirection.TOP_TO_BOTTOM
+    local sizeField = isWidth and "width" or "height"
+    local minField = isWidth and "minWidth" or "minHeight"
 
+    for node in tree.depthFirstIter(root, tree.DepthFirstOrder.POST_ORDER) do
+        local padding = isWidth and node.padding.left + node.padding.right or node.padding.top + node.padding.bottom
+        node._data[sizeField] = node._data[sizeField] + padding
+        node._data[minField] = node._data[minField] + padding
+    
         local childGap = (#node.children - 1) * node.childGap
-        if (node.layoutDirection == gui.LayoutDirection.LEFT_TO_RIGHT) then
-            node._data.width = node._data.width + childGap;
-        else
-            node._data.height = node._data.height + childGap
+        if node.layoutDirection == layoutDir then
+            node._data[sizeField] = node._data[sizeField] + childGap
+            node._data[minField] = node._data[minField] + childGap
         end
-        node._data.width = node.sizing.width or node._data.width
-        node._data.height = node.sizing.height or node._data.height
+        node._data[sizeField] = node.sizing[sizeField] or node._data[sizeField]
+        node._data[minField] = node.sizing[minField] or node._data[minField]
 
         local parent = node.parent
         if not parent then return end
-        if (parent.layoutDirection == gui.LayoutDirection.LEFT_TO_RIGHT) then
-            parent._data.width = parent._data.width + node._data.width
-            parent._data.height = math.max(parent._data.height, node._data.height)
+        if parent.layoutDirection == layoutDir then
+            parent._data[sizeField] = parent._data[sizeField] + node._data[sizeField]
+            parent._data[minField] = parent._data[minField] + node._data[minField]
         else
-            parent._data.width = math.max(parent._data.width, node._data.width)
-            parent._data.height = parent._data.height + node._data.height
+            parent._data[sizeField] = math.max(parent._data[sizeField], node._data[sizeField])
+            parent._data[minField] = math.max(parent._data[minField], node._data[minField])
         end
     end
 end
 
-function gui.growAndShrinkSizingWidth()
+--- @param root gui.UiElement
+--- @param dimension "width"|"height"
+function gui.growAndShrinkSizing(root, dimension)
+    local isWidth = dimension == "width"
+    local layoutDir = isWidth and gui.LayoutDirection.TOP_TO_BOTTOM or gui.LayoutDirection.LEFT_TO_RIGHT
+    local sizeField = isWidth and "width" or "height"
+    local minField = isWidth and "minWidth" or "minHeight"
+    local sizeType = isWidth and "wtype" or "htype"
+
+    for node in tree.depthFirstIter(root, tree.DepthFirstOrder.PRE_ORDER) do
+        local padding = isWidth and node.padding.left + node.padding.right or node.padding.top + node.padding.bottom
+
+        if node.layoutDirection == layoutDir then
+            local remaining = node._data[sizeField] - padding
+            for _, child in ipairs(node.children) do
+                if child.sizing[sizeType] == gui._SizingType.GROW then
+                    child._data[sizeField] = remaining
+                end
+            end
+        else
+            local remaining = node._data[sizeField] - padding
+            for _, child in ipairs(node.children) do
+                remaining = remaining - child._data[sizeField]
+            end
+            remaining = remaining - node.childGap * (#node.children - 1)
+            log.debug("Remaining %s: %d", sizeField, remaining)
+
+            local resizable = util.filter(node.children, function(c)
+                return c.sizing[sizeType] == (remaining > 0 and gui._SizingType.GROW or gui._SizingType.FIT)
+            end)
+
+            if #resizable > 0 then
+                while remaining ~= 0 and #resizable > 0 do
+                    local compare = remaining > 0 and math.min or math.max
+                    local extreme = resizable[1]._data[sizeField]
+                    local secondExtreme = remaining > 0 and math.huge or 0
+                    local delta = remaining
+
+                    for _, child in ipairs(resizable) do
+                        local size = child._data[sizeField]
+                        if (remaining > 0 and size < extreme) or (remaining < 0 and size > extreme) then
+                            secondExtreme = extreme
+                            extreme = size
+                        elseif size ~= extreme then
+                            secondExtreme = compare(secondExtreme, size)
+                            delta = secondExtreme - extreme
+                        end
+                    end
+
+                    delta = compare(delta, remaining / #resizable)
+
+                    for i, child in ipairs(resizable) do
+                        if child._data[sizeField] == extreme then
+                            local old = child._data[sizeField]
+                            child._data[sizeField] = old + delta
+                            if remaining < 0 and child._data[sizeField] < child._data[minField] then
+                                child._data[sizeField] = child._data[minField]
+                                table.remove(resizable, i)
+                            end
+                            remaining = remaining - (child._data[sizeField] - old)
+                        end
+                    end
+                end
+            end
+        end
+    end
 end
 
-function gui.wrapText()
-end
-
-function gui.fitSizingHeights()
-end
-
-function gui.growAndShrinkSizingHeight()
+function gui.wrapText(root)
 end
 
 function gui.positionAndAlignment(root)
@@ -279,7 +345,11 @@ function gui.positionAndAlignment(root)
 end
 
 function gui.layout(root)
-    gui.fitSizing(root)
+    gui.fitSizing(root, "width")
+    gui.growAndShrinkSizing(root, "width")
+    gui.wrapText(root)
+    gui.fitSizing(root, "height")
+    gui.growAndShrinkSizing(root, "height")
     gui.positionAndAlignment(root)
 end
 
@@ -291,7 +361,9 @@ function gui.draw(root)
     term.setCursorPos(1, 1)
     for node in tree.depthFirstIter(root, tree.DepthFirstOrder.PRE_ORDER) do
         log.info("Drawing node %s at (%d, %d) with size (%d, %d) ", node, node._data.x, node._data.y, node._data.width, node._data.height)
-        paintutils.drawFilledBox(node._data.x, node._data.y, node._data.x + node._data.width - 1, node._data.y + node._data.height - 1, node.backgroundColor)
+        if (node._data.width > 0 and node._data.height > 0) then
+            paintutils.drawFilledBox(node._data.x, node._data.y, node._data.x + node._data.width - 1, node._data.y + node._data.height - 1, node.backgroundColor)
+        end
     end
 end
 

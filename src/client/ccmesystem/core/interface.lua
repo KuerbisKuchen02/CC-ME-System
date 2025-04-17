@@ -20,36 +20,54 @@ function Application:constructor()
         backgroundColor = colors.purple,
     })
 
-    for i = 1, 3 do
-        local child = gui.UiElement({
-            sizing = {
-                width = gui.Sizing.FIXED(2),
-                height = gui.Sizing.FIXED(2),
-            },
-            backgroundColor = colors.orange,
-        })
-        root:addChildren(child)
-    end
+    local child1 = gui.UiElement({
+        sizing = {
+            width = gui.Sizing.FIXED(2),
+            height = gui.Sizing.FIXED(2),
+        },
+        backgroundColor = colors.orange,
+    })
+    local child2 = gui.UiElement({
+        sizing = {
+            width = gui.Sizing.FIT(100),
+            height = gui.Sizing.GROW(2),
+        },
+        backgroundColor = colors.orange,
+    })
+    local child3 = gui.UiElement({
+        sizing = {
+            width = gui.Sizing.GROW(10),
+            height = gui.Sizing.GROW(),
+        },
+        backgroundColor = colors.orange,
+    })
+    root:addChildren(child1, child2, child3)
     local hbox = gui.UiElement({
         layoutDirection = gui.LayoutDirection.TOP_TO_BOTTOM,
         sizing = {
-            width = gui.Sizing.FIT(),
-            height = gui.Sizing.FIT(),
+            width = gui.Sizing.FIXED(5),
+            height = gui.Sizing.FIXED(10),
         },
         padding = {1,1,1,1},
         childGap = 1,
         backgroundColor = colors.red,
     })
-    for i = 1, 2 do
-        local child = gui.UiElement({
-            sizing = {
-                width = gui.Sizing.FIXED(2),
-                height = gui.Sizing.FIXED(2),
-            },
-            backgroundColor = colors.blue,
-        })
-        hbox:addChildren(child)
-    end
+    local child4 = gui.UiElement({
+        sizing = {
+            width = gui.Sizing.FIXED(2),
+            height = gui.Sizing.FIXED(2),
+        },
+        backgroundColor = colors.blue,
+    })
+    local child5 = gui.UiElement({
+        sizing = {
+            width = gui.Sizing.GROW(),
+            height = gui.Sizing.GROW(2),
+        },
+        backgroundColor = colors.blue,
+    })
+    hbox:addChildren(child4, child5)
+
     root:addChildren(hbox)
     gui.draw(root)
     term.setCursorPos(1, height)

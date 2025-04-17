@@ -73,7 +73,11 @@ local function serialize(obj)
     elseif type(obj) == "table" then
         local string = "{"
         for k,v in pairs(obj) do
-            string = string .. "[" .. serialize(k) .. "]=" .. serialize(v) .. ","
+            if k == "children" then
+                string = string .. "[" .. serialize(k) .. "]=" .. "..." .. ","
+            else
+                string = string .. "[" .. serialize(k) .. "]=" .. serialize(v) .. ","
+            end
         end
         return string .. "}"
     elseif type(obj) == "thread" then
@@ -99,6 +103,25 @@ local function split(str, sep)
     return fields
 end
 
+--- Filter a table by a function
+--- 
+--- @generic T: table
+--- @param list T table that should be filtered
+--- @param predicate fun(elem): boolean function to filter the table
+--- @return T filtered table
+local function filter(list, predicate)
+    expect(1, list, "table")
+    expect(2, predicate, "function")
+
+    local result = {}
+    for _, v in ipairs(list) do
+        if predicate(v) then
+            table.insert(result, v)
+        end
+    end
+    return result
+end
+
 
 --- return the module
 return {
@@ -107,5 +130,6 @@ return {
     copy = copy,
     union = union,
     serialize = serialize,
-    split = split
+    split = split,
+    filter = filter,
 }
