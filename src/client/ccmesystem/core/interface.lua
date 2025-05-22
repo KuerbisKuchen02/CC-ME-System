@@ -27,11 +27,8 @@ function Application:constructor()
         },
         backgroundColor = colors.orange,
     })
-    local child2 = gui.UiElement({
-        sizing = {
-            width = gui.Sizing.FIT(100),
-            height = gui.Sizing.GROW(2),
-        },
+    local child2 = gui.TextElement({
+        text = "This is a extra long text so that we can test the automatic line break feature",
         backgroundColor = colors.orange,
     })
     local child3 = gui.UiElement({

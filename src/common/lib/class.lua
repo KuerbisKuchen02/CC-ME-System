@@ -1,12 +1,17 @@
 local expect = require("cc.expect").expect
 
+--- @class class.baseClass
+--- @field new function Create a new instance of a class
+--- @field super function Invoke a parent method that was overriden by the child
+
 --- Class system for Lua
 
 --- Create a new object of a class
 ---
+--- @generic T: class.baseClass
 --- @param c table the class
 --- @param ...? any the arguments for the constructor (optional)
---- @return table object the new object
+--- @return T object  the new object
 local function new (c, ...)
     expect(1, c, "table")
 
@@ -102,8 +107,9 @@ end
 
 --- Class table factory
 ---
+--- @generic T: class.baseClass
 --- @param parent? table class to inherit from (optional)
---- @return table class the class table
+--- @return T class the class table
 local function class (parent)
     assert(parent == nil or type(parent) == "table", "Parent must be a table or nil")
 
