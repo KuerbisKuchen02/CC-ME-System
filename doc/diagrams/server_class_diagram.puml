@@ -1,0 +1,39 @@
+@startuml server_class_diagram
+
+class Items {
+    - items: table
+    - peripherals: table
+    - _context: table
+    
+    + getItems(self, hash: string): table
+    + loadPeriperal(self, peripheralName: string)
+    + unloadPeripheral(self, peripheralName: string)
+    + insert(self, from: string, fromSlot: number, item: table|number)
+    + extract(self, toPeripheral: string, hash: string, count: number)
+
+    - hashItem(name: string, nbt: string?): string
+    - unhashItem(hash: string): string, string?
+    - getItemDetails(self, item: table)
+    - updateItemCount(self, item: table, peripheralName: string, index: number, change: number)
+    - indexInventory(self, peripheralName: string)
+    - locationToPeripheralList(self, locations: table): table
+    - sortPeripherals(selfm, peripherals: table): table
+    - insertInto(self, from: string, fromSlot: number, limit: number, peripheralObject: table, hash: string): number
+    - insertInternal(self, from: string, fromSlot: number, hash: string?, limit: number)
+    - checkExtract(self, hash: string, name: string, peripheralObject: table, slot: number, slot_idx: number, detail: string): boolean
+}
+
+class Context {
+    + config: Config
+    + mediator: Mediator
+    - _modules: table
+    - _mainPool: Runner
+    - _peripheralPool: Runner
+
+    + require(self, module: string|table): table
+    + spawn(self, func: function)
+    + spawnPeripheral(self, func: function)
+    + run(self)
+}
+
+@enduml

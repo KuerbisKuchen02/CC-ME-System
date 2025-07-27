@@ -12,10 +12,10 @@ local tree = require("ccmesystem.lib.tree")
 --- @module "common.lib.gui.UiElement"
 local UiElement = require("ccmesystem.lib.gui.UiElement")
 
---- @class gui.TextElemetClacData: gui.UiElementClacData
+--- @class gui.TextElemetClacData : gui.UiElementClacData
 --- @field text string
 
---- @class gui.TextElement: gui.UiElement
+--- @class gui.TextElement : gui.UiElement
 --- @field _data gui.TextElemetClacData
 local TextElement = class.class(UiElement)
 

@@ -1,6 +1,6 @@
 local log = {}
 
-log.level = "debug"
+log.level = "trace"
 log.outfile = "ccmesystem.log"
 log.usecolor = true
 
@@ -42,14 +42,15 @@ for i, x in ipairs(modes) do
                             lineinfo,
                             msg)
         if log.outfile then
-            if fs.getSize(log.outfile) > 100000 then
+            if fs.exists(log.outfile) and fs.getSize(log.outfile) > 100000 then
                 fs.delete(log.outfile)
             end
             local file = fs.open(log.outfile, "a")
+            if file == nil then error("cannot initiate logger!") end
             file.writeLine(msg)
             file.close()
         end
-        print(msg)
+        -- print(msg)
     end
 end
 

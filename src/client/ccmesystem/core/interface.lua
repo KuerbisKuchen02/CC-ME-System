@@ -43,7 +43,7 @@ function Application:constructor()
         layoutDirection = gui.LayoutDirection.TOP_TO_BOTTOM,
         sizing = {
             width = gui.Sizing.FIXED(5),
-            height = gui.Sizing.FIXED(10),
+            height = gui.Sizing.FIXED(5),
         },
         padding = {1,1,1,1},
         childGap = 1,
@@ -59,11 +59,25 @@ function Application:constructor()
     local child5 = gui.UiElement({
         sizing = {
             width = gui.Sizing.GROW(),
-            height = gui.Sizing.GROW(2),
+            height = gui.Sizing.FIXED(2),
         },
         backgroundColor = colors.blue,
     })
-    hbox:addChildren(child4, child5)
+    local child6 = gui.UiElement({
+        sizing = {
+            width = gui.Sizing.GROW(),
+            height = gui.Sizing.FIXED(2),
+        },
+        backgroundColor = colors.blue,
+    })
+    local child7 = gui.UiElement({
+        sizing = {
+            width = gui.Sizing.GROW(),
+            height = gui.Sizing.FIXED(2),
+        },
+        backgroundColor = colors.blue,
+    })
+    hbox:addChildren(child4, child5, child6, child7)
 
     root:addChildren(hbox)
     gui.draw(root)

@@ -1,0 +1,139 @@
+@startuml GUI Class Diagram
+
+package GUI {
+
+    class Layout {
+        draw(root: UiElement)
+        layout(root: UiElement)
+        fitSizing(root: UiElement, axis)
+        growAndShrinkSizing(root: UiElement, axis)
+        wrapText(root: UiElement)
+        positionAndAlignment(root: UiElement)
+    }
+
+    class UiElement {
+        parent: UiElement
+        children: UiElement[]
+        layoutDirection: LayoutDirection
+        alignment: Alignment
+        sizing: Sizing
+        position: Position
+        padding: Padding
+        childGap: number
+        backgroundColor: Color
+        _data: Data
+
+        UiElement(config: UiElementConfig): UiElement
+        draw()
+    }
+
+    enum LayoutDirection {
+        LEFT_TO_RIGHT
+        TOP_TO_BOTTOM
+    }
+
+    enum XAlignment {
+        LEFT
+        CENTER
+        RIGHT
+    }
+
+    enum YAlignment {
+        TOP
+        CENTER
+        BOTTOM
+    }
+
+
+    enum SizingType {
+        FIXED
+        FIT
+        GROW
+        PERCENT
+    }
+
+    class SizingAxis {
+        type: Type
+        n: number
+        min: number
+        max: number
+
+    }
+
+    class Sizing {
+        wtype: Type
+        width: number
+        minWidth: number
+        maxWidth: number
+        htype: Type
+        height: number
+        minHeight: number
+        maxHeight: number
+
+        FIXED(n): SizingAxis
+        FIT(n, min, max): SizingAxis
+        GROW(min, max): SizingAxis
+        PERCENT(n): SizingAxis
+    }
+
+
+    class Alignment {
+        x: XAlignment
+        y: YAlignment
+    }
+
+    class Position {
+        x: number
+        y: number
+    }
+
+    class Padding {
+        top: number
+        left: number
+        bottom: number
+        right: number
+    }
+
+    class Data {
+        width: number
+        minWidth: number
+        height: number
+        minHeight: number
+        x: number
+        y: number
+    }
+
+    class UiElementConfig {
+        width: SizingAxis
+        height: SizingAxis
+        layoutDirection: LayoutDirection
+        padding: Padding
+        childGap: number
+        position: Position
+        alignment: Alignment
+        backgroundColor: Color
+    }
+
+    class TextElementData extends Data {
+        text: string
+    }
+
+    class TextElementConfig extends UiElementConfig {
+        text: string
+    }
+
+    class TextElement extends UiElement {
+        _data: TextElementData
+        
+        TextElement(config: TextElementConfig): TextElement
+        draw()
+    }
+
+    UiElement *-- Sizing
+    UiElement *-- Alignment
+    UiElement *-- Position
+    UiElement *-- Padding
+    UiElement *-- Data
+}
+
+@enduml
