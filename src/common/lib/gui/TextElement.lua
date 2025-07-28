@@ -1,4 +1,5 @@
-local expect = require("cc.expect")
+--- @module "common.lib.expect"
+local expect = require("ccmesystem.lib.expect")
 local expect, field = expect.expect, expect.field
 
 --- @module "common.lib.class"
