@@ -12,7 +12,7 @@ local expect = require("cc.expect").expect
 --- @param c table the class
 --- @param ...? any the arguments for the constructor (optional)
 --- @return T object  the new object
-local function new (c, ...)
+local function new(c, ...)
     expect(1, c, "table")
 
     local o = {}
@@ -32,7 +32,7 @@ end
 --- @param methodName? string|nil the method name
 --- @param ...? any the arguments for the method (optional)
 --- @return ... values the return values of the method
-local function super (object, methodName, ...)
+local function super(object, methodName, ...)
     expect(1, object, "table")
     expect(2, methodName, "string", "nil")
 
@@ -76,7 +76,7 @@ end
 --- @param object table the object to verify
 --- @param class table the class to check against
 --- @return boolean isInstance true if the object is an instance of the class
-local function instanceOf (object, class)
+local function instanceOf(object, class)
     expect(1, object, "table")
     expect(2, class, "table")
 
@@ -96,7 +96,7 @@ end
 --- This is the _gc implementation and should not be called manually
 ---
 --- @param object table the object
-local function finalizer (object)
+local function finalizer(object)
     assert(type(object) == "table", "Object must be a table")
 
     if object.destructor then
@@ -110,7 +110,7 @@ end
 --- @generic T: class.baseClass
 --- @param parent? table class to inherit from (optional)
 --- @return T class the class table
-local function class (parent)
+local function class(parent)
     assert(parent == nil or type(parent) == "table", "Parent must be a table or nil")
 
     local c = {}
@@ -127,6 +127,9 @@ local function class (parent)
 
     c.__index = c
     setmetatable(c, mt)
+    if c.__init then
+        c:__init()
+    end
 
     return c
 end
