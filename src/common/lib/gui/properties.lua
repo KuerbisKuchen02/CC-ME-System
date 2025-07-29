@@ -56,6 +56,40 @@ local function updateProperty(self, name, value)
     end
 end
 
+--- Provides a simple way to define properties for classes.
+--- 
+--- A property is a field that can be accessed like a normal field, but has additional features like 
+--- - validation
+--- - type checking
+--- - custom setter and getter
+--- - observer callbacks
+--- 
+--- ## Usage:
+--- ```lua
+--- local PropertyClass = require("ccmesystem.lib.gui.properties")
+--- local MyClass = class.class(PropertyClass)
+--- MyClass:defineProperty("myProperty", {
+---     type = PropertyClass.Type.STRING,
+---     default = "default value",
+---     canTriggerRender = true,
+---     allowNil = false,
+---     getter = function(self, value)
+---         return value:upper() -- custom getter that returns the value in uppercase
+---     end,
+---     setter = function(self, value)
+---         return value:lower() -- custom setter that converts the value to lowercase
+---     end,
+---     observers = {
+---         function(self, oldValue, newValue)
+---             log.info("Property myProperty changed from %s to %s", oldValue, newValue)
+---         end
+---     }
+--- })
+--- local myObject = MyClass()
+--- myObject.myProperty = "Hello World" -- This will trigger the setter and observer
+--- local value = myObject.myProperty -- This will trigger the getter
+--- log.info("Value of myProperty: %s", value) -- This will print "Value of myProperty: HELLO WORLD"
+--- ```
 --- @class gui.properties.PropertyClass
 --- @field _properties table<string, gui.properties.PropertyConfig>
 --- @field _values table<string, any>
@@ -82,7 +116,7 @@ local PropertyClass = class.class()
 --- @field observers gui.properties.observerType[]?
 
 --- @enum gui.properties.Type
-PropertyClass._Type = {
+PropertyClass.Type = {
     STRING = "string",
     NUMBER = "number",
     BOOLEAN = "boolean",
@@ -167,8 +201,36 @@ end
 
 --- Define a new property for the class
 ---
---- Config has to contain: type<br>
---- Can contain: default, setter, getter, observer, allowNil, canTriggerRender
+--- ## Config
+--- - `type` (string): The type of the property. Can be one of `gui.properties.Type` (STRING, NUMBER, BOOLEAN, NIL, TABLE, FUNCTION).
+--- - `default` (any): The default value of the property. The type of the default value must match the type of the property.
+--- - `canTriggerRender` (boolean): If true, the property change will trigger a render of the element.
+--- - `allowNil` (boolean): If true, the property can be set to nil.
+--- - `getter` (function): A custom getter function that takes the class instance and the current value as arguments and returns the value.
+--- - `setter` (function): A custom setter function that takes the class instance and the new value as arguments and returns the value.
+--- - `observers` (function[]): A list of observer functions that are called when the property is changed. 
+---   Each observer function takes the class instance, the old value and the new value as arguments.
+--- 
+--- ## Example
+--- ```lua
+--- MyClass:defineProperty("myProperty", {
+---     type = PropertyClass.Type.STRING,
+---     default = "default value",
+---     canTriggerRender = true,
+---     allowNil = false,
+---     getter = function(self, value)
+---         return value:upper() -- custom getter that returns the value in uppercase
+---     end,
+---     setter = function(self, value)
+---         return value:lower() -- custom setter that converts the value to lowercase
+---     end,
+---     observers = {
+---         function(self, oldValue, newValue)
+---             log.info("Property myProperty changed from %s to %s", oldValue, newValue)
+---         end
+---     }
+--- })
+--- ```
 --- @param name string
 --- @param config gui.properties.PropertyConfig
 function PropertyClass:defineProperty(name, config)
@@ -183,7 +245,7 @@ function PropertyClass:defineProperty(name, config)
         type = config.type,
         default = config.default,
         canTriggerRender = config.canTriggerRender or false,
-        allowNil = config.allowNil or false,
+        allowNil = config.allowNil or true,
         getter = config.getter,
         setter = config.setter,
         observers = {},
@@ -288,6 +350,10 @@ function PropertyClass:removeAllObservers(name)
 end
 
 --- Set property `name` to `value`
+--- 
+--- The value must match the type of the property.
+--- If the property type is not a function, 
+--- you can pass a function that takes the class instance as an argument and returns the value.
 ---
 --- Alternative for: clazz.name = value
 --- @param name string
