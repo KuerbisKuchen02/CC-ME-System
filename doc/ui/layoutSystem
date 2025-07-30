@@ -1,0 +1,128 @@
+# Layout System
+
+The layout system is reponsible for calculating the sizes and positions of each element.
+The system uses a flow like layouting. Complex layouts can be created by nesting multiple elements.
+
+## How to use
+
+- Base class for all element is UiElement which contains all relevant attributes for layouting
+- Every element can have children elements
+
+### Attributes
+
+- `layoutDirection`
+- `position`
+- `sizing`
+- `padding`
+- `childGap`
+- `backgroundColor`
+- `alignment` (not implementet yet)
+- `overflow` (not implementet yet)
+- `floatingConfig` (not implementet yet)
+
+#### Layout Direction
+
+**Type**: `gui.LayoutDirection`<br>
+**Values**: `LEFT_TO_RIGHT | TOP_TO_BOTTOM`<br>
+**Default**: `LEFT_TO_RIGHT`
+
+The layout direction (or flow direction) is used to specifiy in which direction the elements are arranged.
+
+`LEFT_TO_RIGHT` mean the first child element is placed on the far left and other child elements are placed in order to the right side of it.
+
+`TOP_TO_BOTTOM` mean the first child element is placed on the far top and other child elements are placed in order to the right side of it.
+
+#### Position
+
+**Type**: `table`<br>
+**Options**: `x: number`, `y: number`<br>
+**Default**: `{x=0, y=0}`
+
+The positon attribute defines the relativ position of an element within its parent element.
+
+The **origin** is the **top left corner** of an element (or screen for the root element).
+X defines the position from left to right and y defines the posioton from top to bottom.
+
+The position can either be set using named or unnamed paramter (but not both).
+
+**Example**:
+`{x=1, y=2}` is equivalent to `{1,2}`.
+
+**Not good**:
+`{x=1, 2}`, `{1, y=2}`.
+
+> [!NOTE]
+> If you only want to define one axis use named parameter to prevent misunderstanding.
+
+#### Sizing
+
+**Type**: `table`<br>
+**Options**: `width: gui.Sizing`, `height: gui.Sizing`<br>
+**Default**: `{with=FIT(0), height=FIT(0)}`
+
+The sizing parameter defines the strategy used to determine the final size, values for width and height as well as min and max values.
+
+The options for width and height both expect a table. To make the setup process more intuitve the layout system provides four builder functions, one for each strategy.
+
+**Builder Functions**:
+
+- `FIXED(n: number)`
+- `FIT(min: number, max: number)`
+- `GROW(min: number, max: number)`
+- `PERCENT(n: number)` (not implemented yet)
+
+Each paramter is optional and accepts a positv integer. The parameter can be defined as named or unnamed parameter (but not both).
+
+> [!NOTE]
+> If not all parameter are used, prefer using named parameter to prevent misunderstanding.
+
+With `FIXED` you can define an absolute size for the element. The element will not dynamically respond to anything.
+
+Elements defined with `FIT` are dynamically resized to fit all child elements inside its bounds. The resizing can be constraint up and downwarts using `min` and/or `max` values.
+
+`GROW` allows the element to grow or shrink to completely fill the remaining empty space of its parent. This can also be constaint using a `min` and/or `max` value. If multiple elements are defined as growable, the remaining space is divided equally among them.
+
+With `PERCENT` the size can be specified as a percentage in relation to the parent element size. If multiple elements are specified in percent and the values don't add up to 100%, the elements MAY overflow.
+
+#### Padding
+
+**Type**: `table`<br>
+**Options**: `top: number`, `right: number`, `bottom: number`, `left: number`<br>
+**Default**: `{top=0, right=0, bottom=0, left=0}`
+
+`Padding` is the distance between the outer border of an element and its child elements.
+
+Padding can be applied to each side individually starting from the top and than continuing clockwise.
+
+Each paramter is optional and accepts a positv integer. The parameter can be defined as named or unnamed parameter (but not both).
+
+> [!IMPORTANT]
+> Padding is only applied around child elements not in between them. Use child gap for that.
+
+#### Child Gap
+
+**Type**: `number`<br>
+**Default**: `0`
+
+`childGap` defines the distance between elements.
+
+The parameter accepts a positv integer.
+
+#### Background Color
+
+**Type**: `color`<br>
+**Default**: `colors.black`
+
+See [computercraft documentation](https://tweaked.cc/module/colors.html) for more information about color.
+
+## How it works
+
+### Steps
+
+1. fit sizing width
+2. grow and shrink sizing width
+3. wrap text
+4. fit sizing height
+5. grow and shrink sizing height
+6. position and alignment
+7. (draw)
