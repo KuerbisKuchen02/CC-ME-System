@@ -33,7 +33,7 @@ function Application:constructor()
     })
     local child3 = gui.UiElement({
         sizing = {
-            width = gui.Sizing.GROW(10),
+            width = gui.Sizing.GROW{min=10},
             height = gui.Sizing.GROW(),
         },
         backgroundColor = colors.orange,

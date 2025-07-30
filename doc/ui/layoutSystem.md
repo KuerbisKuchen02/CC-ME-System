@@ -71,7 +71,7 @@ The options for width and height both expect a table. To make the setup process 
 - `GROW(min: number, max: number)`
 - `PERCENT(n: number)` (not implemented yet)
 
-Each paramter is optional and accepts a positv integer. The parameter can be defined as named or unnamed parameter (but not both).
+Each paramter is optional and accepts a positv integer. The parameter for `FIT` and `GROW` can be defined as named or unnamed parameter (but not both).
 
 > [!NOTE]
 > If not all parameter are used, prefer using named parameter to prevent misunderstanding.
