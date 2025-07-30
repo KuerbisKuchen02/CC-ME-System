@@ -86,7 +86,7 @@ With `PERCENT` the size can be specified as a percentage in relation to the pare
 
 #### Padding
 
-**Type**: `table`<br>
+**Type**: `table|number`<br>
 **Options**: `top: number`, `right: number`, `bottom: number`, `left: number`<br>
 **Default**: `{top=0, right=0, bottom=0, left=0}`
 
@@ -95,6 +95,16 @@ With `PERCENT` the size can be specified as a percentage in relation to the pare
 Padding can be applied to each side individually starting from the top and than continuing clockwise.
 
 Each paramter is optional and accepts a positv integer. The parameter can be defined as named or unnamed parameter (but not both).
+
+The padding parameter also allows several shortcuts for common use cases.
+
+1. To apply the same value to all sides, simply add only one unamed value to the table or simpler only add a value.<br>
+   **Example**: `padding={2}` or `padding=1`
+2. To apply the same value to top and bottom (first value) and left to right (second value),
+   only add two values to the table<br>
+   **Example**: `padding={1,2}`
+
+If you dont want to apply padding to all sides prefer using named parameter to prevent misunderstanding.
 
 > [!IMPORTANT]
 > Padding is only applied around child elements not in between them. Use child gap for that.

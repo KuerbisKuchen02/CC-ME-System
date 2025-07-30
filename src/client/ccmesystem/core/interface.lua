@@ -15,7 +15,7 @@ function Application:constructor()
             width = gui.Sizing.FIXED(width - 2),
             height = gui.Sizing.FIT(),
         },
-        padding = {1,1,1,1},
+        padding = 1,
         childGap = 1,
         backgroundColor = colors.purple,
     })
@@ -45,7 +45,7 @@ function Application:constructor()
             width = gui.Sizing.FIXED(5),
             height = gui.Sizing.FIXED(5),
         },
-        padding = {1,1,1,1},
+        padding = {1, 2},
         childGap = 1,
         backgroundColor = colors.red,
     })

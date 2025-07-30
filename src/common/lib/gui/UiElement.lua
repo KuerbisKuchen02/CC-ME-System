@@ -85,9 +85,9 @@ local UiElement = class.class()
 --- Padding table
 --- @class gui.Padding
 --- @field top number
---- @field left number
---- @field bottom number
 --- @field right number
+--- @field bottom number
+--- @field left number
 
 --- Position table
 --- @class gui.Position
@@ -103,7 +103,7 @@ local UiElement = class.class()
 --- @class gui.UiElementConfig
 --- @field layoutDirection gui.LayoutDirection
 --- @field sizing gui.SizingTable
---- @field padding gui.Padding
+--- @field padding gui.Padding | number
 --- @field childGap number
 --- @field position gui.Position
 --- @field alignment gui.Alignment
@@ -137,17 +137,40 @@ function UiElement:constructor(config)
         end
     end
 
-    self.padding = {top=0, bottom=0, left=0, right=0}
+    self.padding = {top=0, right=0, bottom=0, left=0}
     if config.padding then
-        expect(1, config.padding, "table")
-        self.padding.top = config.padding[1] or self.padding.top
-        self.padding.left = config.padding[2] or self.padding.left
-        self.padding.bottom = config.padding[3] or self.padding.bottom
-        self.padding.right = config.padding[4] or self.padding.right
-        self.padding.top = field(config.padding, "top", "number", "nil") or self.padding.top
-        self.padding.left = field(config.padding, "left", "number", "nil") or self.padding.left
-        self.padding.bottom = field(config.padding, "bottom", "number", "nil") or self.padding.bottom
-        self.padding.right = field(config.padding, "right", "number", "nil") or self.padding.right
+        expect(1, config.padding, "table", "number")
+        if type(config.padding) == "number" then
+            ---@diagnostic disable-next-line: assign-type-mismatch
+            self.padding.top = config.padding
+            ---@diagnostic disable-next-line: assign-type-mismatch
+            self.padding.right = config.padding
+            ---@diagnostic disable-next-line: assign-type-mismatch
+            self.padding.bottom = config.padding
+            ---@diagnostic disable-next-line: assign-type-mismatch
+            self.padding.left = config.padding
+        else
+            if #config.padding == 1 then
+                self.padding.top = config.padding[1] or self.padding.top
+                self.padding.right = config.padding[1] or self.padding.right
+                self.padding.bottom = config.padding[1] or self.padding.bottom
+                self.padding.left = config.padding[1] or self.padding.left
+            elseif #config.padding == 2 then
+                self.padding.top = config.padding[1] or self.padding.top
+                self.padding.right = config.padding[2] or self.padding.right
+                self.padding.bottom = config.padding[1] or self.padding.bottom
+                self.padding.left = config.padding[2] or self.padding.left
+            end
+            self.padding.top = config.padding[1] or self.padding.top
+            self.padding.left = config.padding[2] or self.padding.right
+            self.padding.bottom = config.padding[3] or self.padding.bottom
+            self.padding.right = config.padding[4] or self.padding.left
+            self.padding.top = field(config.padding, "top", "number", "nil") or self.padding.top
+            self.padding.left = field(config.padding, "left", "number", "nil") or self.padding.left
+            self.padding.bottom = field(config.padding, "bottom", "number", "nil") or self.padding.bottom
+            self.padding.right = field(config.padding, "right", "number", "nil") or self.padding.right
+        end
+        log.debug("Paddinhg: %s", util.serialize(self.padding))
     end
 
     self.childGap = field(config, "childGap", "number", "nil") or 0
