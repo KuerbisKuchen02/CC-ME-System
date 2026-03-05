@@ -10,6 +10,8 @@ local util = require("ccmesystem.lib.util")
 --- @module "common.lib.tree"
 local tree = require("ccmesystem.lib.tree")
 
+--- @module "common.lib.gui.draw"
+local draw = require("ccmesystem.lib.gui.draw")
 --- @module "common.lib.gui.enums"
 local enums = require("ccmesystem.lib.gui.enums")
 --- @module "common.lib.gui.Sizing"
@@ -160,6 +162,7 @@ local function wrapText(root)
     end
 end
 
+--- @param root gui.UiElement
 local function positionAndAlignment(root)
     for node in tree.depthFirstIter(root, tree.DepthFirstOrder.PRE_ORDER) do
         node._data.x = node._data.x + node.position.x
@@ -167,12 +170,12 @@ local function positionAndAlignment(root)
         local offset = node.layoutDirection == enums.LayoutDirection.LEFT_TO_RIGHT and node.padding.left or node.padding.top
         for _, child in ipairs(node.children) do
             if node.layoutDirection == enums.LayoutDirection.LEFT_TO_RIGHT then
-                child._data.x = node._data.x + offset
-                child._data.y = node._data.y + node.padding.top
+                child._data.x = node._data.x + offset + node.childOffset.x
+                child._data.y = node._data.y + node.padding.top + node.childOffset.y
                 offset = offset + child._data.width + node.childGap
             else
-                child._data.x = node._data.x + node.padding.left
-                child._data.y = node._data.y + offset
+                child._data.x = node._data.x + node.padding.left + node.childOffset.x
+                child._data.y = node._data.y + offset + node.childOffset.y
                 offset = offset + child._data.height + node.childGap
             end
         end
@@ -191,17 +194,14 @@ function layout.layout(root)
 end
 
 --- @param root gui.UiElement
-function layout.draw(root)
+function layout.render(root)
     expect(1, root, "table")
     log.info("Term size: %d x %d", term.getSize())
     layout.layout(root)
     term.clear()
     term.setBackgroundColor(colors.black)
     term.setCursorPos(1, 1)
-    for node in tree.depthFirstIter(root, tree.DepthFirstOrder.PRE_ORDER) do
-        log.info("Drawing node %s at (%d, %d) with size (%d, %d) ", node, node._data.x, node._data.y, node._data.width, node._data.height)
-        node:draw()
-    end
+    root:render()
 end
 
 return layout

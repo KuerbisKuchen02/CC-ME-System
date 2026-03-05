@@ -11,6 +11,8 @@ local util = require("ccmesystem.lib.util")
 --- @module "common.lib.tree"
 local tree = require("ccmesystem.lib.tree")
 
+--- @module "common.lib.gui.draw"
+local draw = require("ccmesystem.lib.gui.draw")
 --- @module "common.lib.gui.enums"
 local enums = require("ccmesystem.lib.gui.enums")
 --- @module "common.lib.gui.Sizing"
@@ -55,7 +57,9 @@ local Sizing = require("ccmesystem.lib.gui.Sizing")
 --- @field sizing gui.UiElementSizing
 --- @field padding gui.Padding
 --- @field childGap number
+--- @field overflow gui.Overflow
 --- @field position gui.Position
+--- @field childOffset gui.Position
 --- @field alignment gui.Alignment
 local UiElement = class.class()
 
@@ -105,6 +109,7 @@ local UiElement = class.class()
 --- @field sizing gui.SizingTable
 --- @field padding gui.Padding | number
 --- @field childGap number
+--- @field overflow gui.Overflow
 --- @field position gui.Position
 --- @field alignment gui.Alignment
 --- @field backgroundColor number
@@ -170,10 +175,11 @@ function UiElement:constructor(config)
             self.padding.bottom = field(config.padding, "bottom", "number", "nil") or self.padding.bottom
             self.padding.right = field(config.padding, "right", "number", "nil") or self.padding.right
         end
-        log.debug("Paddinhg: %s", util.serialize(self.padding))
+        log.debug("Padding: %s", util.serialize(self.padding))
     end
 
     self.childGap = field(config, "childGap", "number", "nil") or 0
+    self.overflow = field(config, "overflow", "number", "nil") or enums.Overflow.VISIBLE
 
     -- Position
     self.position = {x = 0, y = 0}
@@ -194,6 +200,8 @@ function UiElement:constructor(config)
 
     self.parent = nil
     self.children = {}
+    self.childOffset = {x = 0, y = 0}
+
     self._data = {width=0, height=0, minWidth=0, minHeight=0, x=0, y=0}
 
     self.backgroundColor = field(config, "backgroundColor", "number", "nil") or colors.black
@@ -210,9 +218,28 @@ function UiElement:addChildren(...)
 end
 
 function UiElement:draw()
-    if (self._data.width > 0 and self._data.height > 0) then
-        paintutils.drawFilledBox(self._data.x, self._data.y, self._data.x + self._data.width - 1,
-            self._data.y + self._data.height - 1, self.backgroundColor)
+    draw.drawRectangle(self._data.x, self._data.y, self._data.width, self._data.height, self.backgroundColor)
+end
+function UiElement:render()
+
+    -- When the width or height of the visible area or the element is zero we don't need to render it or its children
+    local clip = draw.currentClip()
+    if clip and (clip.width <= 0 or clip.height <= 0)
+        or self._data.width <= 0 or self._data.height <= 0 then
+        return
+    end
+
+    if self.overflow == enums.Overflow.HIDDEN then
+        draw.pushClip(self._data.x, self._data.y, self._data.width, self._data.height)
+    end
+
+    self:draw()
+    for _, child in ipairs(self.children) do
+        child:render()
+    end
+
+    if self.overflow == enums.Overflow.HIDDEN then
+        draw.popClip()
     end
 end
 

@@ -8,6 +8,7 @@ local Application = class.class()
 
 function Application:constructor()
     local width, height = term.getSize()
+    --- @type gui.UiElement
     local root = gui.UiElement({
         layoutDirection = gui.LayoutDirection.LEFT_TO_RIGHT,
         position = {2, 2},
@@ -18,6 +19,7 @@ function Application:constructor()
         padding = 1,
         childGap = 1,
         backgroundColor = colors.purple,
+        overflow = gui.Overflow.HIDDEN,
     })
 
     local child1 = gui.UiElement({
@@ -80,7 +82,9 @@ function Application:constructor()
     hbox:addChildren(child4, child5, child6, child7)
 
     root:addChildren(hbox)
-    gui.draw(root)
+    root.childOffset.x = 2
+    hbox.childOffset.y = 1
+    gui.render(root)
     term.setCursorPos(1, height)
 end
 

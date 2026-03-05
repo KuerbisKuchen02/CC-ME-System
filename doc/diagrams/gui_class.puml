@@ -20,6 +20,8 @@ package GUI {
         position: Position
         padding: Padding
         childGap: number
+        childOffset: Position
+        overflow: Overflow
         backgroundColor: Color
         _data: Data
 
@@ -50,6 +52,13 @@ package GUI {
         FIT
         GROW
         PERCENT
+    }
+
+    enum Overflow {
+        HIDDEN
+        VISIBLE
+        SCROLL
+        WRAP
     }
 
     class SizingAxis {

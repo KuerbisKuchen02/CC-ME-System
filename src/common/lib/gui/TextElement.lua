@@ -10,8 +10,11 @@ local log = require("ccmesystem.lib.log")
 local util = require("ccmesystem.lib.util")
 --- @module "common.lib.tree"
 local tree = require("ccmesystem.lib.tree")
+
 --- @module "common.lib.gui.UiElement"
 local UiElement = require("ccmesystem.lib.gui.UiElement")
+--- @module "common.lib.gui.draw"
+local draw = require("ccmesystem.lib.gui.draw")
 
 --- @class gui.TextElemetClacData : gui.UiElementClacData
 --- @field text string
@@ -42,7 +45,11 @@ function TextElement:draw()
     self:super("draw")
     term.setBackgroundColor(self.backgroundColor)
     local lines = util.split(self._data.text, "\n")
+    local clip = draw.currentClip()
     for i, line in ipairs(lines) do
+        if clip.y + clip.height < self._data.y + i then
+            return
+        end 
         term.setCursorPos(self._data.x + self.padding.left, self._data.y + self.padding.top + i - 1)
         term.write(line)
     end

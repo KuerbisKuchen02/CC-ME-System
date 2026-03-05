@@ -20,4 +20,12 @@ enum.YAlignment = {
     BOTTOM = 3,
 }
 
+--- @enum gui.Overflow
+enum.Overflow = {
+    HIDDEN = 1, -- No overflow, content is clipped
+    VISIBLE = 2, -- Content is visible outside the element bounds
+    SCROLL = 3, -- Content can be scrolled if it overflows
+    WRAP = 4, -- Content wraps to the next line if it overflows
+}
+
 return enum
