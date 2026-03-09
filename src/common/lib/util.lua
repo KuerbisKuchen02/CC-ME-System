@@ -63,28 +63,37 @@ end
 
 --- Serialize an object
 ---
---- @param obj number|string|table object to serialize
+--- @param obj any object to serialize
 --- @return string serialized object
 local function serialize(obj)
-    if obj == nil or type(obj) == "number" or type(obj) == "boolean" or type(obj) == "function" then
-        return tostring(obj)
-    elseif type(obj) == "string" then
-        return string.format("%q", obj)
-    elseif type(obj) == "table" then
-        local string = "{"
-        for k,v in pairs(obj) do
-            if k == "children" then
-                string = string .. "[" .. serialize(k) .. "]=" .. "..." .. ","
-            else
-                string = string .. "[" .. serialize(k) .. "]=" .. serialize(v) .. ","
-            end
+    local function inner(obj, n, seen)
+        if type(obj) == "table" then
+            if seen[obj] then return "self" end
+            seen[obj] = true
         end
-        return string .. "}"
-    elseif type(obj) == "thread" then
-        return "thread("..coroutine.status(obj)..")"
-    else
-        error("cannot serialize a " .. type(obj))
+        if n > 20 then return "...(truncated)..." end
+        
+        if obj == nil or type(obj) == "number" or type(obj) == "boolean" or type(obj) == "function" then
+            return tostring(obj)
+        elseif type(obj) == "string" then
+            return string.format("%q", obj)
+        elseif type(obj) == "table" then
+            local string = "{"
+            for k,v in pairs(obj) do
+                if k == "children" then
+                    string = string .. "[" .. inner(k, n + 1, seen) .. "]=" .. "..." .. ","
+                else
+                    string = string .. "[" .. inner(k, n + 1, seen) .. "]=" .. inner(v, n + 1, seen) .. ","
+                end
+            end
+            return string .. "}"
+        elseif type(obj) == "thread" then
+            return "thread("..coroutine.status(obj)..")"
+        else
+            error("cannot serialize a " .. type(obj))
+        end
     end
+    return inner(obj, 0, {})
 end
 
 
