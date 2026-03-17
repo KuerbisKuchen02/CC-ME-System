@@ -10,8 +10,6 @@ local util = require("ccmesystem.lib.util")
 --- @module "common.lib.tree"
 local tree = require("ccmesystem.lib.tree")
 
---- @module "common.lib.gui.draw"
-local draw = require("ccmesystem.lib.gui.draw")
 --- @module "common.lib.gui.enums"
 local enums = require("ccmesystem.lib.gui.enums")
 --- @module "common.lib.gui.Sizing"
@@ -196,10 +194,8 @@ end
 --- @param root gui.UiElement
 function layout.render(root)
     expect(1, root, "table")
-    log.info("Term size: %d x %d", term.getSize())
-    layout.layout(root)
-    term.clear()
     term.setBackgroundColor(colors.black)
+    term.clear()
     term.setCursorPos(1, 1)
     root:render()
 end
