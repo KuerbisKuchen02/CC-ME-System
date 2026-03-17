@@ -5,7 +5,7 @@ The system uses a flow like layouting. Complex layouts can be created by nesting
 
 ## How to use
 
-- Base class for all element is UiElement which contains all relevant attributes for layouting
+- The UiElement class is the base class for all elements. It contains all relevant attributes for layouting
 - Every element can have children elements
 
 ### Attributes
@@ -17,7 +17,7 @@ The system uses a flow like layouting. Complex layouts can be created by nesting
 - `childGap`
 - `backgroundColor`
 - `alignment` (not implementet yet)
-- `overflow` (not implementet yet)
+- `overflow` (Scroll and Wrap not implementet yet)
 - `floatingConfig` (not implementet yet)
 
 #### Layout Direction
@@ -30,7 +30,7 @@ The layout direction (or flow direction) is used to specifiy in which direction 
 
 `LEFT_TO_RIGHT` mean the first child element is placed on the far left and other child elements are placed in order to the right side of it.
 
-`TOP_TO_BOTTOM` mean the first child element is placed on the far top and other child elements are placed in order to the right side of it.
+`TOP_TO_BOTTOM` mean the first child element is placed on the far top and other child elements are placed in order below it.
 
 #### Position
 
@@ -41,7 +41,7 @@ The layout direction (or flow direction) is used to specifiy in which direction 
 The positon attribute defines the relativ position of an element within its parent element.
 
 The **origin** is the **top left corner** of an element (or screen for the root element).
-X defines the position from left to right and y defines the posioton from top to bottom.
+X defines the position from left to right and y defines the position from top to bottom.
 
 The position can either be set using named or unnamed paramter (but not both).
 
@@ -80,7 +80,7 @@ With `FIXED` you can define an absolute size for the element. The element will n
 
 Elements defined with `FIT` are dynamically resized to fit all child elements inside its bounds. The resizing can be constraint up and downwarts using `min` and/or `max` values.
 
-`GROW` allows the element to grow or shrink to completely fill the remaining empty space of its parent. This can also be constaint using a `min` and/or `max` value. If multiple elements are defined as growable, the remaining space is divided equally among them.
+`GROW` allows the element to grow or shrink to completely fill the remaining empty space of its parent. This can also be constrait using a `min` and/or `max` value. If multiple elements are defined as growable, the remaining space is divided equally among them.
 
 With `PERCENT` the size can be specified as a percentage in relation to the parent element size. If multiple elements are specified in percent and the values don't add up to 100%, the elements MAY overflow.
 
@@ -124,6 +124,27 @@ The parameter accepts a positv integer.
 **Default**: `colors.black`
 
 See [computercraft documentation](https://tweaked.cc/module/colors.html) for more information about color.
+
+#### Alignment
+
+> Important: Not implemented yet!
+
+##### Overflow
+
+> Important: Not fully implemented yet! Only HIDDEN AND VISIBLE are currenty supported.
+
+**Type**: `gui.Overflow`<br>
+**Values**: `HIDDEN | VISIBLE | SCROLL | WRAP`<br>
+**Default**: `VISIBLE`
+
+The four options:
+
+- **HIDDEN**: Overflowing content is cut of and is not visible.
+- **VISIBLE**: Overflowing content is displayed normaly. It is not restricted to the size of the parent
+
+#### Floating Config
+
+> Important: Not implemented yet!
 
 ## How it works
 

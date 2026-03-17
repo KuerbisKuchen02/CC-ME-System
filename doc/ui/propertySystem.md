@@ -214,4 +214,8 @@ local myObject = MyClass()
 myObject.myProperty = "Hello World" -- This will trigger the setter and observer
 local value = myObject.myProperty -- This will trigger the getter
 log.info("Value of myProperty: %s", value) -- This will print "Value of myProperty: HELLO WORLD"
+
+-- Output
+> [INFO] Property myProperty changed from DEFAULT VALUE to HELLO WORLD
+> [INFO] Value of myProperty: HELLO WORLD
 ```
