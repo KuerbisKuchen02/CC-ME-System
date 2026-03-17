@@ -5,8 +5,8 @@ local expect = require("cc.expect").expect
 --- Convert a list to a lookup table. Allow you to easily check,
 --- if a value is present in a list
 ---
---- @param list table List which should be converted
---- @return table lookup with the provided items
+--- @param list any[] List which should be converted
+--- @return {[any]: true} lookup with the provided items
 local function lookup(list)
     expect(1, list, "table")
 
@@ -18,8 +18,8 @@ end
 
 --- Returns a new list containing all entries from both lists
 ---
---- @param ... table lists 
---- @return table list new list with all entries
+--- @param ... any[] lists
+--- @return any[] list new list with all entries
 local function concat_lists(...)
     local list = {}
     for _,l in ipairs({...}) do
@@ -114,7 +114,7 @@ end
 
 --- Filter a table by a function
 --- 
---- @generic T: table
+--- @generic T: any[]
 --- @param list T table that should be filtered
 --- @param predicate fun(elem): boolean function to filter the table
 --- @return T filtered table
@@ -131,6 +131,20 @@ local function filter(list, predicate)
     return result
 end
 
+--- Returns a new list with the elements in reverse order.
+--- @generic T: any[]
+--- @param list T
+--- @return T
+local function reverse(list)
+    expect(1, list, "table")
+
+    local result = {}
+    for i = #list, 1, -1 do
+        table.insert(result, list[i])
+    end
+    return result
+end
+
 
 --- return the module
 return {
@@ -141,4 +155,5 @@ return {
     serialize = serialize,
     split = split,
     filter = filter,
+    reverse = reverse,
 }
