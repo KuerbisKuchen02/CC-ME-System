@@ -11,8 +11,8 @@ local util = require("ccmesystem.lib.util")
 --- @module "common.lib.tree"
 local tree = require("ccmesystem.lib.tree")
 
---- @module "common.lib.gui.UiElement"
-local UiElement = require("ccmesystem.lib.gui.UiElement")
+--- @module "common.lib.gui.elements.UiElement"
+local UiElement = require("ccmesystem.lib.gui.elements.UiElement")
 --- @module "common.lib.gui.draw"
 local draw = require("ccmesystem.lib.gui.draw")
 

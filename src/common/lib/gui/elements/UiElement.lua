@@ -51,7 +51,7 @@ local Sizing = require("ccmesystem.lib.gui.Sizing")
 --- root.addChildren(child1, child2)
 --- gui.render(root)
 --- ```
---- @class (exact) gui.UiElement
+--- @class (exact) gui.UiElement : class.baseClass
 --- @field parent gui.UiElement
 --- @field children gui.UiElement[]
 --- @field layoutDirection gui.LayoutDirection

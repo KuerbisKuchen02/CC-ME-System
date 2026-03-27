@@ -17,10 +17,12 @@ local layout = require("ccmesystem.lib.gui.Layout")
 local handleEvent = require("ccmesystem.lib.gui.events").handleEvent
 --- @module "common.lib.gui.Sizing"
 gui.Sizing = require("ccmesystem.lib.gui.Sizing")
---- @module "common.lib.gui.UiElement"
-gui.UiElement = require("ccmesystem.lib.gui.UiElement")
---- @module "common.lib.gui.TextElement"
-gui.TextElement = require("ccmesystem.lib.gui.TextElement")
+
+-- Load all elements inside the elements sub folder
+local elements = require("ccmesystem.lib.gui.elements")
+for k, v in pairs(elements) do
+    gui[k] = v
+end
 
 local context = UiContext()
 

@@ -14,10 +14,10 @@ local tree = require("ccmesystem.lib.tree")
 local enums = require("ccmesystem.lib.gui.enums")
 --- @module "common.lib.gui.Sizing"
 local Sizing = require("ccmesystem.lib.gui.Sizing")
---- @module "common.lib.gui.UiElement"
-local UiElement = require("ccmesystem.lib.gui.UiElement")
---- @module "common.lib.gui.TextElement"
-local TextElement = require("ccmesystem.lib.gui.TextElement")
+--- @module "common.lib.gui.elements.UiElement"
+local UiElement = require("ccmesystem.lib.gui.elements.UiElement")
+--- @module "common.lib.gui.elements.TextElement"
+local TextElement = require("ccmesystem.lib.gui.elements.TextElement")
 
 
 local layout = {}
