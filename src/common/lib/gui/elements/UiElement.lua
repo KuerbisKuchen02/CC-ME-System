@@ -64,8 +64,8 @@ local Sizing = require("ccmesystem.lib.gui.Sizing")
 --- @field alignment gui.Alignment
 --- @field _data gui.UiElementCalcData
 --- @field _context gui.UiContext
---- @field _filters {[string]: gui.FilterFunction}|gui.FilterFunction
---- @field _eventHandlers {[string]: gui.EventHandler} | gui.EventHandler
+--- @field _filters {[string]: gui.FilterFunction[]}
+--- @field _eventHandlers {[string]: gui.EventHandler[]}
 --- @field name string
 --- @field backgroundColor number
 local UiElement = class.class()
@@ -314,10 +314,17 @@ function UiElement:dispatchEvent(event)
     table.insert(event.handleChain, self)
 
     if self._filters then
-        if type(self._filters) == "function" then
-            self._filters(event)
-        elseif self._filters[event.type] then
-            self._filters[event.type](event)
+        if self._filters[event.type] then
+            for _, filter in pairs(self._filters[event.type]) do
+                filter(event)
+                if event.isConsumed then return end
+            end
+        end
+        if self._filters["global"] then
+            for _, filter in pairs(self._filters["global"] or {}) do
+                filter(event)
+                if event.isConsumed then return end
+            end
         end
     end
     if event.isConsumed then return end
@@ -356,10 +363,17 @@ function UiElement:handleEvent(event)
     table.remove(event.handleChain, #event.handleChain)
 
     if self._eventHandlers then
-        if type(self._eventHandlers) == "function" then
-            self._eventHandlers(event)
-        elseif self._eventHandlers[event.type] then
-            self._eventHandlers[event.type](event)
+        if self._eventHandlers[event.type] then
+            for _, handler in pairs(self._eventHandlers[event.type]) do
+                handler(event)
+                if event.isConsumed then return end
+            end
+        end
+        if self._eventHandlers["global"] then
+            for _, handler in pairs(self._eventHandlers["global"] or {}) do
+                handler(event)
+                if event.isConsumed then return end
+            end
         end
     end
 
@@ -372,49 +386,39 @@ end
 
 --- Add a filter for a specific event or a global filter
 --- If `eventName` is not provided, the filter will be applied globally.
---- Only one global filter is allowed per element, if a global filter is already set you first have to remove it
---- You can add multiple filters for specific events, but only if no global filter is set.
---- You can only add one filter per event type
+--- Multiple filters for the same event type are allowed.
+--- A specific filter can only be added once per event type.
+--- A global filter will always be called last after all specific filters.
+--- Multiple filters for the same event type are called in the order they were added.
+---
 ---
 ---@param callback gui.FilterFunction
 ---@param eventName? string|nil
 function UiElement:addFilter(callback, eventName)
-    if type(self._filters) == "function" then
-        if eventName then
-            errorManager.error("Cannot add filter for specific event to element with global filter", 2)
+
+    eventName = eventName or "global"
+    self._filters[eventName] = self._filters[eventName] or {}
+    local filters = self._filters[eventName]
+    for _, filter in pairs(filters) do
+        if filter == callback then
+            errorManager.error("Cannot add the same filter multiple times for the same event", 2)
+            return
         end
-        if self._filters ~= callback then
-            errorManager.error("Cannot add multiple global filters to the same element", 2)
-        end
-        return
     end
-    if not eventName then
-       self._filters = callback
-       log.debug("Added global filter: %s", tostring(callback))
-       return
-    end
-    if self._filters[eventName] and self._filters[eventName] ~= callback then
-        errorManager.error("Cannot add multiple filters for the same event", 2)
-    end
-    self._filters[eventName] = callback
+    table.insert(filters, callback)
     log.debug("Added filter for event '%s': %s", eventName, tostring(callback))
 end
 
 --- Remove a filter for a specific event or a global filter
 ---@param callback gui.FilterFunction
 function UiElement:removeFilter(callback)
-    if type(self._filters) == "function" then
-        if self._filters == callback then
-            self._filters = {}
-        end
-        return
-    end
----@diagnostic disable-next-line: param-type-mismatch
-    for name, filter in pairs(self._filters) do
-        if filter == callback then
-            self._filters[name] = nil
-            log.debug("Removed filter: %s", tostring(callback))
-            return
+    for name, filters in pairs(self._filters) do
+        for i, filter in ipairs(filters) do
+            if filter == callback then
+                table.remove(filters, i)
+                log.debug("Removed filter for event '%s': %s", name, tostring(callback))
+                return
+            end
         end
     end
     log.warn("Tried to remove filter that was not found: %s", tostring(callback))
@@ -422,52 +426,37 @@ end
 
 --- Add an event handler for a specific event or a global event handler
 --- If `eventName` is not provided, the handler will be applied globally.
---- Only one global handler is allowed per element, if a global handler is already set you first have to remove it
---- You can add multiple handlers for specific events, but only if no global handler is set.
---- You can only add one handler per event type
---- 
+--- Multiple handlers for a specific event type are allowed.
+--- A specific handler can only be added once per event type.
+--- A global handler will always be called last after all specific handlers.
+--- Multiple handlers for the same event type are called in the order they were added.
+---
 --- @param callback gui.EventHandler
 --- @param eventName string|nil
 function UiElement:addEventHandler(callback, eventName)
-    if type(self._eventHandlers) == "function" then
-        if eventName then
-            errorManager.error("Cannot add event handler for specific event to element with global event handler", 2)
+    eventName = eventName or "global"
+    self._eventHandlers[eventName] = self._eventHandlers[eventName] or {}
+    local handlers = self._eventHandlers[eventName]
+    for _, handler in pairs(handlers) do
+        if handler == callback then
+            errorManager.error("Cannot add the same event handler multiple times for the same event", 2)
+            return
         end
-        if self._eventHandlers ~= callback then
-            errorManager.error("Cannot add multiple global event handlers to the same element", 2)
-        end
-        return
     end
-    if not eventName then
-        self._eventHandlers = callback
-        log.debug("Added global event handler: %s", tostring(callback))
-        return
-    end
-    if self._eventHandlers[eventName] and not util.contains(self._eventHandlers[eventName], callback) then
-        errorManager.error("Cannot add multiple event handlers for the same event", 2)
-    end
-    self._eventHandlers[eventName] = callback
+    table.insert(handlers, callback)
     log.debug("Added event handler for event '%s': %s", eventName, tostring(callback))
 end
 
 --- Remove an event handler for a specific event or a global event handler
 --- @param callback gui.EventHandler
 function UiElement:removeEventHandler(callback)
-    if type(self._eventHandlers) == "function" then
-        if self._eventHandlers == callback then
-            self._eventHandlers = {}
-            log.debug("Removed global event handler: %s", tostring(callback))
-        else
-            log.warn("Tried to remove event handler that was not found: %s", tostring(callback))
-        end
-        return
-    end
----@diagnostic disable-next-line: param-type-mismatch
-    for eventName, handler in pairs(self._eventHandlers) do
-        if handler == callback then
-            self._eventHandlers[eventName] = nil
-            log.debug("Removed event handler for event '%s': %s", eventName, tostring(callback))
-            return
+    for name, handlers in pairs(self._eventHandlers) do
+        for i, handler in ipairs(handlers) do
+            if handler == callback then
+                table.remove(handlers, i)
+                log.debug("Removed event handler for event '%s': %s", name, tostring(callback))
+                return
+            end
         end
     end
     log.warn("Tried to remove event handler that was not found: %s", tostring(callback))
