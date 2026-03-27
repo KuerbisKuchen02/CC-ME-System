@@ -16,11 +16,11 @@ local UiElement = require("ccmesystem.lib.gui.elements.UiElement")
 --- @module "common.lib.gui.draw"
 local draw = require("ccmesystem.lib.gui.draw")
 
---- @class gui.TextElemetClacData : gui.UiElementClacData
+--- @class gui.TextElementCalcData : gui.UiElementCalcData
 --- @field text string
 
 --- @class gui.TextElement : gui.UiElement
---- @field _data gui.TextElemetClacData
+--- @field _data gui.TextElementCalcData
 local TextElement = class.class(UiElement)
 
 function TextElement:constructor(config)

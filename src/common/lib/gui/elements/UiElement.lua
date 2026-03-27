@@ -20,7 +20,7 @@ local enums = require("ccmesystem.lib.gui.enums")
 --- @module "common.lib.gui.Sizing"
 local Sizing = require("ccmesystem.lib.gui.Sizing")
 
---- Abstact base class of every ui component
+--- Abstract base class of every ui component
 --- 
 --- This class provides all relevant field for layouting and positioning.
 --- The layout uses a flow like layouting, either horizontal or vertical.
@@ -32,11 +32,11 @@ local Sizing = require("ccmesystem.lib.gui.Sizing")
 --- # Parameter
 --- > Every paramter is optional. 
 --- 
---- - `layoutDirection`: Flow direction [LEFT_TO_RIGHT or TOP_TO_BOTTOM]; default LEFT_TO_RIGH`
+--- - `layoutDirection`: Flow direction [LEFT_TO_RIGHT or TOP_TO_BOTTOM]; default LEFT_TO_RIGHT
 --- - `sizing`: [FIT(n, min, max), FIXED(n), GROW(n, min, max), PERCENT(n)] parameters can be named or unnamed; default FIT()
---- - `padding`: {top, left, bottom, right} paramters can be named or unnamed; default 0,0,0,0
+--- - `padding`: {top, left, bottom, right} parameters can be named or unnamed; default 0,0,0,0
 --- - `childGap`: 0...n; default 0
---- - `position`: {x=0..n, y=0..n} paramters can be named or unnamed; default 0,0
+--- - `position`: {x=0..n, y=0..n} parameters can be named or unnamed; default 0,0
 --- - `alignment`: {x=[LEFT or CENTER or RIGHT], y=[TOP or CENTER or BOTTOM]}; default LEFT,TOP
 ---
 --- # Functions
@@ -62,7 +62,7 @@ local Sizing = require("ccmesystem.lib.gui.Sizing")
 --- @field position gui.Position
 --- @field childOffset gui.Position
 --- @field alignment gui.Alignment
---- @field _data gui.UiElementClacData
+--- @field _data gui.UiElementCalcData
 --- @field _context gui.UiContext
 --- @field _filters {[string]: gui.FilterFunction}|gui.FilterFunction
 --- @field _eventHandlers {[string]: gui.EventHandler} | gui.EventHandler
@@ -73,7 +73,7 @@ local UiElement = class.class()
 --- @alias gui.FilterFunction fun(e: gui.Event)
 --- @alias gui.EventHandler fun(e: gui.Event)
 
---- @class gui.UiElementClacData
+--- @class gui.UiElementCalcData
 --- @field width number
 --- @field height number
 --- @field minWidth number
@@ -178,9 +178,9 @@ function UiElement:constructor(config)
                 self.padding.left = config.padding[2] or self.padding.left
             end
             self.padding.top = config.padding[1] or self.padding.top
-            self.padding.left = config.padding[2] or self.padding.right
+            self.padding.left = config.padding[2] or self.padding.left
             self.padding.bottom = config.padding[3] or self.padding.bottom
-            self.padding.right = config.padding[4] or self.padding.left
+            self.padding.right = config.padding[4] or self.padding.right
             self.padding.top = field(config.padding, "top", "number", "nil") or self.padding.top
             self.padding.left = field(config.padding, "left", "number", "nil") or self.padding.left
             self.padding.bottom = field(config.padding, "bottom", "number", "nil") or self.padding.bottom
@@ -393,7 +393,7 @@ function UiElement:addFilter(callback, eventName)
        log.debug("Added global filter: %s", tostring(callback))
        return
     end
-    if self._filters[eventName] and not self._filters[eventName] == callback then
+    if self._filters[eventName] and self._filters[eventName] ~= callback then
         errorManager.error("Cannot add multiple filters for the same event", 2)
     end
     self._filters[eventName] = callback
