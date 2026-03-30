@@ -59,7 +59,7 @@ local util = require("ccmesystem.lib.util")
 local enums = require("ccmesystem.lib.gui.enums")
 
 --- The base class for every gui event
---- @class (exact) gui.Event
+--- @class (exact) gui.events.GenericEvent : class.baseClass
 --- @field source gui.UiElement|nil
 --- @field target gui.UiElement|nil
 --- @field type string
@@ -67,11 +67,11 @@ local enums = require("ccmesystem.lib.gui.enums")
 --- @field isConsumed boolean
 --- @field dispatchChain gui.UiElement[]
 --- @field handleChain gui.UiElement[]
-local Event = class.class()
+local GenericEvent = class.class()
 
 --- @param type string
 --- @param ... any
-function Event:constructor(type, ...)
+function GenericEvent:constructor(type, ...)
     expect(1, type, "string")
 
     self.type = type
@@ -81,7 +81,7 @@ function Event:constructor(type, ...)
     self.handleChain = {}
 end
 
-function Event:consume()
+function GenericEvent:consume()
     self.isConsumed = true
 end
 
@@ -147,6 +147,414 @@ local function calculateEventTarget(context, eventName, ...)
     return target
 end
 
+--- @class (exact) gui.events.AlarmEvent : gui.events.GenericEvent
+--- @field id number
+local AlarmEvent = class.class(GenericEvent)
+
+function AlarmEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local id = ...
+    self.id = id
+end
+
+--- @class (exact) gui.events.CharEvent : gui.events.GenericEvent
+--- @field character string
+local CharEvent = class.class(GenericEvent)
+
+function CharEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local character = ...
+    self.character = character
+end
+
+--- @class (exact) gui.events.ComputerCommandEvent : gui.events.GenericEvent
+--- @field arguments table
+local ComputerCommandEvent = class.class(GenericEvent)
+
+function ComputerCommandEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local arguments = ...
+    self.arguments = arguments
+end
+
+--- @class (exact) gui.events.DiskEvent : gui.events.GenericEvent
+--- @field side string
+local DiskEvent = class.class(GenericEvent)
+
+function DiskEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local side = ...
+    self.side = side
+end
+
+--- @class (exact) gui.events.DiskEjectEvent : gui.events.GenericEvent
+--- @field side string
+local DiskEjectEvent = class.class(GenericEvent)
+
+function DiskEjectEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local side = ...
+    self.side = side
+end
+
+--- @class (exact) gui.events.FileTransferEvent : gui.events.GenericEvent
+--- @field transferredFiles table[]
+local FileTransferEvent = class.class(GenericEvent)
+
+function FileTransferEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local transferredFiles = ...
+    self.transferredFiles = transferredFiles
+end
+
+--- @class (exact) gui.events.HttpCheckEvent : gui.events.GenericEvent
+--- @field url string
+--- @field ok boolean
+--- @field error string?
+local HttpCheckEvent = class.class(GenericEvent)
+
+function HttpCheckEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local url, ok, error = ...
+    self.url = url
+    self.ok = ok
+    self.error = error
+end
+
+--- @class (exact) gui.events.HttpFailureEvent : gui.events.GenericEvent
+--- @field url string
+--- @field error string
+--- @field handle table?
+local HttpFailureEvent = class.class(GenericEvent)
+
+function HttpFailureEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local url, error, handle = ...
+    self.url = url
+    self.error = error
+    self.handle = handle
+end
+
+--- @class (exact) gui.events.HttpSuccessEvent : gui.events.GenericEvent
+--- @field url string
+--- @field handle table
+local HttpSuccessEvent = class.class(GenericEvent)
+
+function HttpSuccessEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local url, handle = ...
+    self.url = url
+    self.handle = handle
+end
+
+--- @class (exact) gui.events.KeyEvent : gui.events.GenericEvent
+--- @field key number
+--- @field isHeld boolean
+local KeyEvent = class.class(GenericEvent)
+
+function KeyEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local key, isHeld = ...
+    self.key = key
+    self.isHeld = isHeld
+end
+
+--- @class (exact) gui.events.KeyUpEvent : gui.events.GenericEvent
+--- @field key number
+local KeyUpEvent = class.class(GenericEvent)
+
+function KeyUpEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local key = ...
+    self.key = key
+end
+
+--- @class (exact) gui.events.ModemMessageEvent : gui.events.GenericEvent
+--- @field side string
+--- @field channel number
+--- @field replyChannel number
+--- @field message any
+--- @field distance number
+local ModemMessageEvent = class.class(GenericEvent)
+
+function ModemMessageEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local side, channel, replyChannel, message, distance = ...
+    self.side = side
+    self.channel = channel
+    self.replyChannel = replyChannel
+    self.message = message
+    self.distance = distance
+end
+
+--- @class (exact) gui.events.MouseClickEvent : gui.events.GenericEvent
+--- @field button number
+--- @field x number
+--- @field y number
+local MouseClickEvent = class.class(GenericEvent)
+
+function MouseClickEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local button, x, y = ...
+    self.button = button
+    self.x = x
+    self.y = y
+end
+
+--- @class (exact) gui.events.MouseDragEvent : gui.events.GenericEvent
+--- @field button number
+--- @field x number
+--- @field y number
+local MouseDragEvent = class.class(GenericEvent)
+
+function MouseDragEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local button, x, y = ...
+    self.button = button
+    self.x = x
+    self.y = y
+end
+
+--- @class (exact) gui.events.MouseScrollEvent : gui.events.GenericEvent
+--- @field direction number
+--- @field x number
+--- @field y number
+local MouseScrollEvent = class.class(GenericEvent)
+
+function MouseScrollEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local direction, x, y = ...
+    self.direction = direction
+    self.x = x
+    self.y = y
+end
+
+--- @class (exact) gui.events.MouseUpEvent : gui.events.GenericEvent
+--- @field button number
+--- @field x number
+--- @field y number
+local MouseUpEvent = class.class(GenericEvent)
+
+function MouseUpEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local button, x, y = ...
+    self.button = button
+    self.x = x
+    self.y = y
+end
+
+--- @class (exact) gui.events.PasteEvent : gui.events.GenericEvent
+--- @field text string
+local PasteEvent = class.class(GenericEvent)
+
+function PasteEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local text = ...
+    self.text = text
+end
+
+--- @class (exact) gui.events.PeripheralDetachEvent : gui.events.GenericEvent
+--- @field side string
+local PeripheralDetachEvent = class.class(GenericEvent)
+
+function PeripheralDetachEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local side = ...
+    self.side = side
+end
+
+--- @class (exact) gui.events.PeripheralEvent : gui.events.GenericEvent
+--- @field side string
+local PeripheralEvent = class.class(GenericEvent)
+
+function PeripheralEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local side = ...
+    self.side = side
+end
+
+--- @class (exact) gui.events.RednetMessageEvent : gui.events.GenericEvent
+--- @field senderId number
+--- @field message any
+--- @field protocol string?
+local RednetMessageEvent = class.class(GenericEvent)
+
+function RednetMessageEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local senderId, message, protocol = ...
+    self.senderId = senderId
+    self.message = message
+    self.protocol = protocol
+end
+
+--- @class (exact) gui.events.RedstoneEvent : gui.events.GenericEvent
+local RedstoneEvent = class.class(GenericEvent)
+
+function RedstoneEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+end
+
+--- @class (exact) gui.events.SpeakerAudioEmptyEvent : gui.events.GenericEvent
+--- @field name string
+local SpeakerAudioEmptyEvent = class.class(GenericEvent)
+
+function SpeakerAudioEmptyEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local name = ...
+    self.name = name
+end
+
+--- @class (exact) gui.events.TaskCompleteEvent : gui.events.GenericEvent
+--- @field id number
+--- @field success boolean
+--- @field errorMsg string?
+--- @field parameters table?
+local TaskCompleteEvent = class.class(GenericEvent)
+
+function TaskCompleteEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local id, success, errorMsg, parameters = ...
+    self.id = id
+    self.success = success
+    self.errorMsg = errorMsg
+    self.parameters = parameters
+end
+
+--- @class (exact) gui.events.TermResizeEvent : gui.events.GenericEvent
+local TermResizeEvent = class.class(GenericEvent)
+
+function TermResizeEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+end
+
+--- @class (exact) gui.events.TerminateEvent : gui.events.GenericEvent
+local TerminateEvent = class.class(GenericEvent)
+
+function TerminateEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+end
+
+--- @class (exact) gui.events.TimerEvent : gui.events.GenericEvent
+--- @field id number
+local TimerEvent = class.class(GenericEvent)
+
+function TimerEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local id = ...
+    self.id = id
+end
+
+--- @class (exact) gui.events.TurtleInventoryEvent : gui.events.GenericEvent
+local TurtleInventoryEvent = class.class(GenericEvent)
+
+function TurtleInventoryEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+end
+
+--- @class (exact) gui.events.WebsocketClosedEvent : gui.events.GenericEvent
+--- @field url string
+--- @field reason string?
+--- @field code number?
+local WebsocketClosedEvent = class.class(GenericEvent)
+
+function WebsocketClosedEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local url, reason, code = ...
+    self.url = url
+    self.reason = reason
+    self.code = code
+end
+
+--- @class (exact) gui.events.WebsocketFailureEvent : gui.events.GenericEvent
+--- @field url string
+--- @field error string
+local WebsocketFailureEvent = class.class(GenericEvent)
+
+function WebsocketFailureEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local url, error = ...
+    self.url = url
+    self.error = error
+end
+
+--- @class (exact) gui.events.WebsocketMessageEvent : gui.events.GenericEvent
+--- @field url string
+--- @field message string
+--- @field isBinary boolean
+local WebsocketMessageEvent = class.class(GenericEvent)
+
+function WebsocketMessageEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local url, message, isBinary = ...
+    self.url = url
+    self.message = message
+    self.isBinary = isBinary
+end
+
+--- @class (exact) gui.events.WebsocketSuccessEvent : gui.events.GenericEvent
+--- @field url string
+--- @field handle table
+local WebsocketSuccessEvent = class.class(GenericEvent)
+
+function WebsocketSuccessEvent:constructor(event, ...)
+    self:super("constructor", event, ...)
+    local url, handle = ...
+    self.url = url
+    self.handle = handle
+end
+
+--- This table maps all cc event names to their corresponding event classes.
+--- @type table<string, gui.events.GenericEvent>
+local EventMap = {
+    alarm = AlarmEvent,
+    char = CharEvent,
+    computer_command = ComputerCommandEvent,
+    disk = DiskEvent,
+    disk_eject = DiskEjectEvent,
+    file_transfer = FileTransferEvent,
+    http_check = HttpCheckEvent,
+    http_failure = HttpFailureEvent,
+    http_success = HttpSuccessEvent,
+    key = KeyEvent,
+    key_up = KeyUpEvent,
+    modem_message = ModemMessageEvent,
+    mouse_click = MouseClickEvent,
+    mouse_drag = MouseDragEvent,
+    mouse_scroll = MouseScrollEvent,
+    mouse_up = MouseUpEvent,
+    paste = PasteEvent,
+    peripheral = PeripheralEvent,
+    peripheral_detach = PeripheralDetachEvent,
+    rednet_message = RednetMessageEvent,
+    redstone = RedstoneEvent,
+    speaker_audio_empty = SpeakerAudioEmptyEvent,
+    task_complete = TaskCompleteEvent,
+    term_resize = TermResizeEvent,
+    terminate = TerminateEvent,
+    timer = TimerEvent,
+    turtle_inventory = TurtleInventoryEvent,
+    websocket_closed = WebsocketClosedEvent,
+    websocket_failure = WebsocketFailureEvent,
+    websocket_message = WebsocketMessageEvent,
+    websocket_success = WebsocketSuccessEvent,
+}
+
+
+--- Factory function for creating event classes for cc events
+--- @param eventName string
+--- @param ... any
+--- @return gui.events.GenericEvent
+local function createEvent(eventName, ...)
+    local EventClass = EventMap[eventName]
+
+    if not EventClass then
+        -- Fallback auf GenericEvent
+        return GenericEvent(eventName, ...)
+    end
+
+    return EventClass(eventName, ...)
+end
+
 --- Base event handler
 ---
 --- The function will
@@ -164,8 +572,7 @@ local function handleEvent(context, eventName, ...)
 
     if not context.root then return end
 
-    --- @type gui.Event
-    local newUiEvent = Event(eventName, ...)
+    local newUiEvent = createEvent(eventName, ...)
 
     newUiEvent.target = calculateEventTarget(context, eventName, ...)
     newUiEvent.source = context.root
@@ -184,6 +591,39 @@ end
 
 --- @type gui.events
 return {
-    Event = Event,
-    handleEvent = handleEvent
+    handleEvent = handleEvent,
+    createEvent = createEvent,
+    GenericEvent = GenericEvent,
+
+    AlarmEvent = AlarmEvent,
+    CharEvent = CharEvent,
+    ComputerCommandEvent = ComputerCommandEvent,
+    DiskEvent = DiskEvent,
+    DiskEjectEvent = DiskEjectEvent,
+    FileTransferEvent = FileTransferEvent,
+    HttpCheckEvent = HttpCheckEvent,
+    HttpFailureEvent = HttpFailureEvent,
+    HttpSuccessEvent = HttpSuccessEvent,
+    KeyEvent = KeyEvent,
+    KeyUpEvent = KeyUpEvent,
+    ModemMessageEvent = ModemMessageEvent,
+    MouseClickEvent = MouseClickEvent,
+    MouseDragEvent = MouseDragEvent,
+    MouseScrollEvent = MouseScrollEvent,
+    MouseUpEvent = MouseUpEvent,
+    PasteEvent = PasteEvent,
+    PeripheralDetachEvent = PeripheralDetachEvent,
+    PeripheralEvent = PeripheralEvent,
+    RednetMessageEvent = RednetMessageEvent,
+    RedstoneEvent = RedstoneEvent,
+    SpeakerAudioEmptyEvent = SpeakerAudioEmptyEvent,
+    TaskCompleteEvent = TaskCompleteEvent,
+    TermResizeEvent = TermResizeEvent,
+    TerminateEvent = TerminateEvent,
+    TimerEvent = TimerEvent,
+    TurtleInventoryEvent = TurtleInventoryEvent,
+    WebsocketClosedEvent = WebsocketClosedEvent,
+    WebsocketFailureEvent = WebsocketFailureEvent,
+    WebsocketMessageEvent = WebsocketMessageEvent,
+    WebsocketSuccessEvent = WebsocketSuccessEvent,
 }

@@ -70,8 +70,8 @@ local Sizing = require("ccmesystem.lib.gui.Sizing")
 --- @field backgroundColor number
 local UiElement = class.class()
 
---- @alias gui.FilterFunction fun(e: gui.Event)
---- @alias gui.EventHandler fun(e: gui.Event)
+--- @alias gui.FilterFunction fun(self: gui.UiElement, e: gui.events.GenericEvent)
+--- @alias gui.EventHandler fun(self: gui.UiElement, e: gui.events.GenericEvent)
 
 --- @class gui.UiElementCalcData
 --- @field width number
@@ -299,7 +299,7 @@ end
 --- 1. The event is consumed
 --- 2. The root element is reached
 --- 
---- @param event gui.Event
+--- @param event gui.events.GenericEvent
 function UiElement:dispatchEvent(event)
     log.trace("Dispatching event '%s' for element: %s", event.type, self.name)
     if #event.dispatchChain <= 0 then
@@ -316,13 +316,13 @@ function UiElement:dispatchEvent(event)
     if self._filters then
         if self._filters[event.type] then
             for _, filter in pairs(self._filters[event.type]) do
-                filter(event)
+                filter(self, event)
                 if event.isConsumed then return end
             end
         end
         if self._filters["global"] then
             for _, filter in pairs(self._filters["global"] or {}) do
-                filter(event)
+                filter(self, event)
                 if event.isConsumed then return end
             end
         end
@@ -349,7 +349,7 @@ end
 --- 1. The event is consumed
 --- 2. The root element is reached
 ---
---- @param event gui.Event
+--- @param event gui.events.GenericEvent
 function UiElement:handleEvent(event)
     log.trace("Handling event '%s' for element: %s", event.type, self.name)
     if #event.handleChain <= 0 then
@@ -365,13 +365,13 @@ function UiElement:handleEvent(event)
     if self._eventHandlers then
         if self._eventHandlers[event.type] then
             for _, handler in pairs(self._eventHandlers[event.type]) do
-                handler(event)
+                handler(self, event)
                 if event.isConsumed then return end
             end
         end
         if self._eventHandlers["global"] then
             for _, handler in pairs(self._eventHandlers["global"] or {}) do
-                handler(event)
+                handler(self, event)
                 if event.isConsumed then return end
             end
         end

@@ -19,7 +19,7 @@ function UiContext:invalidateLayout()
     self.needsLayout = true
 end
 
---- @param event gui.Event
+--- @param event gui.events.GenericEvent
 function UiContext:fireEvent(event)
     if not self.root then return end
     self.root:dispatchEvent(event)
