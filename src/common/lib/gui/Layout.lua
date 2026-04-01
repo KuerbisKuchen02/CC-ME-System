@@ -170,6 +170,37 @@ local function wrapText(root)
 end
 
 --- @param root gui.UiElement
+local function calculateChildSize(root)
+    for node in tree.depthFirstIter(root, tree.DepthFirstOrder.PRE_ORDER) do
+        node._data.childWidth = 0
+        node._data.childHeight = 0
+        if #node.children > 0 then
+            if node.layoutDirection == enums.LayoutDirection.LEFT_TO_RIGHT then
+                node._data.childWidth = (#node.children - 1) * node.childGap
+                local max_h = 0
+                for _, child in ipairs(node.children) do
+                    node._data.childWidth = node._data.childWidth + child._data.width
+                    if child._data.height > max_h then
+                        max_h = child._data.height
+                    end
+                end
+                node._data.childHeight = max_h
+            else -- TOP_TO_BOTTOM
+                node._data.childHeight = (#node.children - 1) * node.childGap
+                local max_w = 0
+                for _, child in ipairs(node.children) do
+                    node._data.childHeight = node._data.childHeight + child._data.height
+                    if child._data.width > max_w then
+                        max_w = child._data.width
+                    end
+                end
+                node._data.childWidth = max_w
+            end
+        end
+    end
+end
+
+--- @param root gui.UiElement
 local function positionAndAlignment(root)
     for node in tree.depthFirstIter(root, tree.DepthFirstOrder.PRE_ORDER) do
         node._data.x = node._data.x + node.position.x
@@ -197,6 +228,7 @@ function layout.layout(root)
     wrapText(root)
     fitSizing(root, "height")
     growAndShrinkSizing(root, "height")
+    calculateChildSize(root)
     positionAndAlignment(root)
 end
 

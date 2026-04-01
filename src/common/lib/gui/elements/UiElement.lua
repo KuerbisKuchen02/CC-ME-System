@@ -80,6 +80,8 @@ local UiElement = class.class()
 --- @field minHeight number
 --- @field x number
 --- @field y number
+--- @field childWidth number
+--- @field childHeight number
 
 --- @class gui.UiElementSizing
 --- @field wtype gui.Sizing.Type
@@ -212,7 +214,7 @@ function UiElement:constructor(config)
     self.children = {}
     self.childOffset = {x = 0, y = 0}
 
-    self._data = {width=0, height=0, minWidth=0, minHeight=0, x=0, y=0}
+    self._data = {width=0, height=0, minWidth=0, minHeight=0, x=0, y=0, childWidth=0, childHeight=0}
     self._eventHandlers = {}
     self._filters = {}
     self.name = field(config, "name", "string", "nil") or "Unnamed UiElement"
@@ -468,12 +470,28 @@ function UiElement:handleScroll(event)
     if self.overflow ~= enums.Overflow.SCROLL then return end
     log.debug("Scroll in direction: " .. event.direction)
     if event.direction == 0 then return end
-    self.childOffset.y = self.childOffset.y + event.direction
+
+    local old_offset_y = self.childOffset.y
+    self.childOffset.y = self.childOffset.y - event.direction
+
     if self.childOffset.y > 0 then
         self.childOffset.y = 0
+    end
+
+    local visible_height = self._data.height - self.padding.top - self.padding.bottom
+    if self._data.childHeight > visible_height then
+        local min_offset_y = visible_height - self._data.childHeight
+        if self.childOffset.y < min_offset_y then
+            self.childOffset.y = min_offset_y
+        end
     else
+        self.childOffset.y = 0
+    end
+
+    if old_offset_y ~= self.childOffset.y then
         self._context.needsLayout = true
     end
+
     log.trace("Updated child offset: " .. util.serialize(self.childOffset) .. " for element: " .. self.name)
     log.trace("Size of targeted element " .. self.name .. ": " .. util.serialize(self._data))
 end
