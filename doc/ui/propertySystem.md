@@ -105,7 +105,7 @@ If set to `true`, a value can only be set to an actual value that satisfies the 
 
 The `getter` is invoked whenever a value is read in any way. The getter function is invoked with a reference to the calling object and the value of the property. The getter MAY manipulate the value in any way or do other things. The function MUST return the final value.
 
-> IMPORTANT
+> [!IMPORTANT]
 > The `getter` MUST return a value that matches the specified `type`.
 
 #### Setter
@@ -117,7 +117,7 @@ The `setter` is invoked whenever a value is set in any way.
 The setter function is invoked with a reference to the calling object and the new value of the property.
 The setter MAY manipulate the value in any way or do other things. The function MUSt return the final value.
 
-> IMPORTANT
+> [!IMPORTANT]
 > The `setter` MUST return a value that matches the specified `type`.
 
 #### Observers

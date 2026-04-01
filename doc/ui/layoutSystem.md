@@ -131,7 +131,7 @@ See [computercraft documentation](https://tweaked.cc/module/colors.html) for mor
 
 ##### Overflow
 
-> Important: Not fully implemented yet! Only HIDDEN AND VISIBLE are currenty supported.
+> Important: Not fully implemented yet! WRAP is currenty not supported.
 
 **Type**: `gui.Overflow`<br>
 **Values**: `HIDDEN | VISIBLE | SCROLL | WRAP`<br>
@@ -139,8 +139,10 @@ See [computercraft documentation](https://tweaked.cc/module/colors.html) for mor
 
 The four options:
 
-- **HIDDEN**: Overflowing content is cut of and is not visible.
+- **HIDDEN**: Overflowing content is cut off and is not visible.
 - **VISIBLE**: Overflowing content is displayed normaly. It is not restricted to the size of the parent
+- **SCROLL**: Overflowing content is cut off and can be scrolled to if element is selected
+- **WRAP**: NOT IMPLEMETED YET
 
 #### Floating Config
 
