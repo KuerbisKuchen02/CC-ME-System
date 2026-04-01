@@ -91,25 +91,29 @@ end
 --- @param y number
 --- @return gui.UiElement|nil
 local function hitTest(element, x, y) -- 1 37
-    log.trace("Hit testing at %s %s with element: %s", x, y, util.serialize(element))
+    log.trace("Hit testing at %s %s with element: %s", x, y, element.name)
 
     -- _data.x = 2 _data.y = 2 _data.width = 37 _data.height = 7
     local isInside = element._data.x <= x and element._data.x + element._data.width > x and element._data.y <= y and element._data.y + element._data.height > y
 
     -- If the mouse is not inside the element and the overflow is hidden, return nil
     -- Otherwise we need to continue looking through possibly all descendants
-    if not isInside and element.overflow == enums.Overflow.HIDDEN then
+    if not isInside and (element.overflow == enums.Overflow.HIDDEN or element.overflow == enums.Overflow.SCROLL) then
         log.trace("Element '%s' overflow is hidden and mouse is outside, skipping children", element.name)
         return nil
     end
 
+    --- The hit was inside the element, but we first need to check if any children are also hit
     for i = #element.children, 1, -1 do
         local child = element.children[i]
         local hit = hitTest(child, x, y)
         if hit then return hit end
     end
 
-    return element
+    --- No children were hit, return the element if the hit was inside
+    if isInside then return element end
+
+    return nil
 end
 
 --- Calculate the event target for a given event
