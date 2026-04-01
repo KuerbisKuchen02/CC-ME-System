@@ -54,6 +54,7 @@ function Application:constructor()
         padding = {1, 2},
         childGap = 1,
         backgroundColor = colors.red,
+        overflow = gui.Overflow.SCROLL,
         name = "hbox",
     })
     local child4 = gui.UiElement({
