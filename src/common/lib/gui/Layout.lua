@@ -31,10 +31,18 @@ local function fitSizing(root, dimension)
     local minField = isWidth and "minWidth" or "minHeight"
 
     for node in tree.depthFirstIter(root, tree.DepthFirstOrder.POST_ORDER) do
+        if isWidth then
+            node._data.width = 0
+            node._data.height = 0
+            node._data.minWidth = 0
+            node._data.minHeight = 0
+            node._data.x = 0
+            node._data.y = 0
+        end
         local padding = isWidth and node.padding.left + node.padding.right or node.padding.top + node.padding.bottom
         node._data[sizeField] = node._data[sizeField] + padding
         node._data[minField] = node._data[minField] + padding
-    
+
         local childGap = (#node.children - 1) * node.childGap
         if node.layoutDirection == layoutDir then
             node._data[sizeField] = node._data[sizeField] + childGap
@@ -131,6 +139,7 @@ local function wrapText(root)
     for node in tree.depthFirstIter(root, tree.DepthFirstOrder.POST_ORDER) do
         if class.instanceOf(node, TextElement) then
             ---@cast node gui.TextElement
+            node._data.text = ""
             local lineBreaks = 0
             local lines = util.split(node.text, "\n")
             for _, line in ipairs(lines) do

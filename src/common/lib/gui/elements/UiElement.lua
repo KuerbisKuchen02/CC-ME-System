@@ -220,6 +220,7 @@ function UiElement:constructor(config)
 
     self.backgroundColor = field(config, "backgroundColor", "number", "nil") or colors.black
     -- log.trace("Created UiElement: %s", util.serialize(self))
+    self:addEventHandler(UiElement.handleScroll, enums.EventType.MOUSE_SCROLL)
 end
 
 function UiElement:setContext(context)
@@ -260,7 +261,7 @@ function UiElement:render()
         return
     end
 
-    if self.overflow == enums.Overflow.HIDDEN then
+    if self.overflow == enums.Overflow.HIDDEN or self.overflow == enums.Overflow.SCROLL then
         draw.pushClip(self._data.x, self._data.y, self._data.width, self._data.height)
     end
 
@@ -460,6 +461,21 @@ function UiElement:removeEventHandler(callback)
         end
     end
     log.warn("Tried to remove event handler that was not found: %s", tostring(callback))
+end
+
+--- @param event gui.events.MouseScrollEvent
+function UiElement:handleScroll(event)
+    if self.overflow ~= enums.Overflow.SCROLL then return end
+    log.debug("Scroll in direction: " .. event.direction)
+    if event.direction == 0 then return end
+    self.childOffset.y = self.childOffset.y + event.direction
+    if self.childOffset.y > 0 then
+        self.childOffset.y = 0
+    else
+        self._context.needsLayout = true
+    end
+    log.trace("Updated child offset: " .. util.serialize(self.childOffset) .. " for element: " .. self.name)
+    log.trace("Size of targeted element " .. self.name .. ": " .. util.serialize(self._data))
 end
 
 return UiElement
