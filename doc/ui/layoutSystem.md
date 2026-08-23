@@ -114,7 +114,7 @@ If you dont want to apply padding to all sides prefer using named parameter to p
 **Type**: `number`<br>
 **Default**: `0`
 
-`childGap` defines the distance between elements.
+`childGap` defines the distance between child elements.
 
 The parameter accepts a positv integer.
 
@@ -147,6 +147,14 @@ The four options:
 #### Floating Config
 
 > Important: Not implemented yet!
+
+#### Child offset
+
+**Type**: `table`<br>
+**Options**: `x: number`, `y: number`<br>
+**Default**: `{x=0, y=0}`
+
+The `childOffset` shifts the content of the element. The origin point is the top left corner of the element. E.g. positive numbers for x shift the content right, negativ numbers shift it left, positive numbers for y shift the content down, negativ numbers shift it up.
 
 ## How it works
 
