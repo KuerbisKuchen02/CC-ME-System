@@ -1,3 +1,5 @@
 .vscode
 cc
 .DS_Store
+_build
+.venv
