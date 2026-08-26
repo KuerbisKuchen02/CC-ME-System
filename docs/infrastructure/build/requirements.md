@@ -58,18 +58,25 @@ Scopes:
 
 # 2 Build Configuration
 
-| ID        | Requirement                                                                                                                                                                                                                   | Reference | Dependency |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| FR-CFG-01 | The default repository structure MUST distinguish `projects/`, `lib/`, and `external/` source categories.                                                                                                                     | US-BLD-01 |            |
-| FR-CFG-02 | By default, project source modules MUST be located below `projects/<project>/src/`.                                                                                                                                           | US-BLD-01 |            |
-| FR-CFG-03 | By default, shared-library source modules MUST be located below `lib/src/`.                                                                                                                                                   | US-BLD-01 |            |
-| FR-CFG-04 | By default, external source modules MUST be located below `external/`.                                                                                                                                                        | US-BLD-01 |            |
-| FR-CFG-05 | Repository-level configuration MUST allow the default shared-library and external source roots to be overridden.                                                                                                              | US-BLD-02 |            |
-| FR-CFG-06 | The default logical module prefix for shared libraries MUST be `lib`. The default logical module prefix for external code MUST be `external`.                                                                                 | US-BLD-02 |            |
-| FR-CFG-07 | The module prefixes for shared libraries and external code MUST be configurable.                                                                                                                                              | US-BLD-02 |            |
-| FR-CFG-08 | The build configuration MUST allow specific files or modules to be excluded from the main bundle.                                                                                                                             | US-BLD-15 |            |
-| FR-CFG-09 | Build configuration MUST support hierarchical inheritance. For scalar values, a more specific configuration MUST override the inherited value. For list values, a more specific configuration MUST extend the inherited list. | US-BLD-17 |            |
-| FR-CFG-10 | Each project or library MUST define its build configuration in a build configuration file located at the root of that project or library.                                                                                     | US-DEP-02 |            |
+| ID        | Requirement                                                                                                                                                                                                                                      | Reference            | Dependency |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------- | ---------- |
+| FR-CFG-01 | The default repository structure MUST distinguish `projects/`, `libraries/`, and `external/` source categories.                                                                                                                                  | US-BLD-01            |            |
+| FR-CFG-02 | By default, project source modules MUST be located below `projects/<project>/src/`.                                                                                                                                                              | US-BLD-01            |            |
+| FR-CFG-03 | A shared library MUST be either `libraries/<name>.lua` or a directory package below `libraries/<name>/src/`.                                                                                                                                     | US-BLD-01            |            |
+| FR-CFG-04 | By default, external source modules MUST be located below `external/`.                                                                                                                                                                           | US-BLD-01            |            |
+| FR-CFG-05 | Repository-level configuration MUST allow the library and external category roots to be overridden.                                                                                                                                              | US-BLD-02            |            |
+| FR-CFG-06 | The default logical module prefixes MUST be `lib` for shared libraries, `external` for external code, and `test` for test modules.                                                                                                               | US-BLD-02            |            |
+| FR-CFG-07 | Module prefixes and the project `source_root` and `test_source_root` MUST be configurable.                                                                                                                                                       | US-BLD-02            |            |
+| FR-CFG-08 | The build configuration MUST allow specific files or modules to be excluded from the main bundle.                                                                                                                                                | US-BLD-15            |            |
+| FR-CFG-09 | Build configuration MUST support inheritance in the order repository, category, package/project, target, and build type. Scalars MUST override inherited values and maps MUST merge by key with the more-specific value winning.                 | US-BLD-17            |            |
+| FR-CFG-10 | A project, large library, or large external package configuration MUST be named `build_config.yaml` and reside at that entity's root. A configurable small package MUST use the sidecar form `<name>.build_config.yaml`.                         | US-DEP-02            |            |
+| FR-CFG-11 | The category configurations `projects/build_config.yaml`, `libraries/build_config.yaml`, and `external/build_config.yaml` MUST apply to entries in their respective categories.                                                                  | US-BLD-17            |            |
+| FR-CFG-12 | Inherited list values MUST append by default. A list configuration MAY use `mode: replace` with `items` to replace inherited values, or `mode: clear` without items to clear them.                                                               | US-BLD-17            |            |
+| FR-CFG-13 | Project build targets MUST be defined as entries of a `targets` map. Target, project, and group names MUST match `^[A-Za-z0-9](?:[A-Za-z0-9_]*[A-Za-z0-9])?$`.                                                                                   | US-BLD-05, US-BLD-24 |            |
+| FR-CFG-14 | If a project has no explicit targets, the system MUST create an implicit `default` target. A library or external package without targets MUST be treated as a manifest and MUST NOT produce an artifact.                                         | US-BLD-05, US-DEP-01 |            |
+| FR-CFG-15 | `entry_point` and `preserved` values MUST be interpreted relative to the applicable source root. Unknown or invalid configuration fields MUST be reported as warnings and ignored; duplicate targets and invalid required values MUST be errors. | US-BLD-05, US-BLD-16 |            |
+| FR-CFG-16 | A target version MUST be a Semantic Versioning value. It MUST be required for Release builds and SHOULD produce a warning when absent from Development or Test builds.                                                                           | US-DEP-13, US-DEP-14 |            |
+| FR-CFG-17 | `artifact_base_url` MUST be configurable only at repository level.                                                                                                                                                                               | US-DEP-15            |            |
 
 ---
 
@@ -85,17 +92,19 @@ Topics:
 
 ## 3.1 Dependency Declaration
 
-| ID         | Requirement                                                                                                                                                     | Reference | Dependency |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| FR-DEP-101 | The build system MUST support shared libraries that can be consumed by multiple projects.                                                                       | US-DEP-01 |            |
-| FR-DEP-102 | Each project or library that has dependencies MUST declare those dependencies in its build configuration.                                                       | US-DEP-02 |            |
-| FR-DEP-103 | The build configuration MUST describe the dependency graph, while `require()` statements MUST describe module usage.                                            | US-DEP-02 |            |
-| FR-DEP-104 | The build system MUST distinguish between declared dependencies and dependencies actually referenced by source code.                                            | US-DEP-03 |            |
-| FR-DEP-105 | The build system MUST distinguish static and dynamic dependencies.                                                                                              | US-DEP-07 |            |
-| FR-DEP-106 | Static dependencies MUST use `require()` statement with string literals for the module name.                                                                    | US-DEP-07 |            |
-| FR-DEP-107 | Dynamic dependencies MUST NOT use `require()` statement with string literals for the module name                                                                | US-DEP-08 |            |
-| FR-DEP-108 | External dependencies MUST be included as source code within the repository. External dependency origin and license information MAY be documented manually.     | US-DEP-20 |            |
-| FR-DEP-109 | The build system SHOULD support library structures in which an `init.lua` module acts as a public interface and internal modules remain implementation details. | US-DEP-16 |            |
+| ID         | Requirement                                                                                                                                                                                                             | Reference            | Dependency |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- |
+| FR-DEP-101 | The build system MUST support shared libraries that can be consumed by multiple projects.                                                                                                                               | US-DEP-01            |            |
+| FR-DEP-102 | Each project or library that has dependencies MUST declare those dependencies in its build configuration.                                                                                                               | US-DEP-02            |            |
+| FR-DEP-103 | The build configuration MUST describe the dependency graph, while `require()` statements MUST describe module usage.                                                                                                    | US-DEP-02            |            |
+| FR-DEP-104 | The build system MUST distinguish between declared dependencies and dependencies actually referenced by source code.                                                                                                    | US-DEP-03            |            |
+| FR-DEP-105 | The build system MUST distinguish static and dynamic dependencies.                                                                                                                                                      | US-DEP-07            |            |
+| FR-DEP-106 | Static dependencies MUST use `require()` statement with string literals for the module name.                                                                                                                            | US-DEP-07            |            |
+| FR-DEP-107 | Dynamic dependencies MUST NOT use `require()` statement with string literals for the module name                                                                                                                        | US-DEP-08            |            |
+| FR-DEP-108 | Dependencies MUST be source packages within the repository's `libraries/` or `external/` category; arbitrary filesystem paths and URLs MUST NOT be dependency declarations.                                             | US-DEP-20            |            |
+| FR-DEP-109 | A dependency declaration MUST name a complete package. An unprefixed name MUST search libraries before external packages; `lib.` and `external.` prefixes MUST select their category explicitly.                        | US-DEP-02            |            |
+| FR-DEP-110 | A single-file package without configuration MUST NOT contain static dependencies. A package that contains static dependencies MUST declare them in its applicable configuration.                                        | US-DEP-02, US-DEP-04 |            |
+| FR-DEP-111 | An `init.lua` module MUST define the public interface of its package subtree. Callers outside that package MUST NOT require descendants of that interface; callers inside the package MAY require its internal modules. | US-DEP-16            |            |
 
 ## 3.2 Dependency Validation
 
@@ -118,6 +127,9 @@ Topics:
 | FR-DEP-305 | Static dependencies MUST be eligible for dependency resolution and bundling according to the selected build type.                                                                                                               | US-DEP-07            |            |
 | FR-DEP-306 | Dynamic dependencies MUST NOT be statically resolved or bundled into the referencing artifact.                                                                                                                                  | US-DEP-08            |            |
 | FR-DEP-307 | A `require()` whose argument is a string literal MUST be treated as statically resolvable, while a `require()` whose argument is not a string literal MUST be treated as dynamic.                                               | US-DEP-07, US-DEP-09 |            |
+| FR-DEP-308 | Dependency resolution MUST start at the configured entry point of the current build target. The system then MUST recursively search all required modules for dependencies.                                                      | US-DEP-05            |            |
+| FR-DEP-309 | The resolver MUST report a static dependency cycle as an error and identify the cycle.                                                                                                                                          | US-DEP-18            |            |
+| FR-DEP-310 | A same-name single-file and directory package within a category MUST be rejected because it maps to the same logical module identity.                                                                                           | US-BLD-04            |            |
 
 ## 3.4 Dynamic Dependencies and Plugins
 
@@ -146,6 +158,7 @@ Topics:
 | FR-DEP-603 | For shared-library modules, the default logical module name MUST be derived from the configured library source root and the configured prefix.                                                                                                        | US-BLD-04 |            |
 | FR-DEP-604 | For external modules, the default logical module name MUST be derived from the configured external source root and the configured prefix.                                                                                                             | US-BLD-04 |            |
 | FR-DEP-605 | The development tooling SHOULD expose the build system's module mappings to Lua Language Server. If Lua Language Server cannot resolve the mappings through generated/configured workspace information, source annotations MAY be used as a fallback. | US-BLD-18 |            |
+| FR-DEP-606 | Test modules MUST derive their module name from `test_source_root` and `test_prefix`, and MUST be emitted below the corresponding test namespace in an unbundled artifact.                                                                            | US-TST-02 |            |
 
 ---
 
@@ -165,25 +178,25 @@ Topics:
 
 ## 4.1 Build Targets
 
-| ID         | Requirement                                                                                                | Reference | Dependency |
-| ---------- | ---------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| FR-BLD-101 | A project MUST be able to define multiple build targets.                                                   | US-BLD-06 |            |
-| FR-BLD-102 | Each build target MUST have a unique name within its project.                                              | US-BLD-05 |            |
-| FR-BLD-103 | Each build target MUST define an entry point.                                                              | US-BLD-05 |            |
-| FR-BLD-104 | The entry point MUST serve as the root of static dependency resolution for the target.                     | US-BLD-05 |            |
-| FR-BLD-105 | A build target MAY define additional source files or modules required by its build process.                | US-BLD-05 |            |
-| FR-BLD-106 | Each build target MUST produce one logical build artifact.                                                 | US-BLD-09 |            |
-| FR-BLD-107 | A build artifact MAY contain multiple output files.                                                        | US-BLD-10 |            |
-| FR-BLD-108 | Each build target MUST have a stable identity that can be used by the build system and associated tooling. | US-BLD-24 |            |
+| ID         | Requirement                                                                                                                                           | Reference | Dependency |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
+| FR-BLD-101 | A project MUST be able to define multiple build targets.                                                                                              | US-BLD-06 |            |
+| FR-BLD-102 | Each build target MUST have a unique name within its project.                                                                                         | US-BLD-05 |            |
+| FR-BLD-103 | Each artifact-producing build target MUST have an effective entry point. A library or external package manifest without targets MUST NOT require one. | US-BLD-05 |            |
+| FR-BLD-104 | The entry point MUST serve as the root of static dependency resolution for the target.                                                                | US-BLD-05 |            |
+| FR-BLD-105 | A build target MAY define additional source files or modules required by its build process.                                                           | US-BLD-05 |            |
+| FR-BLD-106 | Each build target MUST produce one logical build artifact.                                                                                            | US-BLD-09 |            |
+| FR-BLD-107 | A build artifact MAY contain multiple output files.                                                                                                   | US-BLD-10 |            |
+| FR-BLD-108 | Each build target MUST have a stable identity that can be used by the build system and associated tooling.                                            | US-BLD-24 |            |
 
 ## 4.2 Build Types
 
-| ID         | Requirement                                                                                                                                     | Reference | Dependency |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| FR-BLD-201 | Each build target MUST support the predefined Development, Test, and Release build types.                                                       | US-BLD-07 |            |
-| FR-BLD-202 | Development builds MUST be available without requiring target-specific test or release configuration.                                           | US-BLD-07 |            |
-| FR-BLD-203 | Test builds MUST be available without requiring a test entry point; when no test entry point is configured, the normal entry point MAY be used. | US-BLD-08 |            |
-| FR-BLD-204 | A target MAY define a separate test entry point for Test builds.                                                                                | US-BLD-08 |            |
+| ID         | Requirement                                                                                                                                                                                         | Reference            | Dependency |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- |
+| FR-BLD-201 | Each build target MUST support the predefined Development, Test, and Release build types.                                                                                                           | US-BLD-07            |            |
+| FR-BLD-202 | Development builds MUST be available without requiring target-specific test or release configuration.                                                                                               | US-BLD-07            |            |
+| FR-BLD-203 | Test builds MUST discover `Test*.lua` suites below `test_source_root` and use every discovered suite together with the test environment/effective test entry point as a dependency-resolution root. | US-BLD-08, US-TST-02 |            |
+| FR-BLD-204 | A target MAY define a separate test entry point for Test builds.                                                                                                                                    | US-BLD-08            |            |
 
 ## 4.3 Bundling and Minification
 
@@ -196,14 +209,15 @@ Topics:
 
 ## 4.4 Preserved Files
 
-| ID         | Requirement                                                                                             | Reference | Dependency |
-| ---------- | ------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| FR-BLD-401 | A build target MUST be able to define preserved files.                                                  | US-BLD-16 |            |
-| FR-BLD-402 | Preserved files MUST be included in the resulting artifact without being bundled into the main program. | US-BLD-16 |            |
-| FR-BLD-403 | Preserved files MUST NOT be minified by the normal target bundling/minification process.                | US-BLD-16 |            |
-| FR-BLD-404 | Preserved files SHOULD be suitable for user modification after deployment.                              | US-BLD-16 |            |
-| FR-BLD-405 | Preserved-file configuration MUST be target-specific.                                                   | US-BLD-16 |            |
-| FR-BLD-406 | The build system MUST NOT rewrite `require()` statements belonging to preserved files.                  | US-BLD-16 |            |
+| ID         | Requirement                                                                                                                                                                                                | Reference | Dependency |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
+| FR-BLD-401 | A build target MUST be able to define preserved files.                                                                                                                                                     | US-BLD-16 |            |
+| FR-BLD-402 | Preserved files MUST be included in the resulting artifact without being bundled into the main program.                                                                                                    | US-BLD-16 |            |
+| FR-BLD-403 | Preserved files MUST NOT be minified by the normal target bundling/minification process.                                                                                                                   | US-BLD-16 |            |
+| FR-BLD-404 | Preserved files SHOULD be suitable for user modification after deployment.                                                                                                                                 | US-BLD-16 |            |
+| FR-BLD-405 | Preserved-file configuration MUST be target-specific.                                                                                                                                                      | US-BLD-16 |            |
+| FR-BLD-406 | The build system MUST NOT rewrite `require()` statements belonging to preserved files.                                                                                                                     | US-BLD-16 |            |
+| FR-BLD-407 | A preserved module and its complete static runtime dependency closure MUST be emitted as files. If a module is both preserved and otherwise eligible for bundling, it MUST be emitted as a preserved file. | US-BLD-16 |            |
 
 ## 4.5 Build Groups and Selection Scopes
 
@@ -230,14 +244,10 @@ Topics:
 
 ## 4.7 Incremental Builds
 
-| ID         | Requirement                                                                                                                       | Reference | Dependency |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| FR-BLD-701 | The build system SHOULD detect when source inputs relevant to a target have not changed.                                          | US-BLD-20 |            |
-| FR-BLD-702 | The build system SHOULD detect changes to build configuration that affect a target's output.                                      | US-BLD-20 |            |
-| FR-BLD-703 | The build system SHOULD detect changes to relevant dependencies using dependency relationships and source metadata.               | US-BLD-20 |            |
-| FR-BLD-704 | When only one dependency branch changes, the build system SHOULD avoid rebuilding unrelated dependency branches.                  | US-BLD-21 |            |
-| FR-BLD-705 | The incremental build mechanism SHOULD be based on deterministic input metadata such as file hashes and dependency relationships. | US-BLD-20 |            |
-| FR-BLD-706 | The build system MAY cache intermediate build results to support efficient incremental rebuilding.                                | US-BLD-20 |            |
+| ID         | Requirement                                                                                                                                           | Reference            | Dependency |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- |
+| FR-BLD-701 | The build system MUST record deterministic hashes for source files relevant to a target so it can determine whether the artifact requires rebuilding. | US-BLD-20            |            |
+| FR-BLD-702 | Full incremental and intermediate-result caching are deferred; the initial implementation MUST NOT require them.                                      | US-BLD-20, US-BLD-21 |            |
 
 ## 4.8 Build Failure Handling
 
@@ -252,16 +262,18 @@ Topics:
 
 ## 4.9 Build Output
 
-| ID         | Requirement                                                                                                                                                              | Reference | Dependency |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- | ---------- |
-| FR-BLD-901 | Unbundled artifact paths MUST correspond to the logical module hierarchy so that statically resolved `require()` calls remain valid without changing their module names. | US-BLD-13 |            |
-| FR-BLD-902 | Development artifacts MUST preserve the complete module structure and MUST NOT bundle or minify source modules.                                                          | US-BLD-14 |            |
-| FR-BLD-903 | Test artifacts MUST preserve the complete module structure and MUST NOT bundle or minify source modules.                                                                 | US-BLD-25 |            |
-| FR-BLD-904 | Release artifacts MUST bundle all eligible static modules into a single main Lua artifact.                                                                               | US-BLD-15 |            |
-| FR-BLD-905 | Release artifacts MUST minify the bundled main Lua artifact.                                                                                                             | US-BLD-15 |            |
-| FR-BLD-906 | The build output SHOULD provide sufficient metadata to identify the project, target, build type, and source revision associated with an artifact.                        | US-BLD-24 |            |
-| FR-BLD-907 | The build system SHOULD keep generated build output separate from editable project source.                                                                               | US-BLD-01 |            |
-| FR-BLD-908 | Preserved files MUST retain their relative directory structure below the applicable project's `src/` directory in unbundled/deployed output.                             | US-BLD-16 |            |
+| ID         | Requirement                                                                                                                                                                                                | Reference            | Dependency |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- |
+| FR-BLD-901 | Unbundled artifact paths MUST correspond to the logical module hierarchy so that statically resolved `require()` calls remain valid without changing their module names.                                   | US-BLD-13            |            |
+| FR-BLD-902 | Development artifacts MUST emit only the static dependency closure of the effective normal entry point as unbundled, unminified modules.                                                                   | US-BLD-14            |            |
+| FR-BLD-903 | Test artifacts MUST emit the combined static dependency closure of the discovered suites and test roots as unbundled, unminified modules.                                                                  | US-BLD-25            |            |
+| FR-BLD-904 | Release artifacts MUST bundle all eligible static modules into a single main Lua artifact.                                                                                                                 | US-BLD-15            |            |
+| FR-BLD-905 | Release artifacts MUST minify the bundled main Lua artifact.                                                                                                                                               | US-BLD-15            |            |
+| FR-BLD-906 | Every artifact MUST contain metadata identifying its name, target, build type, source revision, optional version, artifact base URL, and a `FILES` list of artifact-relative paths with SHA-256 checksums. | US-BLD-24, US-DEP-15 |            |
+| FR-BLD-907 | The build system SHOULD keep generated build output separate from editable project source.                                                                                                                 | US-BLD-01            |            |
+| FR-BLD-908 | Preserved files MUST retain their relative directory structure below the applicable project's `src/` directory in unbundled/deployed output.                                                               | US-BLD-16            |            |
+| FR-BLD-909 | Artifacts MUST be written below `build/<project>/artifacts/<artifact-name>/<build-type>/`, and rebuilding locally MAY overwrite that artifact directory.                                                   | US-BLD-24            |            |
+| FR-BLD-910 | A Release build MUST require a clean worktree, configured repository-level `artifact_base_url`, full source commit SHA, and effective target version.                                                      | US-DEP-15            |            |
 
 ---
 
@@ -282,22 +294,22 @@ Topics:
 | ID         | Requirement                                                                                                                                                          | Reference | Dependency |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
 | FR-TST-101 | The test framework MUST organize tests into test suites represented by classes inheriting from a generic test-suite base class.                                      | US-TST-01 |            |
-| FR-TST-102 | A Lua file whose name begins with `test` and which returns a class inheriting from the generic test-suite base class MUST be recognized as a test suite.             | US-TST-02 |            |
+| FR-TST-102 | A Lua file whose name matches `Test*.lua` and which returns a class inheriting from the generic test-suite base class MUST be recognized as a test suite.            | US-TST-02 |            |
 | FR-TST-103 | Each discovered test file MUST contain exactly one test suite.                                                                                                       | US-TST-02 |            |
 | FR-TST-104 | Test cases MUST be discovered automatically from test-suite methods whose names begin with `test`. No explicit test registration or decorator mechanism is required. | US-TST-03 |            |
 
 ## 5.2 Test Lifecycle and Failure Handling
 
-| ID         | Requirement                                                                                                                                                                                                                                                                                                                                                                                                                 | Reference | Dependency |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| FR-TST-201 | Each test suite MUST execute using a fresh test-suite instance. Class members MAY be used as shared fixture state for the test cases in that suite.                                                                                                                                                                                                                                                                         | US-TST-04 |            |
-| FR-TST-202 | `setup()` MUST be executed before every test case in the suite.                                                                                                                                                                                                                                                                                                                                                             | US-TST-05 |            |
-| FR-TST-203 | `teardown()` MUST be executed after every test case in the suite.                                                                                                                                                                                                                                                                                                                                                           | US-TST-05 |            |
-| FR-TST-204 | `suiteSetup()` MUST be executed before the first test case of the suite.                                                                                                                                                                                                                                                                                                                                                    | US-TST-05 |            |
-| FR-TST-205 | `suiteTeardown()` MUST be executed after the last test case of the suite.                                                                                                                                                                                                                                                                                                                                                   | US-TST-05 |            |
-| FR-TST-206 | The test runner MUST provide environment setup and environment teardown around the complete test execution.                                                                                                                                                                                                                                                                                                                 | US-TST-05 |            |
-| FR-TST-207 | A `setup()` failure MUST fail its test case and prevent that test method from executing. A `teardown()` failure MUST fail its test case even if the test method passed. A `suiteSetup()` failure MUST cause all test cases in the affected suite to fail or not execute, while allowing the runner to continue with the next suite. A `suiteTeardown()` failure MUST cause the suite to fail even if all test cases passed. | US-TST-10 |            |
-| FR-TST-208 | Test methods, lifecycle methods, and runner operations MUST be executed using protected calls so that failures do not terminate the complete test run.                                                                                                                                                                                                                                                                      | US-TST-10 |            |
+| ID         | Requirement                                                                                                                                                                                                                                                                                                                                                                                                                         | Reference | Dependency |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
+| FR-TST-201 | Each test suite MUST execute using a fresh test-suite instance. Class members MAY be used as shared fixture state for the test cases in that suite.                                                                                                                                                                                                                                                                                 | US-TST-04 |            |
+| FR-TST-202 | `setup()` MUST be executed before every test case in the suite.                                                                                                                                                                                                                                                                                                                                                                     | US-TST-05 |            |
+| FR-TST-203 | `teardown()` MUST be executed after every test case in the suite.                                                                                                                                                                                                                                                                                                                                                                   | US-TST-05 |            |
+| FR-TST-204 | `setupTestSuite()` MUST be executed before the first test case of the suite.                                                                                                                                                                                                                                                                                                                                                        | US-TST-05 |            |
+| FR-TST-205 | `teardownTestSuite()` MUST be executed after the last test case of the suite.                                                                                                                                                                                                                                                                                                                                                       | US-TST-05 |            |
+| FR-TST-206 | The test runner MUST provide environment setup and environment teardown around the complete test execution.                                                                                                                                                                                                                                                                                                                         | US-TST-05 |            |
+| FR-TST-207 | A `setup()` failure MUST fail its test case and prevent that test method from executing. A `teardown()` failure MUST fail its test case even if the test method passed. A `setupTestSuite()` failure MUST cause all test cases in the affected suite to fail or not execute, while allowing the runner to continue with the next suite. A `teardownTestSuite()` failure MUST cause the suite to fail even if all test cases passed. | US-TST-10 |            |
+| FR-TST-208 | Test methods, lifecycle methods, and runner operations MUST be executed using protected calls so that failures do not terminate the complete test run.                                                                                                                                                                                                                                                                              | US-TST-10 |            |
 
 ## 5.3 Test Execution and Assertions
 
@@ -335,17 +347,17 @@ Topics:
 
 ## 5.6 Test Environment and Artifacts
 
-| ID         | Requirement                                                                                                                                                  | Reference | Dependency |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- | ---------- |
-| FR-TST-601 | The test build type MUST execute in the development environment rather than inside a ComputerCraft runtime.                                                  | US-TST-19 |            |
-| FR-TST-602 | ComputerCraft APIs used by tests MUST be mocked or replaced by the test developer when required.                                                             | US-TST-20 |            |
-| FR-TST-603 | The test system MUST NOT require or prescribe a specific ComputerCraft API mocking framework.                                                                | US-TST-20 |            |
+| ID         | Requirement                                                                                                 | Reference | Dependency |
+| ---------- | ----------------------------------------------------------------------------------------------------------- | --------- | ---------- |
+| FR-TST-601 | The test build type MUST execute in the development environment rather than inside a ComputerCraft runtime. | US-TST-19 |            |
+| FR-TST-602 | ComputerCraft APIs used by tests MUST be mocked or replaced by the test developer when required.            | US-TST-20 |            |
+| FR-TST-603 | The test system MUST NOT require or prescribe a specific ComputerCraft API mocking framework.               | US-TST-20 |            |
 
 ## 5.7 Test Quality Attributes
 
-| ID          | Requirement                                                                                                                                                   | Reference            | Dependency |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- |
-| NFR-TST-701 | The test framework MUST NOT be responsible for isolating system resources such as the filesystem. Such isolation is the responsibility of the test developer. | US-TST-20            |            |
+| ID          | Requirement                                                                                                                                                   | Reference | Dependency |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
+| NFR-TST-701 | The test framework MUST NOT be responsible for isolating system resources such as the filesystem. Such isolation is the responsibility of the test developer. | US-TST-20 |            |
 
 ---
 
@@ -353,13 +365,13 @@ Topics:
 
 These requirements apply across both areas.
 
-| ID     | Requirement                                                                                                                                                                            |
-| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| NFR-01 | The build and dependency system SHOULD prioritize simplicity over features that are not required by current use cases.                                                                 |
-| NFR-02 | The system MUST provide deterministic dependency resolution for a given repository state and build configuration.                                                                      |
-| NFR-03 | Diagnostics SHOULD be actionable and SHOULD identify the category, location, cause, and possible remediation of a problem where practical.                                             |
-| NFR-04 | Build processing SHOULD maximize useful work in a single invocation rather than terminating at the first independent error.                                                            |
-| NFR-05 | Terminology defined in the controlled terminology section MUST be used consistently throughout the system documentation, design, implementation, and user-facing interfaces.           |
-| NFR-06 | The build system SHOULD minimize generated artifact size because ComputerCraft environments have limited storage capacity.                                                             |
-| NFR-07 | Build functionality SHOULD be structured into separable stages so that individual responsibilities remain understandable and testable.                                                 |
-| NFR-08 | The default repository layout SHOULD require minimal configuration for normal projects and libraries.                                                                                  |
+| ID     | Requirement                                                                                                                                                                  |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| NFR-01 | The build and dependency system SHOULD prioritize simplicity over features that are not required by current use cases.                                                       |
+| NFR-02 | The system MUST provide deterministic dependency resolution for a given repository state and build configuration.                                                            |
+| NFR-03 | Diagnostics SHOULD be actionable and SHOULD identify the category, location, cause, and possible remediation of a problem where practical.                                   |
+| NFR-04 | Build processing SHOULD maximize useful work in a single invocation rather than terminating at the first independent error.                                                  |
+| NFR-05 | Terminology defined in the controlled terminology section MUST be used consistently throughout the system documentation, design, implementation, and user-facing interfaces. |
+| NFR-06 | The build system SHOULD minimize generated artifact size because ComputerCraft environments have limited storage capacity.                                                   |
+| NFR-07 | Build functionality SHOULD be structured into separable stages so that individual responsibilities remain understandable and testable.                                       |
+| NFR-08 | The default repository layout SHOULD require minimal configuration for normal projects and libraries.                                                                        |

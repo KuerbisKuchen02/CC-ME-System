@@ -49,6 +49,8 @@ F --> G@{shape: stop}
 +++ ...
 ++ <&folder> libraries/
 +++ <&folder> <big_lib_name>/
+++++ <&folder> src/
+++++ build_config.yaml
 +++ <small_lib>.lua
 ++ <&folder> projects/
 +++ <&folder> <project_name>/
@@ -139,67 +141,69 @@ With the given example project a unbundled artifact would look like this:
 }
 @endsalt
 ```
-# Build configuration
 
-Could look something like this:
+# Build-configuration architecture
 
-> [NOTE] Not the final
+## Configuration hierarchy and merging
+
+Configuration is composed in this fixed order:
+
+```text
+repository/build_config.yaml
+→ projects/build_config.yaml | libraries/build_config.yaml | external/build_config.yaml
+→ project/package build_config.yaml or small-package sidecar configuration
+→ target
+→ build type
+```
+
+The category-level configuration applies to all entries in that category. A project configuration without `targets` creates an implicit `default` target. A library configuration without `targets` is a library manifest: it supplies dependency and preserved-file settings when the library is consumed, but produces no artifact. Library targets are optional and represent independently publishable subsets.
+
+Scalar values override inherited values. Maps merge by key, with the more-specific value winning. Lists append by default; a list can instead use `mode: replace` or `mode: clear`. `clear` has no items.
 
 ```yaml
-ccmeserver:
-  version: 1.0.0
-  entrypoint:
-    - src/main.lua
-  dependencies:
-    - class.lua
-    - logging.lua
-  test:
+targets:
+  default:
+    version: 1.0.0-alpha
+    entry_point: main.lua
     dependencies:
-      - test.lua
-    entrypoint:
-      - test/main.lua
-
+      - lib.logging
+    test:
+      entry_point: TestMain.lua
+      dependencies:
+        mode: append
+        items:
+          - lib.testing
 ```
 
-# Module Identity
+Build-target names, project names, and group names use `^[A-Za-z0-9](?:[A-Za-z0-9_]*[A-Za-z0-9])?$`. The stable target identity is `<project>/<target>`; the target name also determines its artifact name. `default` uses the project name as its artifact name.
 
-The logical module name is the stable identity of a module. Repository source paths and artifact paths are mappings of that identity.
+## Module identity and packages
 
-Default namespaces:
+The logical module name is a module's stable identity. Repository and artifact paths are mappings of that identity. Project modules have no prefix, library modules use `lib.`, external modules use `external.`, and test modules use `test.`. Defaults are `source_root: src/` and `test_source_root: test/`; entry points and preserved paths are relative to the applicable source root.
 
-Project modules: no namespace prefix
-Shared libraries: lib
-External code: external
-Default source roots:
+Libraries and external packages share two package shapes beneath their respective category roots:
 
-Projects: projects/<project>/src/
-Shared libraries: lib/src/
-External code: external/
-These defaults are configurable through hierarchical build configuration.
-
-## Module resolution
-
-To create a artifact it is important to first find all required dependencies inside the repository. Since the repository holds multiple projects, shared libraries and external source code, the repository structure is vastly different from the final artifact structure.
-
-The process of mapping the module names used inside a `require()` statement to a file path inside the repository is called module resolution.
-
-The module name is defined by its relative location based on the search_path of the dependency type while replacing `/` with `.` and removing the file type `.lua`.
-
-For example another module from the project `/projects/project1/src/module1/file1.lua` can be required with `module1.file`.
-A shared library `/libraries/src/lib1.lua` can be required with `lib.lib1`
-
-To find the source files inside the repo the module resolver uses defined search paths. These search paths can also be modified using the build configuration.
-
-The search paths have the following default values:
-
-```yaml
-project_prefix=""
-project_search_path="./"
-library_prefix="lib."
-library_search_path = "/libraries/src/"
-external_prefix="external."
-external_search_path = "/external/"
+```text
+libraries/logging.lua                    → lib.logging
+libraries/logging/src/init.lua           → lib.logging
+libraries/logging/src/format/json.lua    → lib.logging.format.json
+external/example.lua                     → external.example
+external/example/src/init.lua            → external.example
 ```
+
+`library_search_path` and `external_search_path` name category roots (`libraries/` and `external/` by default), not a package's `src/` directory. A same-name single-file and directory package is an error because both map to the same module. Small packages that need configuration use a sidecar file such as `libraries/logging.build_config.yaml`; large packages use `<package>/build_config.yaml`.
+
+An `init.lua` defines a public interface for its package subtree. Code outside that package may require only the interface module; code inside the package can require its internal modules. Declared dependencies name complete packages, with an optional `lib.` or `external.` prefix. An unprefixed name searches libraries before external packages. Static dependency cycles are errors.
+
+## Artifact selection and layout
+
+All build types include only the static dependency closure of their resolution roots. Development and Release use the effective normal entry point. Test first discovers `Test*.lua` files under `test_source_root`; every discovered suite and the test environment/effective test entry point are roots. Tests use the `test.` namespace and are emitted below `test/`, while production modules retain their ordinary namespaces.
+
+Development and Test artifacts preserve the selected modules as files. Release artifacts bundle and minify selected modules, except preserved modules. A preserved module and its complete static runtime closure are emitted as files; runtime-file `require()` calls are retained, and preservation wins when a module is selected both for bundling and runtime emission.
+
+Artifacts are written below `build/<project>/artifacts/<artifact-name>/<build-type>/`. A Release build requires a clean worktree, a repository-level `artifact_base_url`, a full source commit SHA, and a target version. Development and Test builds may lack a version but report a warning.
+
+Each artifact contains generated metadata with its name, optional version, source revision, artifact base URL, and a `FILES` manifest. Each manifest entry contains an artifact-relative `path` and the file's SHA-256 checksum so an installer can verify individually downloaded files.
 
 `./` means relative to the `src/` folder of the current project.
 `/` means relative to the repository root.

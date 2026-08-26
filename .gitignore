@@ -1,5 +1,8 @@
 .vscode
 cc
 .DS_Store
-_build
 .venv
+
+# Documentation
+/docs/_build
+/docs/drafts
