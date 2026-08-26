@@ -1,6 +1,17 @@
 # Architecture of the build system, test and deployment system
 
-## Build pipeline
+## 1. Build pipeline
+
+The build pipeline is structured into clearly separated stages to ensure modular processing and clean error isolation. Each stage has a single, well-defined responsibility:
+
+1. **Configuration Loading & Merging**: The system loads build configurations following the configuration hierarchy (Repository → Category → Package → Target → Build Type). Merging rules apply (scalar override, map merge, and list appending/replacement/clearing).
+2. **Dependency Resolution**: Static dependencies are parsed from `require()` calls and mapped to packages declared in the configuration. The dependency resolver constructs the directed dependency graph starting from the defined entry point.
+3. **Dependency Validation**: The system validates the resolved dependency graph against declared package bounds, identifying any undeclared dependencies (error) or unused declared dependencies (warning).
+4. **Source Packaging & Bundling**: Based on the active build type:
+   - *Development / Test*: Individual modules are mapped to their logical namespaces and prepared for unbundled file emission.
+   - *Release*: The static dependency closure is bundled into a single file, except for explicitly preserved files.
+5. **Minification**: Release bundles are minified by stripping comments and unnecessary white spaces.
+6. **Artifact Assembly & Metadata Generation**: The files are packaged, and a standard `metadata.lua` manifest is generated containing the artifact metadata and individual file checksums.
 
 ```mermaid
 flowchart LR
@@ -18,147 +29,58 @@ F --> f@{shape: doc, label: installer.lua}
 F --> G@{shape: stop}
 ```
 
-## Repository structure
-
-```plantuml
-@startsalt
-{
-{T
-+ <&folder> repository/
-++ <&folder> <color:gray>build/
-+++ <&folder> <color:gray><project_name>/
-++++ <&folder> <color:gray>artifacts/
-+++++ <&folder> <color:gray><project_name>/
-++++++ <&folder> <color:gray>development/
-++++++ <&folder> <color:gray>release/
-++++++ <&folder> <color:gray>test/
-+++++ <&folder> <color:gray><plugin_name>/
-+++++ ...
-++++ ...
-++ <&folder> docs/
-+++ <&folder> infrastructure/
-+++ <&folder> libraries/
-+++ <&folder> projects/
-+++ index.md
-++ <&folder> external/
-++ <&folder> scripts/
-+++ build.lua
-+++ bundle.lua
-+++ minify.lua
-+++ test.lua
-+++ ...
-++ <&folder> libraries/
-+++ <&folder> <big_lib_name>/
-++++ <&folder> src/
-++++ build_config.yaml
-+++ <small_lib>.lua
-++ <&folder> projects/
-+++ <&folder> <project_name>/
-++++ <&folder> src/
-++++ <&folder> test/
-++++ build_config.yaml
-++++ ...
-++ .gitignore
-++ build_config.yaml
-++ LICENSE
-++ Makefile
-++ README.md
-}
-}
-@endsalt
-```
-
-## Artifact structure
-
-When you have the following example project structure.
-
-The project contains multiple modules and source files. It also contains two preserved files. The init file serves as the entrypoint
-
-```plantuml
-@startsalt
-{
-    {T
-    + <&folder> project1
-    ++ <&folder> module1/
-    +++ file1.lua
-    ++ <&folder> module2/
-    +++ file2.lua
-    +++ preserved1.lua
-    ++ build_config.yaml
-    ++ file3.lua
-    ++ init.lua
-    ++ preserved2.lua
-    }
-}
-@endsalt
-```
-
-### Bundled
-
-With the given example project a bundled artifact would look like this:
-
-- All files are combined inside a single file called like the project root folder
-- with the exception of preserved files. These files remain intact and also keep there relative structure to the project root.
-- Additionally a metadata file gets generated which contains info about the artifact like revision and project version.
-
-```plantuml
-@startsalt
-{
-    {T
-    + artifact
-    ++ <&folder> module2/
-    +++ preserved1.lua
-    ++ metadata.lua
-    ++ preserved.lua
-    ++ project1.lua
-    }
-}
-@endsalt
-```
-
-### Not bundled
-
-With the given example project a unbundled artifact would look like this:
-
-- All source files remain intact and keep there relative structure to the project root.
-- Additionally a metadata file gets generated which contains info about the artifact like revision and project version.
-
-```plantuml
-@startsalt
-{
-    {T
-    + <&folder> project1
-    ++ <&folder> module1/
-    +++ file1.lua
-    ++ <&folder> module2/
-    +++ file2.lua
-    +++ preserved1.lua
-    ++ metadata.lua
-    ++ file3.lua
-    ++ init.lua
-    ++ preserved2.lua
-    }
-}
-@endsalt
-```
-
-# Build-configuration architecture
-
-## Configuration hierarchy and merging
-
-Configuration is composed in this fixed order:
+## 2. Repository structure
 
 ```text
-repository/build_config.yaml
-→ projects/build_config.yaml | libraries/build_config.yaml | external/build_config.yaml
-→ project/package build_config.yaml or small-package sidecar configuration
-→ target
-→ build type
+/ (Repository Root)
+├── build_config.yaml                    # Repository-level configuration
+├── projects/                            # Application and plugin packages
+│   ├── build_config.yaml                # Category-level projects configuration
+│   └── <project>/
+│       ├── build_config.yaml            # Project-level configuration
+│       └── src/                         # Project source files (default source_root)
+├── libraries/                           # Shared library packages
+│   ├── build_config.yaml                # Category-level libraries configuration
+│   ├── <library>.lua                    # Small library (single file)
+│   ├── <library>.build_config.yaml      # Small library sidecar configuration
+│   └── <library>/
+│       ├── build_config.yaml            # Large library configuration
+│       └── src/                         # Large library source files
+├── external/                            # External vendored packages
+│   ├── build_config.yaml                # Category-level external configuration
+│   ├── <package>.lua                    # Small external package (single file)
+│   ├── <package>.build_config.yaml      # Small external package sidecar configuration
+│   └── <package>/
+│       ├── build_config.yaml            # Large external package configuration
+│       └── src/                         # Large external package source files
+└── build/                               # Write-only build output directory (ignored)
 ```
 
-The category-level configuration applies to all entries in that category. A project configuration without `targets` creates an implicit `default` target. A library configuration without `targets` is a library manifest: it supplies dependency and preserved-file settings when the library is consumed, but produces no artifact. Library targets are optional and represent independently publishable subsets.
+### 3. Artifact Structure
 
-Scalar values override inherited values. Maps merge by key, with the more-specific value winning. Lists append by default; a list can instead use `mode: replace` or `mode: clear`. `clear` has no items.
+Every build target produces exactly one logical build artifact, whose output files are structured based on the active build type.
+
+### 3.1. Bundled Artifact (Release Build Type)
+
+In a Release build, the artifact is bundled and minified to minimize storage footprints in ComputerCraft environments:
+
+- **Bundled Core**: All statically resolved source files in the target's dependency closure are combined into a single, main executable file. The main file is named after the target name (or after the project name if using the default target).
+- **Preserved Files**: Explicitly preserved modules, directory paths, or files remain intact as separate files, preserving their relative folder structure under the project's source root.
+- **FILES Manifest**: A generated `metadata.lua` file is included, which lists all files in the artifact and their SHA-256 checksums to enable installer-level verification.
+
+### 3.2. Unbundled Artifact (Development and Test Build Types)
+
+Development and Test builds preserve the original module structure to facilitate step-by-step debugging:
+
+- **Preserved Module Structure**: All statically resolved source modules remain intact as individual files and keep their relative directory layout corresponding to their logical module names.
+- **Unminified Sources**: Comments, formatting, and white spaces are preserved.
+- **FILES Manifest**: A generated `metadata.lua` file contains artifact metadata and file checksums, identical to the Release manifest.
+
+---
+
+## 4. Build-configuration architecture
+
+Example config file
 
 ```yaml
 targets:
@@ -175,13 +97,49 @@ targets:
           - lib.testing
 ```
 
+### 4.1. Configuration hierarchy and merging
+
+Configuration is composed in this fixed order:
+
+```text
+repository/build_config.yaml
+→ projects/build_config.yaml | libraries/build_config.yaml | external/build_config.yaml
+→ project/package build_config.yaml or small-package sidecar configuration
+→ target
+→ build type
+```
+
+The category-level configuration applies to all entries in that category. A project configuration without `targets` creates an implicit `default` target. A library configuration without `targets` is a library manifest: it supplies dependency and preserved-file settings when the library is consumed, but produces no artifact. Library targets are optional and represent independently publishable subsets.
+
+#### Merging Behavior
+
+- **Scalars**: A child configuration value completely overrides any inherited value from higher levels.
+- **Maps**: Merged by key, with the more-specific child value winning in case of key collisions.
+- **Lists**: Merged using one of three explicit list modes:
+  - **Append (Default)**: Items from the child list are appended to the inherited list.
+  - **Replace (`mode: replace`)**: The child list completely replaces the inherited list.
+  - **Clear (`mode: clear`)**: The inherited list is entirely cleared, resulting in an empty list.
+
 Build-target names, project names, and group names use `^[A-Za-z0-9](?:[A-Za-z0-9_]*[A-Za-z0-9])?$`. The stable target identity is `<project>/<target>`; the target name also determines its artifact name. `default` uses the project name as its artifact name.
 
-## Module identity and packages
+#### Target Identity and Artifact Naming
 
-The logical module name is a module's stable identity. Repository and artifact paths are mappings of that identity. Project modules have no prefix, library modules use `lib.`, external modules use `external.`, and test modules use `test.`. Defaults are `source_root: src/` and `test_source_root: test/`; entry points and preserved paths are relative to the applicable source root.
+- **Stable Identity**: The stable logical identity of a build target is `<project>/<target>`. This identity is used by the build cache, build directory, and diagnostic system.
+- **Artifact Naming**: The build target name determines its output artifact name. The default target, named `default`, uses the project name as its artifact name.
+- **Identifier Constraints**: Target names, project names, and group names must match the regular expression: `^[A-Za-z0-9](?:[A-Za-z0-9_]*[A-Za-z0-9])?$`.
+- **Implicit Target**: A project configuration without targets creates an implicit default target. A library or external package configuration without targets behaves as a manifest only, supplying dependencies and preservation settings but generating no artifact.
 
-Libraries and external packages share two package shapes beneath their respective category roots:
+### 4.2. Module Identity and Packages
+
+The logical module name serves as a module's stable identity within the Lua ecosystem, mapping physical repository paths to import namespaces:
+
+- **Namespaces and Prefixes**: Project modules have no prefix. Shared libraries use a `lib.` prefix (e.g., `lib.logging`). External modules use an `external.` prefix (e.g., `external.json`). Test modules use a `test.` prefix (e.g., `test.user_management.TestRegister`).
+- **Source Roots**: Defaults are `source_root: src/` and `test_source_root: test/`, configured relative to the package root. All entry points and preserved paths are interpreted relative to the active source root.
+- **Package Shapes**: Shared libraries and external packages exist in two shapes beneath their category roots (configured by `library_search_path` and `external_search_path`, which default to `libraries/` and `external/` respectively):
+  1. *Small Package*: A single file located at `libraries/<name>.lua` or `external/<name>.lua`. Small packages that require static dependencies utilize a sidecar configuration file (`libraries/<name>.build_config.yaml` or `external/<name>.build_config.yaml`).
+  2. *Large Package*: A package directory located at `libraries/<name>/` or `external/<name>/` containing `build_config.yaml` at its root, with its sources inside a `src/` directory.
+- **Name Collisions**: A same-name small-file package and directory package within the same category (e.g., `libraries/logging.lua` and `libraries/logging/`) is a build-time resolution error.
+- **Public Interfaces**: An `init.lua` file defines a public interface for its package subtree. External consumers outside the package are restricted to require *only* the public interface (e.g., `require("lib.logging")`) and are forbidden from importing internal descendants recursively. Code inside the package itself is caller-aware and is permitted to import its internal modules (e.g., `require("lib.logging.internal_module")`).
 
 ```text
 libraries/logging.lua                    → lib.logging
@@ -191,24 +149,33 @@ external/example.lua                     → external.example
 external/example/src/init.lua            → external.example
 ```
 
-`library_search_path` and `external_search_path` name category roots (`libraries/` and `external/` by default), not a package's `src/` directory. A same-name single-file and directory package is an error because both map to the same module. Small packages that need configuration use a sidecar file such as `libraries/logging.build_config.yaml`; large packages use `<package>/build_config.yaml`.
+### 4.3. Artifact Selection and Layout
 
-An `init.lua` defines a public interface for its package subtree. Code outside that package may require only the interface module; code inside the package can require its internal modules. Declared dependencies name complete packages, with an optional `lib.` or `external.` prefix. An unprefixed name searches libraries before external packages. Static dependency cycles are errors.
+All build types include *only* the static dependency closure of their resolution roots; unreachable source files are omitted from the output.
 
-## Artifact selection and layout
+- **Development Builds**: Resolve dependencies from the target's effective entry point and output the resolved closure as unbundled, unminified files under `build/<project>/artifacts/<artifact-name>/development/`.
+- **Release Builds**: Resolve dependencies from the target's effective entry point, bundle and minify them into a single executable, and copy preserved files. They require a clean Git worktree, a configured repository-level `artifact_base_url`, a full source commit SHA, and a mandatory target version.
+- **Test Builds**: Test builds discover `Test*.lua` files (CamelCase class-definition naming) under `test_source_root`. Every discovered suite plus the test environment and the effective test entry point are treated as dependency-resolution roots.
+  - Test files use the `test.` namespace (via `test_prefix`) and are emitted below a separate `test/` runtime path to avoid colliding with production modules. Production modules retain their normal namespaces. Test artifacts are unbundled and unminified to keep source file names and line numbers useful for debugging.
 
-All build types include only the static dependency closure of their resolution roots. Development and Release use the effective normal entry point. Test first discovers `Test*.lua` files under `test_source_root`; every discovered suite and the test environment/effective test entry point are roots. Tests use the `test.` namespace and are emitted below `test/`, while production modules retain their ordinary namespaces.
+#### Generated Metadata Format
 
-Development and Test artifacts preserve the selected modules as files. Release artifacts bundle and minify selected modules, except preserved modules. A preserved module and its complete static runtime closure are emitted as files; runtime-file `require()` calls are retained, and preservation wins when a module is selected both for bundling and runtime emission.
+Each artifact contains a generated `metadata.lua` written as an executable Lua file that returns a table of the following format:
 
-Artifacts are written below `build/<project>/artifacts/<artifact-name>/<build-type>/`. A Release build requires a clean worktree, a repository-level `artifact_base_url`, a full source commit SHA, and a target version. Development and Test builds may lack a version but report a warning.
+```lua
+return {
+  NAME = "target_name",
+  VERSION = "1.2.3",                    -- Optional for Development/Test, mandatory for Release
+  SOURCE_REVISION = "<git revision>",   -- Immutable full Git commit SHA
+  BASE_URL = "<artifact directory URL>", -- Base URL for deployment-facing installer downloads
+  FILES = {
+    { path = "main.lua", sha256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" },
+    { path = "metadata.lua", sha256 = "c04bc8a7cf95e34771bb402120e2cc76f0fb576ef982df0f0fb537b0ffbe6520" }
+  }
+}
+```
 
-Each artifact contains generated metadata with its name, optional version, source revision, artifact base URL, and a `FILES` manifest. Each manifest entry contains an artifact-relative `path` and the file's SHA-256 checksum so an installer can verify individually downloaded files.
-
-`./` means relative to the `src/` folder of the current project.
-`/` means relative to the repository root.
-
-# Dependency Scope and Type
+# 5. Dependency Scope and Type
 
 Dependency scope and dependency type are deliberately separate concepts.
 
@@ -229,7 +196,7 @@ The resolver distinguishes them by the form of the require() argument:
 - require("module.name") → static
 - require(variable) → dynamic
 
-## Testing
+## 6. Testing
 
 The repository uses a test architecture based on the xUnit architecture.
 
