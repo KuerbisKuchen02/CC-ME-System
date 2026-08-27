@@ -218,3 +218,28 @@ Disabling a broken test case SHOULD be preferred over commenting out a test case
 Additionally you can create a test environment class at the root of the test src folder. This class inherits the class `TestEnvironment` from the `testing` library and can contain the test entry point `main()`, a environment `setup()` and `teardown()` method. The entry point method is executed before the complete test execution an can be used to configure the test system and process program parameter. Setup/ teardown methods are executed before/after the test execution. So before the first test suite/ after the last test suite.
 
 A test listener can used to perform an action on test lifecycle and execution events. This can be used for example to output the test results to a csv file or provide additional information to the command line output. Test listeners can be registered inside the test environment entry point.
+
+## 7. Bundling and Minification
+
+The process of bundling and minification is not a strait forward process with many edge cases.
+Since this is also a pretty standard problem with already existing solutions we can leverage such a solution to simplify implementation and focus on the important project specific requirements.
+
+A possible implementation is provided by the [Shale bundler](https://github.com/Pyroxenium/Shale/tree/main) which is also used by the Basalt GUI framework with is a big inspiration for this repository and my own gui library.
+
+- The bundler already included an option to declare excluded files which could work seamlessly with our preserved file approach
+- The bundler also has many options to configure the release artifact which would allow us to define exactly the level of minification that we want
+- The bundler also supports tree shaking what does exactly what we already doing with our unreachable file approach
+
+## 8. Changelog System
+
+- Changelog file per project or library
+- if a changelog is present in the directory of the project it is mandatory that the changelog contains changes to be able to publish a new release
+- it is also possible to use a the `changelog_path` option in a target level config to define a per target changelog file
+- by default the changelog is only used for the default build target of a project
+- the changelog uses the [Keep a Changelog Convention](https://keepachangelog.com/en/1.1.0/)
+- for every release the version, date and git ref is recorded in the changelog
+- additionally a unreleased section in the top hold all changes of the current dev version
+- the changelog is manually filled with changes
+- the release workflow is supported by a guided partially automatic release process
+- the changelog is primarily written for humans and users of the system
+- but since we a strictly defined format the changelog is also machine parsable to include the changes in the installer or release notification
