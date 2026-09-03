@@ -39,6 +39,7 @@ ID structure: `<type>-<scope>-<topic_number><number>`
 * **DEP** = Dependency Management
 * **BLD** = Build and Artifact Management
 * **TST** = Software Testing
+* **MET** = Build Metadata
 
 ---
 
@@ -180,24 +181,39 @@ ID structure: `<type>-<scope>-<topic_number><number>`
 
 ### 4.3. Bundling and Minification
 
-| ID             | Requirement                                                                                                                                                                   | Reference | Dependency |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| **FR-BLD-301** | The bundling process MUST bundle the target entry point and its statically resolved bundled dependencies into a single main program where technically possible.               | US-BLD-15 |            |
-| **FR-BLD-302** | Minifying SHOULD remove comments and other unnecessary source representation where doing so reduces artifact size without changing program behavior.                          | US-BLD-15 |            |
-| **FR-BLD-303** | The build system MUST preserve the functional distinction between bundled source and files explicitly excluded from bundling.                                                 | US-BLD-15 |            |
-| **FR-BLD-304** | When a module is bundled into the main artifact, its individual `require()` statements MUST be resolved at build time and replaced with the inline source code of the module. | US-BLD-15 |            |
+| ID             | Requirement                                                                                                                                                                                                 | Reference            | Dependency |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- |
+| **FR-BLD-301** | A Release artifact MUST bundle the target entry point and all eligible modules in its static dependency closure into a single main Lua artifact.                                                            | US-BLD-28            |            |
+| **FR-BLD-302** | A Release artifact MUST provide runtime resolution for bundled modules using their logical module names.                                                                                                    | US-BLD-29            |            |
+| **FR-BLD-303** | Bundled modules MUST execute in isolated module scopes such that local variables and declarations from one module cannot collide with or leak into another module.                                          | US-BLD-30            |            |
+| **FR-BLD-304** | The Release artifact's module loader MUST attempt to resolve a requested module from the bundled module registry before delegating unresolved modules to the ComputerCraft host `require()` implementation. | US-BLD-31            |            |
+| **FR-BLD-305** | The bundled module loader MUST cache successfully loaded bundled modules so that subsequent requests for the same module return the same module instance according to Lua `require()` semantics.            | US-BLD-29            |            |
+| **FR-BLD-306** | The build system MUST NOT require a statically bundled module to remain available as a separate physical file in the Release artifact.                                                                      | US-BLD-28, US-BLD-29 |            |
+| **FR-BLD-307** | Release main Lua artifacts MUST be minified.                                                                                                                                                                | US-BLD-33            |            |
+| **FR-BLD-308** | Minification MUST preserve program semantics and execution behavior.                                                                                                                                        | US-BLD-33, US-BLD-36 |            |
+| **FR-BLD-309** | Minification MUST remove comments and unnecessary horizontal source representation where doing so does not change program behavior.                                                                         | US-BLD-33            |            |
+| **FR-BLD-310** | Minification MUST preserve line breaks such that source line numbers remain aligned with corresponding unminified source lines.                                                                             | US-BLD-34            |            |
+| **FR-BLD-312** | The minifier MUST rename eligible local variables and local functions using lexical-scope-aware analysis.                                                                                                   | US-BLD-35            |            |
+| **FR-BLD-313** | Global variables and global functions MUST NOT be renamed by local-variable minification.                                                                                                                   | US-BLD-36            |            |
+| **FR-BLD-314** | Lua standard libraries and ComputerCraft APIs used as globals MUST NOT be renamed.                                                                                                                          | US-BLD-36            |            |
+| **FR-BLD-315** | Identifiers occurring inside string literals MUST NOT be interpreted as renameable identifiers.                                                                                                             | US-BLD-36            |            |
+| **FR-BLD-316** | Literal string keys in tables MUST NOT be changed by local-variable renaming.                                                                                                                               | US-BLD-36            |            |
+| **FR-BLD-317** | Long string literals and long-string comments MUST be excluded from lexical identifier rewriting.                                                                                                           | US-BLD-36            |            |
+| **FR-BLD-318** | Preserved files MUST NOT be processed by the Release minification step.                                                                                                                                     | US-BLD-16            |            |
+| **FR-BLD-319** | The build system MUST provide the resolved Release module set and applicable preservation exclusions to the bundling/minification implementation.                                                           | US-BLD-28, US-BLD-32 |            |
+| **FR-BLD-320** | The build system SHOULD use Shale or an equivalent implementation capable of providing the required bundling, module loading, preservation, and minification behavior.                                      | US-BLD-28–36         |            |
+| **FR-BLD-321** | Bundling and minification MUST occur after dependency resolution and validation.                                                                                                                            | US-BLD-19            |            |
 
 ### 4.4. Preserved Files
 
-| ID             | Requirement                                                                                                                                                                                                                    | Reference | Dependency |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- | ---------- |
-| **FR-BLD-401** | A build target MUST be able to define preserved files using file paths, directories, or glob patterns relative to the active source root.                                                                                      | US-BLD-16 |            |
-| **FR-BLD-402** | Preserved files MUST be included in the resulting artifact without being bundled into the main program.                                                                                                                        | US-BLD-16 |            |
-| **FR-BLD-403** | Preserved files MUST NOT be minified by the normal target bundling/minification process.                                                                                                                                       | US-BLD-16 |            |
-| **FR-BLD-404** | Preserved files SHOULD be suitable for user modification after deployment.                                                                                                                                                     | US-BLD-16 |            |
-| **FR-BLD-405** | Preserved-file configuration MUST be target-specific.                                                                                                                                                                          | US-BLD-16 |            |
-| **FR-BLD-406** | The build system MUST NOT rewrite `require()` statements belonging to or pointing to preserved files.                                                                                                                          | US-BLD-16 |            |
-| **FR-BLD-407** | A preserved module and its complete static runtime dependency closure MUST be emitted as files. If a module is both preserved and otherwise eligible for bundling, it MUST be emitted as a preserved file (preservation wins). | US-BLD-16 |            |
+| ID             | Requirement                                                                                                | Reference | Dependency |
+| -------------- | ---------------------------------------------------------------------------------------------------------- | --------- | ---------- |
+| **FR-BLD-401** | A preserved file MUST be excluded from Release bundling and minification.                                  | US-BLD-16 |            |
+| **FR-BLD-402** | A preserved module MUST remain available as a separate physical file in the Release artifact.              | US-BLD-31 |            |
+| **FR-BLD-403** | The build system MUST NOT rewrite `require()` statements belonging to or targeting preserved modules.      | US-BLD-31 |            |
+| **FR-BLD-404** | When a module is preserved, every module in its complete static dependency closure MUST also be preserved. | US-BLD-32 |            |
+| **FR-BLD-405** | Preservation MUST take precedence over otherwise eligible bundling.                                        | US-BLD-32 |            |
+| **FR-BLD-406** | A preserved module MUST NOT depend on a module that exists only inside the Release bundle.                 | US-BLD-32 |            |
 
 ### 4.5. Build Groups and Selection Scopes
 
@@ -331,17 +347,101 @@ ID structure: `<type>-<scope>-<topic_number><number>`
 
 ---
 
-## 6. Non-Functional Requirements Established So Far
+## 6. Build Metadata
+
+| ID             | Requirement                                                                                                                                   | Reference            | Dependency |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- |
+| **FR-MET-101** | Every build artifact MUST contain a file named `metadata.lua` at the artifact root.                                                           | US-MET-01, US-MET-05 |            |
+| **FR-MET-102** | `metadata.lua` MUST be a valid executable Lua file that returns a table.                                                                      | US-MET-01            |            |
+| **FR-MET-103** | The metadata table MUST contain a `NAME` field identifying the artifact.                                                                      | US-MET-02            |            |
+| **FR-MET-104** | The metadata table MUST contain a `SOURCE_REVISION` field containing the full immutable Git commit SHA from which the artifact was generated. | US-MET-02            |            |
+| **FR-MET-105** | The metadata table MUST contain a `BASE_URL` field containing the configured artifact base URL.                                               | US-MET-04            |            |
+| **FR-MET-106** | The metadata table MUST contain a `FILES` list.                                                                                               | US-MET-03            |            |
+| **FR-MET-107** | Each `FILES` entry MUST contain an artifact-relative `path` and the corresponding file's SHA-256 checksum in a `sha256` field.                | US-MET-03            |            |
+| **FR-MET-108** | `metadata.lua` MUST NOT need to list itself in `FILES`. Its location and filename are fixed and MUST be known to deployment tooling.          | US-MET-05            |            |
+| **FR-MET-109** | `VERSION` MUST be present for Release artifacts and MAY be omitted for Development and Test artifacts.                                        | US-MET-02            |            |
+| **FR-MET-201** | Every file represented by `FILES` MUST have a checksum calculated from the exact file content emitted into the artifact.                      | US-MET-03            |            |
+| **FR-MET-202** | Artifact file paths in `FILES` MUST be relative to the artifact root.                                                                         | US-MET-03            |            |
+| **FR-MET-203** | SHA-256 values in `FILES` MUST be represented as hexadecimal checksums.                                                                       | US-MET-03            |            |
+
+---
+
+## 7. Changelog Management
+
+### 7.1 General Structure
+
+| ID             | Requirement                                                                                                         | Reference | Dependency |
+| -------------- | ------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
+| **FR-CHG-101** | Each changelog MUST use the Keep a Changelog convention as its structural standard.                                 | US-CHG-01 |            |
+| **FR-CHG-102** | Each changelog MUST begin with the Markdown heading `# Changelog`.                                                  | US-CHG-01 |            |
+| **FR-CHG-103** | Each changelog MUST contain an `[Unreleased]` section.                                                              | US-CHG-02 |            |
+| **FR-CHG-104** | The `Unreleased` section MUST occur before all released version sections.                                           | US-CHG-02 |            |
+| **FR-CHG-105** | A changelog MAY contain the change categories `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, and `Security`. | US-CHG-03 |            |
+| **FR-CHG-106** | The contents of an individual change-category section are otherwise developer-defined.                              | US-CHG-03 |            |
+
+### 7.2 Unreleased Content
+
+| ID             | Requirement                                                                                                                                                                                                       | Reference | Dependency |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
+| **FR-CHG-201** | A changelog MUST be considered non-empty when its `Unreleased` section contains at least one supported change-category subheading with at least one paragraph or bullet point of content beneath that subheading. | US-CHG-04 |            |
+| **FR-CHG-202** | Release tooling MUST be able to determine whether the `Unreleased` section is empty according to **FR-CHG-201**.                                                                                                  | US-CHG-04 |            |
+| **FR-CHG-203** | Release tooling MUST NOT attempt to determine whether a documented change is factually correct or complete.                                                                                                       | US-CHG-04 |            |
+
+### 7.3 Released Versions
+
+| ID             | Requirement                                                                                                                                                            | Reference | Dependency |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
+| **FR-CHG-301** | A released version section MUST use the heading format `[<semantic_version>] - <date>`.                                                                                | US-CHG-05 |            |
+| **FR-CHG-302** | Release dates MUST use the `YYYY-MM-DD` ISO date format.                                                                                                               | US-CHG-05 |            |
+| **FR-CHG-303** | The version in a released version heading MUST be a Semantic Versioning value.                                                                                         | US-CHG-05 |            |
+| **FR-CHG-304** | The first released version reference MUST identify the Git revision associated with that initial release.                                                              | US-CHG-06 |            |
+| **FR-CHG-305** | Every subsequent released version reference MUST compare the previous release revision with the current release revision.                                              | US-CHG-06 |            |
+| **FR-CHG-306** | The `Unreleased` comparison reference MUST compare the previous release revision with `HEAD`.                                                                          | US-CHG-06 |            |
+| **FR-CHG-307** | The release revision used for a changelog reference MUST represent the source commit before the changelog release commit is created, preventing a circular comparison. | US-CHG-06 |            |
+
+### 7.4 Markdown Reference Links
+
+| ID             | Requirement                                                                                                                                     | Reference            | Dependency |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- |
+| **FR-CHG-401** | Changelog version identifiers MUST use Markdown reference links.                                                                                | US-CHG-07            |            |
+| **FR-CHG-402** | The `[Unreleased]` reference and every released version reference MUST be defined in the reference-link section at the bottom of the changelog. | US-CHG-07            |            |
+| **FR-CHG-403** | Reference definitions MUST identify the corresponding Git comparison or release location according to the release state.                        | US-CHG-06, US-CHG-07 |            |
+
+### 7.5 Release Workflow
+
+| ID             | Requirement                                                                                                                                                  | Reference            | Dependency |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------- | ---------- |
+| **FR-CHG-501** | The release workflow SHOULD generate the released version section and its reference link from the selected release version, release date, and Git revisions. | US-CHG-08            |            |
+| **FR-CHG-502** | The release workflow SHOULD preserve developer-authored change descriptions when generating a release entry.                                                 | US-CHG-08            |            |
+| **FR-CHG-503** | A project or target requiring a changelog MUST NOT be considered ready for release when its `Unreleased` section is empty according to **FR-CHG-201**.       | US-CHG-04, US-CHG-08 |            |
+| **FR-CHG-504** | Changelog validation MUST report structural violations separately from build, dependency, bundling, and deployment errors.                                   | US-CHG-04            |            |
+
+### 7.6 Scope
+
+| ID             | Requirement                                                                                                              | Reference             | Dependency |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------- | ---------- |
+| **FR-CHG-601** | A changelog MAY be associated with a project or library.                                                                 | Existing architecture |            |
+| **FR-CHG-602** | A target MAY select a target-specific changelog using `changelog_path`.                                                  | Existing architecture |            |
+| **FR-CHG-603** | Unless a target-specific changelog is configured, the default changelog behavior MUST apply to the default build target. | Existing architecture |            |
+
+---
+
+## 8. Non-Functional Requirements Established So Far
 
 These requirements apply across both areas.
 
-| ID         | Requirement                                                                                                                                            |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **NFR-01** | The build and dependency system SHOULD prioritize simplicity over features that are not required by current use cases.                                 |
-| **NFR-02** | The system MUST provide deterministic dependency resolution for a given repository state and build configuration.                                      |
-| **NFR-03** | Diagnostics SHOULD be actionable and SHOULD identify the category, location, cause, and possible remediation of a problem where practical.             |
-| **NFR-04** | Build processing SHOULD maximize useful work in a single invocation rather than terminating at the first independent error.                            |
-| **NFR-05** | Terminology defined in the glossary MUST be used consistently throughout the system documentation, design, implementation, and user-facing interfaces. |
-| **NFR-06** | The build system SHOULD minimize generated artifact size because ComputerCraft environments have limited storage capacity.                             |
-| **NFR-07** | Build functionality SHOULD be structured into separable stages so that individual responsibilities remain understandable and testable.                 |
-| **NFR-08** | The default repository layout SHOULD require minimal configuration for normal projects and libraries.                                                  |
+| ID         | Requirement                                                                                                                                                               |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **NFR-01** | The build and dependency system SHOULD prioritize simplicity over features that are not required by current use cases.                                                    |
+| **NFR-02** | The system MUST provide deterministic dependency resolution for a given repository state and build configuration.                                                         |
+| **NFR-03** | Diagnostics SHOULD be actionable and SHOULD identify the category, location, cause, and possible remediation of a problem where practical.                                |
+| **NFR-04** | Build processing SHOULD maximize useful work in a single invocation rather than terminating at the first independent error.                                               |
+| **NFR-05** | Terminology defined in the glossary MUST be used consistently throughout the system documentation, design, implementation, and user-facing interfaces.                    |
+| **NFR-06** | The build system SHOULD minimize generated artifact size because ComputerCraft environments have limited storage capacity.                                                |
+| **NFR-07** | Build functionality SHOULD be structured into separable stages so that individual responsibilities remain understandable and testable.                                    |
+| **NFR-08** | The default repository layout SHOULD require minimal configuration for normal projects and libraries.                                                                     |
+| **NFR-09** | Release bundling and minification MUST be deterministic for identical source, configuration, dependency, and tool inputs.                                                 |
+| **NFR-10** | Project-specific bundler logic SHOULD be minimized by delegating general Lua bundling/minification mechanics to a dedicated implementation such as Shale.                 |
+| **NFR-11** | Artifact metadata MUST use a stable machine-readable structure so deployment tooling can consume it without parsing human-oriented documentation.                         |
+| **NFR-12** | Changelog formatting MUST remain human-readable while being sufficiently structured for automated parsing and release tooling.                                            |
+| **NFR-13** | Changelog automation MUST NOT modify developer-authored change descriptions beyond transformations explicitly required to create a release section and update references. |

@@ -20,6 +20,12 @@ extensions = [
     "sphinx_markdown_builder",
 ]
 
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".txt": "markdown",
+    ".md": "markdown",
+}
+
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
@@ -37,5 +43,5 @@ lua_ls_verbose = True
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "alabaster"
+html_theme = 'furo'
 html_static_path = ["_static"]

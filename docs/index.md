@@ -5,10 +5,12 @@ Add your content using ``reStructuredText`` syntax. See the
 documentation for details.
 
 ```{toctree}
-   :maxdepth: 2
-   :caption: Contents:
-```
+:maxdepth: 2
+:caption: Contents:
 
-```{lua:autoobject} gui.UiElement
-:members:
+infrastructure/build/architecture
+infrastructure/build/requirements
+infrastructure/build/user_stories
+infrastructure/build/glossary
+infrastructure/build/config-reference
 ```

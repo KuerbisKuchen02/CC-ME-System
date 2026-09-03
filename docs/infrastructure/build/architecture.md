@@ -170,7 +170,7 @@ return {
   BASE_URL = "<artifact directory URL>", -- Base URL for deployment-facing installer downloads
   FILES = {
     { path = "main.lua", sha256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" },
-    { path = "metadata.lua", sha256 = "c04bc8a7cf95e34771bb402120e2cc76f0fb576ef982df0f0fb537b0ffbe6520" }
+    ...
   }
 }
 ```
