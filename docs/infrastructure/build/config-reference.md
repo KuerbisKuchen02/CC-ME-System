@@ -66,7 +66,7 @@ Below is the complete catalog of all valid configuration keys, organized by logi
 
 * **Level of Definition**: Package/Project Level
 * **Data Type**: Object/Map (Keys are custom target names; values are target configurations)
-* **Allowed Pattern for Target Names**: `^[A-Za-z0-9](?:[A-Za-z0-9_]*[A-Za-z0-9])?$` (Alphanumeric and underscores; cannot start or end with underscores)
+* **Allowed Pattern for Target Names**: `^[A-Za-z0-9](?:[A-Za-z0-9_]*[A-Za-z0-9])?$` (Alphanumeric and underscores; cannot start or end with underscores); Need to be unique inside a project
 * **Description**: Declares the map of independently buildable targets in the project. If a project contains no `targets` key, the build system implicitly constructs a single `default` target using the folder name as the artifact name.
 * **Example**:
 
@@ -214,7 +214,7 @@ All path settings can be defined at any level (usually defined globally at the r
 
 * **Level of Definition**: All levels
 * **Data Type**: String (Directory path relative to the repository root)
-* **Default Value**: `"libraries/"` (replaces outdated `/libraries/src/` default)
+* **Default Value**: `"libraries/"`
 * **Constraint**: Automatically appends a trailing slash `/` if omitted.
 * **Description**: Category-level folder where shared libraries are located.
 * **Example**:
@@ -315,6 +315,96 @@ All path settings can be defined at any level (usually defined globally at the r
 
   ```
 
+### 2.5 Deployment
+
+#### `deployments`
+
+* **Level of Definition**: Repository Root, Category Root, Package Root and/ or Build Target
+* **Data Type**: Object/Map (Keys are custom target names; values are target configurations)
+* **Allowed Pattern for Target Names**: `^[A-Za-z0-9](?:[A-Za-z0-9_]*[A-Za-z0-9])?$` (Alphanumeric and underscores; cannot start or end with underscores)
+* **Description**: Declares the map of independently deployable targets in the repository/ category, package, build target.
+* **Example**
+
+```yaml
+deployments:
+  release_git:
+    method: release
+    destination: git_repository
+    build_type: release
+  local: 
+    method: development
+    destination: local_filesystem
+    build_type: development
+```
+
+#### `method`
+
+* **Level of Definition**: Deployment target only
+* **Data Type**: String
+* **Allowed options**: "development", "release"
+* **Description**: Defines which workflow should be used to deploy the artefact.
+* **Example**:
+
+```yaml
+method: development
+```
+
+#### `destination`
+
+* **Level of Definition**: Deployment target only
+* **Data Type**: Object/ Map
+* **Allowed options**: "local_filesystem", "git_repository" (defined by `name` field)
+* **Description**: The location where the artefact should be deployed to.
+
+##### `local_filesystem`
+
+* **Level of Definition**: Deployment Destination only
+* **Data Type**: Object/ Map
+* **Parameters**:
+  * **name**: always `git_repository`
+  * **path**: string (path to a local directory)
+  * **mode**: string (optional); `copy` (copy files to destination), `link` (create soft links at destination) (default: copy)
+* **Description**: Deploy the artifact directly to a git repository
+* **Example**:
+
+```yaml
+destination: 
+  name: git_repository
+  path: /Users/max/Library/Application Support/PrismLauncher/instances/create-astral/
+  mode: copy
+  branch: releases
+```
+
+##### `git_repository`
+
+* **Level of Definition**: Deployment Destination only
+* **Data Type**: Object/ Map
+* **Parameters**:
+  * **name**: always `git_repository`
+  * **url**: string (url to a git repository)
+  * **branch**: string (optional); any valid branch name in the repository (default: main)
+* **Description**: Deploy the artifact directly to a git repository
+* **Example**:
+
+```yaml
+destination: 
+  name: git_repository
+  url: git@github.com:KuerbisKuchen02/CC-ME-System.git
+  branch: releases
+```
+
+#### `build_type`
+
+* **Level of Definition**: Deployment target only
+* **Data Type**: String
+* **Allowed options**: "development", "release"
+* **Description**: Defines which artefact should be used for the deployment
+* **Example**:
+
+```yaml
+build_type: development
+```
+
 ---
 
 ## 3. Configuration Inheritance and List-Merging Mechanics
@@ -327,7 +417,7 @@ All path settings can be defined at any level (usually defined globally at the r
 
 ### 3.2. Structured List-Merging Modes
 
-To allow developers to clear or replace inherited lists rather than appending to them, the configuration system supports a structured map syntax using the `mode` attribute:
+To allow developers to clear or replace inherited lists (also applies to deployment targets) rather than appending to them, the configuration system supports a structured map syntax using the `mode` attribute:
 
 #### Append Mode (Default)
 
@@ -406,6 +496,17 @@ entry_point: "main.lua"
 dependencies:
   - "lib.logging"
 
+deployments:
+  release_git:
+    method: release
+    destination: git_repository
+    build_type: release
+  local: 
+    method: development
+    destination: local_filesystem
+    build_type: development
+
+
 ```
 
 ### 5.2. Category Level (`/projects/build_config.yaml`)
@@ -453,3 +554,11 @@ targets:
     release:
       preserved:
         mode: clear  # Release build removes all separate files for bundling\n
+
+  deployments:
+    mode: replace
+    release_git:
+      method: release
+      destination: git_repository
+      build_type: development
+

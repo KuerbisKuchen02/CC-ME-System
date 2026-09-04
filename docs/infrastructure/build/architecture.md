@@ -243,3 +243,252 @@ A possible implementation is provided by the [Shale bundler](https://github.com/
 - the release workflow is supported by a guided partially automatic release process
 - the changelog is primarily written for humans and users of the system
 - but since we a strictly defined format the changelog is also machine parsable to include the changes in the installer or release notification
+
+## 9. Deployment
+
+### 9.1. Responsibility Boundary
+
+Deployment is the stage between build artifacts and installation.
+
+```text
+Repository
+    │
+    ▼
+  Build
+    │
+    ├── Development artifact
+    ├── Test artifact
+    └── Release artifact
+             │
+             ▼
+        Deployment
+             │
+             ▼
+     Artifact repository
+             │
+             ▼
+        Installation
+             │
+             ▼
+     ComputerCraft computer
+```
+
+The responsibilities are deliberately separated:
+
+- **Build** transforms source code into a build artifact.
+- **Deployment** makes a build artifact available at a distribution location.
+- **Installation** retrieves an available artifact and installs it onto a ComputerCraft computer.
+
+The deployment system does not define installer behavior.
+
+### 9.2. Deployment Concepts
+
+#### Deployment Method
+
+The deployment method identifies which build artifact type is being deployed:
+
+- **Development** — mutable and replaceable.
+- **Release** — versioned and immutable once successfully deployed.
+
+Test artifacts are not deployable.
+
+#### Deployment Target
+
+A deployment target identifies where an artifact is published.
+
+Initial targets are:
+
+- `local_filesystem`
+- `git_repository`
+
+The deployment method and deployment target are independent dimensions. All combinations of Development/Release with the two initial targets are valid.
+
+### 9.3. Deployment Operation
+
+A deployment operation handles exactly one build artifact and one deployment target.
+
+When several targets are selected, the deployment orchestrator creates independent operations. A failed deployment stops only that operation. It does not roll back or cancel other targets, which continue to be processed and are reported independently.
+
+### 9.4. Release Deployment
+
+The general Release sequence is:
+
+```text
+Clean source worktree
+        │
+        ▼
+Build Release artifact
+        │
+        ▼
+Run selected tests
+        │
+        ▼
+Validate version/changelog
+        │
+        ▼
+Prepare deployment target
+        │
+        ▼
+Check existing version
+        │
+        ├── complete → error
+        │
+        └── incomplete → remove
+        │
+        ▼
+Publish artifact
+        │
+        ▼
+Update changelog
+        │
+        ▼
+Commit changelog
+```
+
+The build occurs before the changelog is finalized:
+
+```text
+Commit A
+   │
+   ├── Build Release
+   │       SOURCE_REVISION = A
+   │
+   ├── Deploy Release
+   │
+   └── Commit changelog → Commit B
+```
+
+If the final changelog commit fails, the already deployed Release remains deployed. No rollback is attempted.
+
+### 9.5. Local Filesystem Target
+
+The `local_filesystem` target publishes the artifact directly to a configured filesystem location.
+
+Development deployments are mutable and replace the existing Development artifact.
+
+Release deployments are versioned and immutable:
+
+```text
+<project>/<target>/<version>/
+```
+
+If a Release directory contains `metadata.lua`, it is considered complete and deployment fails.
+
+If the directory exists without `metadata.lua`, it is considered incomplete and may be removed and replaced.
+
+### 9.6. Git Repository Target
+
+Git deployment uses a dedicated deployment branch and a separate local deployment workspace.
+
+Before every deployment, the workspace is synchronized to the remote:
+
+```text
+git fetch remote
+       │
+       ▼
+git reset --hard remote/deployment_branch
+       │
+       ▼
+git clean -fd
+       │
+       ▼
+clean deployment workspace
+```
+
+This ensures tracked modifications and untracked files from previous unsuccessful deployment attempts cannot affect the next deployment.
+
+The deployment layout is:
+
+```text
+root/
+├── project1/
+│   ├── default/
+│   │   ├── v1.0.0/
+│   │   ├── v1.0.1/
+│   │   └── ...
+│   └── plugin1/
+│       └── v1.0.0/
+└── project2/
+    └── default/
+        └── v1.0.0/
+```
+
+This corresponds to:
+
+```text
+<project>/<build-target>/<version>/
+```
+
+The Git Release workflow is:
+
+```text
+fetch remote
+    │
+    ▼
+reset --hard remote/deployment_branch
+    │
+    ▼
+clean untracked files
+    │
+    ▼
+inspect release directory
+    │
+    ├── metadata.lua exists → completed release → error
+    │
+    └── metadata.lua missing → incomplete release → remove
+    │
+    ▼
+create directory structure
+    │
+    ▼
+copy artifact files
+    │
+    ▼
+create Git commit
+    │
+    ▼
+push commit to remote
+```
+
+`metadata.lua` is the completion marker. It is made available only after the other artifact files have been prepared.
+
+If deployment fails before the commit is pushed, the next attempt starts from the remote branch again and discards the failed local state. If a deployment was successfully pushed, the next attempt sees the actual remote state and can determine whether the release is already complete.
+
+### 9.7. Artifact Metadata
+
+Build artifacts contain `metadata.lua`, including the `FILES` manifest with artifact-relative paths and SHA-256 checksums.
+
+Deployment publishes the artifact produced by the build and does not regenerate its build metadata.
+
+For Release deployment, the presence of `metadata.lua` at the destination also serves as the deployment completion marker.
+
+### 9.8. Failure Isolation
+
+Deployment is fault tolerant across targets, but not within an individual target operation.
+
+```text
+Selected targets
+      │
+      ├── local filesystem
+      │       └── failure → stop this deployment
+      │
+      ├── Git repository A
+      │       └── success
+      │
+      └── Git repository B
+              └── success
+```
+
+A failure at one target does not trigger rollback of another target.
+
+### 9.9. Build and Test Integration
+
+Deployment may orchestrate build and test execution but does not duplicate their responsibilities.
+
+The normal Release pipeline is:
+
+```text
+Build → Test → Deployment
+```
+
+Build and test stages may be explicitly skipped by the deployment invocation. The deployment rules remain unchanged.

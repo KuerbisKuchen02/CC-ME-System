@@ -40,6 +40,7 @@ ID structure: `<type>-<scope>-<topic_number><number>`
 * **BLD** = Build and Artifact Management
 * **TST** = Software Testing
 * **MET** = Build Metadata
+* **DPL**: Deployment
 
 ---
 
@@ -424,9 +425,108 @@ ID structure: `<type>-<scope>-<topic_number><number>`
 | **FR-CHG-602** | A target MAY select a target-specific changelog using `changelog_path`.                                                  | Existing architecture |            |
 | **FR-CHG-603** | Unless a target-specific changelog is configured, the default changelog behavior MUST apply to the default build target. | Existing architecture |            |
 
+## 8. Deployment
+
+### 8.1. Deployment Model
+
+| ID             | Requirement                                                                                                                                       | Reference            | Dependency     |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | -------------- |
+| **FR-DPL-101** | The deployment system MUST deploy a build artifact produced for a configured build target to a configured deployment target.                      | US-DPL-01            | Build system   |
+| **FR-DPL-102** | A deployment MUST operate on one build artifact and one deployment target as an independently contained operation.                                | US-DPL-01, US-DPL-10 |                |
+| **FR-DPL-103** | The deployment system MUST support Development and Release deployment methods corresponding to Development and Release build artifacts.           | US-DPL-02            | Build types    |
+| **FR-DPL-104** | Test artifacts MUST NOT be treated as a deployment method.                                                                                        | US-DPL-02            |                |
+| **FR-DPL-105** | A completed Release deployment MUST be immutable and MUST NOT overwrite an existing completed release with the same project, target, and version. | US-DPL-06            |                |
+| **FR-DPL-106** | A Release deployment MUST publish the artifact such that `metadata.lua` is the completion marker for the deployment.                              | US-DPL-08            | Build metadata |
+
+### 8.2. Local Filesystem Deployment
+
+| ID             | Requirement                                                                                                                                                | Reference            | Dependency |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- |
+| **FR-DPL-201** | The `local_filesystem` deployment target MUST support deployment of Development artifacts.                                                                 | US-DPL-03            |            |
+| **FR-DPL-202** | The `local_filesystem` deployment target MUST support deployment of Release artifacts.                                                                     | US-DPL-03            |            |
+| **FR-DPL-203** | Development deployments to a local filesystem MUST replace the existing Development artifact when one exists.                                              | US-DPL-02, US-DPL-03 |            |
+| **FR-DPL-204** | Release deployments to a local filesystem MUST reject an existing completed release with the same project, target, and version.                            | US-DPL-06            |            |
+| **FR-DPL-205** | An incomplete Release deployment at a local filesystem destination, identified by a release directory without `metadata.lua`, MAY be removed and replaced. | US-DPL-06            |            |
+
+### 8.3. Git Repository Deployment
+
+| ID             | Requirement                                                                                                                                                                                                 | Reference            | Dependency |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- |
+| **FR-DPL-301** | The `git_repository` deployment target MUST publish artifacts to a configured deployment branch in a Git repository.                                                                                        | US-DPL-04            | Git        |
+| **FR-DPL-302** | A Git deployment MUST use the deployment layout `<project>/<build-target>/<version>/` for Release artifacts.                                                                                                | US-DPL-04            |            |
+| **FR-DPL-303** | Before a Git deployment starts modifying its deployment workspace, the system MUST fetch the configured remote.                                                                                             | US-DPL-05            | Git        |
+| **FR-DPL-304** | Before inspecting or creating a deployment, the system MUST reset the deployment workspace to the fetched remote deployment branch and remove untracked files and directories created by previous attempts. | US-DPL-05            | Git        |
+| **FR-DPL-305** | The Git deployment process MUST inspect the synchronized local deployment workspace to determine whether the requested Release version already exists and is complete.                                      | US-DPL-06            |            |
+| **FR-DPL-306** | A Release directory that exists without `metadata.lua` MUST be treated as incomplete.                                                                                                                       | US-DPL-07            |            |
+| **FR-DPL-307** | An incomplete Release directory in the Git deployment workspace MUST be removed before the replacement artifact is copied.                                                                                  | US-DPL-07            |            |
+| **FR-DPL-308** | A Git Release deployment MUST copy the artifact files into the release directory, create a Git commit, and push the commit to the configured remote.                                                        | US-DPL-04, US-DPL-08 |            |
+| **FR-DPL-309** | A Git Release deployment MUST make `metadata.lua` available only after all other artifact files have been copied successfully, so that its presence represents a complete published artifact.               | US-DPL-08            |            |
+| **FR-DPL-310** | A Git deployment MUST fail if the remote cannot be fetched, the deployment branch cannot be synchronized, the artifact cannot be copied, the commit cannot be created, or the push cannot be completed.     | US-DPL-04, US-DPL-05 |            |
+
+### 8.4. Release Preconditions and Workflow
+
+| ID             | Requirement                                                                                                                                                                                                                | Reference | Dependency    |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------- |
+| **FR-DPL-401** | Before publishing a Release artifact, the deployment system MUST verify that the source working directory is clean.                                                                                                        | US-DPL-09 | Git           |
+| **FR-DPL-402** | Before publishing a Release artifact, the deployment system MUST verify that an effective target version is configured.                                                                                                    | US-DPL-09 | Configuration |
+| **FR-DPL-403** | If a changelog is configured or present for the target, the deployment system MUST require a non-empty `Unreleased` section before publishing the Release.                                                                 | US-DPL-09 | Changelog     |
+| **FR-DPL-404** | If tests exist and testing is selected for the deployment, all required tests MUST pass before the Release artifact is published.                                                                                          | US-DPL-09 | Test system   |
+| **FR-DPL-405** | After a successful Release deployment, the deployment process MUST convert the current `Unreleased` changelog section into the released version section with the release date and create a new empty `Unreleased` section. | US-DPL-12 | Changelog     |
+| **FR-DPL-406** | The changelog update MUST be committed after the Release artifact has been built and successfully deployed.                                                                                                                | US-DPL-12 | Git           |
+| **FR-DPL-407** | Failure to create or commit the post-deployment changelog update MUST be reported as a post-deployment error and MUST NOT remove or roll back the successfully deployed Release artifact.                                  | US-DPL-13 |               |
+| **FR-DPL-408** | Build and test stages MAY be skipped only when explicitly selected by the deployment invocation; skipping a stage MUST NOT change the artifact or deployment rules themselves.                                             | US-DPL-14 |               |
+
+### 8.5. Independent Target Processing
+
+| ID             | Requirement                                                                                                                                                                | Reference | Dependency |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
+| **FR-DPL-501** | When multiple deployment targets are selected, each target MUST be processed as an independent deployment operation.                                                       | US-DPL-10 |            |
+| **FR-DPL-502** | Failure of one deployment target MUST stop only that deployment operation and MUST NOT roll back, cancel, or otherwise invalidate successful deployments to other targets. | US-DPL-10 |            |
+| **FR-DPL-503** | After processing all selected deployment targets, the deployment system MUST report the result of each target individually.                                                | US-DPL-11 |            |
+| **FR-DPL-504** | A deployment operation MUST preserve successfully deployed artifacts even when another selected target fails.                                                              | US-DPL-10 |            |
+
+### 8.6. Deployment Workflow
+
+#### 8.6.1 Release
+
+For each selected deployment target:
+
+1. Verify that the source working directory is clean.
+2. Build the Release artifact if build execution is selected.
+3. Run tests if test execution is selected and tests exist.
+4. Validate the Release version and changelog preconditions.
+5. Prepare the deployment target.
+6. Check whether the requested version already exists.
+7. Reject a completed existing release.
+8. Remove an incomplete release if applicable.
+9. Publish the artifact.
+10. Finalize the changelog after successful deployment.
+11. Commit the changelog update.
+
+The build MUST occur before the changelog release commit so that the artifact's `SOURCE_REVISION` identifies the source revision actually used to build it.
+
+#### 8.6.2 Development
+
+For each selected deployment target:
+
+1. Build the Development artifact if build execution is selected.
+2. Run tests if test execution is selected and tests exist.
+3. Replace the existing Development artifact at the destination.
+4. Publish the new artifact.
+
+Development deployment has no Release-specific version or changelog preconditions.
+
+### 8.7. Deployment Atomicity
+
+| ID              | Requirement                                                                                                                                                          | Reference | Dependency |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
+| **NFR-DPL-701** | Deployment operations SHOULD avoid leaving a destination in an intentionally empty state when replacement of an existing Development artifact fails partway through. | US-DPL-03 |            |
+| **NFR-DPL-702** | A Git Release deployment SHOULD use the presence of `metadata.lua` as the final publication marker rather than requiring a separate deployment-state file.           | US-DPL-08 |            |
+| **NFR-DPL-703** | Deployment diagnostics MUST identify the deployment target, project, build target, deployment method, and failure cause.                                             | US-DPL-11 |            |
+
 ---
 
-## 8. Non-Functional Requirements Established So Far
+## 9. Non-Functional Requirements Established So Far
 
 These requirements apply across both areas.
 
@@ -445,3 +545,6 @@ These requirements apply across both areas.
 | **NFR-11** | Artifact metadata MUST use a stable machine-readable structure so deployment tooling can consume it without parsing human-oriented documentation.                         |
 | **NFR-12** | Changelog formatting MUST remain human-readable while being sufficiently structured for automated parsing and release tooling.                                            |
 | **NFR-13** | Changelog automation MUST NOT modify developer-authored change descriptions beyond transformations explicitly required to create a release section and update references. |
+| **NFR-14** | Deployment operations SHOULD avoid leaving a destination in an intentionally empty state when replacement of an existing Development artifact fails partway through.      |
+| **NFR-15** | A Git Release deployment SHOULD use the presence of `metadata.lua` as the final publication marker rather than requiring a separate deployment-state file.                |
+| **NFR-16** | Deployment diagnostics MUST identify the deployment target, project, build target, deployment method, and failure cause.                                                  |
