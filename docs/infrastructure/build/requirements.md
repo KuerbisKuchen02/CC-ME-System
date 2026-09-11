@@ -14,8 +14,8 @@
 
 Normative text describes one or both of the following kinds of elements:
 
-* Vital elements of the specification.
-* Elements that contain the conformance language key words as defined by IETF RFC 2119, “Key words for use in RFCs to Indicate Requirement Levels”.
+- Vital elements of the specification.
+- Elements that contain the conformance language key words as defined by IETF RFC 2119, “Key words for use in RFCs to Indicate Requirement Levels”.
 
 Informative text is potentially helpful to the user, but dispensable. Informative text can be changed, added, or deleted editorially without negatively affecting the implementation of the specification. Informative text does not contain conformance keywords.
 
@@ -29,18 +29,19 @@ ID structure: `<type>-<scope>-<topic_number><number>`
 
 **Types:**
 
-* **FR** = Functional Requirement
-* **NFR** = Non-Functional Requirement
+- **FR** = Functional Requirement
+- **NFR** = Non-Functional Requirement
 
 **Scopes:**
 
-* **XFN** = Cross functional (no specific scope)
-* **CFG** = Build Configuration
-* **DEP** = Dependency Management
-* **BLD** = Build and Artifact Management
-* **TST** = Software Testing
-* **MET** = Build Metadata
-* **DPL**: Deployment
+- **XFN** = Cross functional (no specific scope)
+- **CFG** = Build Configuration
+- **DEP** = Dependency Management
+- **BLD** = Build and Artifact Management
+- **TST** = Software Testing
+- **MET** = Build Metadata
+- **DPL**: Deployment
+- **INS** Installation
 
 ---
 
@@ -58,27 +59,64 @@ ID structure: `<type>-<scope>-<topic_number><number>`
 
 ---
 
-## 2. Build Configuration
+## 2. Configuration
 
-| ID            | Requirement                                                                                                                                                                                                                                       | Reference                       | Dependency |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- | ---------- |
-| **FR-CFG-01** | The default repository structure MUST distinguish `projects/`, `libraries/`, and `external/` source categories.                                                                                                                                   | US-BLD-01                       |            |
-| **FR-CFG-02** | By default, project source modules MUST be located below `projects/<project>/src/`.                                                                                                                                                               | US-BLD-01                       |            |
-| **FR-CFG-03** | A shared library MUST be either `libraries/<name>.lua` (small library) or a directory package below `libraries/<name>/src/` (large library).                                                                                                      | US-BLD-01, US-CFG-03            |            |
-| **FR-CFG-04** | By default, external source modules MUST be located below `external/`.                                                                                                                                                                            | US-BLD-01                       |            |
-| **FR-CFG-05** | Repository-level configuration MUST allow the library and external category roots to be overridden (`library_search_path` and `external_search_path` respectively).                                                                               | US-BLD-02                       |            |
-| **FR-CFG-06** | The default logical module prefixes MUST be `lib.` for shared libraries, `external.` for external code, and `test.` for test modules.                                                                                                             | US-BLD-02                       |            |
-| **FR-CFG-07** | Module prefixes, category search paths, and the project `source_root` (default `src/`) and `test_source_root` (default `test/`) MUST be configurable.                                                                                             | US-BLD-02                       |            |
-| **FR-CFG-08** | The build configuration MUST allow specific files or modules to be excluded from the main bundle using the `preserved` list.                                                                                                                      | US-BLD-15                       |            |
-| **FR-CFG-09** | Build configuration MUST support inheritance in the order: Repository → Category → Package/Project → Target → Build Type. Scalars MUST override inherited values, and maps MUST merge by key with the more-specific value winning.                | US-CFG-01, US-BLD-17            |            |
-| **FR-CFG-10** | A project, large library, or large external package configuration MUST be named `build_config.yaml` and reside at that entity's root. A configurable small package MUST use the sidecar form `<name>.build_config.yaml` within its category root. | US-CFG-03, US-CFG-07            |            |
-| **FR-CFG-11** | The category configurations `/projects/build_config.yaml`, `/libraries/build_config.yaml`, and `/external/build_config.yaml` MUST apply to entries in their respective categories.                                                                | US-CFG-01                       |            |
-| **FR-CFG-12** | Inherited list values MUST append by default. A list configuration MAY use `mode: replace` with items to replace inherited values, or `mode: clear` without items to clear them.                                                                  | US-CFG-06, US-BLD-17            |            |
-| **FR-CFG-13** | Project build targets MUST be defined as entries of a `targets` map. Target, project, and group names MUST match `^[A-Za-z0-9](?:[A-Za-z0-9_]*[A-Za-z0-9])?$`.                                                                                    | US-CFG-02, US-BLD-11, US-BLD-24 |            |
-| **FR-CFG-14** | If a project has no explicit targets, the system MUST create an implicit default target. A library or external package without targets MUST be treated as a manifest and MUST NOT produce an artifact.                                            | US-CFG-02, US-DEP-01            |            |
-| **FR-CFG-15** | `entry_point` and `preserved` values MUST be interpreted relative to the active source root. Unknown or invalid configuration fields MUST be reported as warnings and ignored; duplicate targets and invalid required values MUST be errors.      | US-CFG-04, US-BLD-05, US-BLD-16 |            |
-| **FR-CFG-16** | A target version MUST be a Semantic Versioning value. It MUST be required for Release builds and SHOULD produce a warning when absent from Development or Test builds.                                                                            | US-CFG-05, US-DEP-13, US-DEP-14 |            |
-| **FR-CFG-17** | `artifact_base_url` MUST be configurable only at the repository level.                                                                                                                                                                            | US-CFG-05, US-DEP-15            |            |
+### 2.1. Build Configuration
+
+| ID             | Requirement                                                                                                                                                                                                                                       | Reference                       | Dependency |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- | ---------- |
+| **FR-CFG-101** | The default repository structure MUST distinguish `projects/`, `libraries/`, and `external/` source categories.                                                                                                                                   | US-BLD-01                       |            |
+| **FR-CFG-102** | By default, project source modules MUST be located below `projects/<project>/src/`.                                                                                                                                                               | US-BLD-01                       |            |
+| **FR-CFG-103** | A shared library MUST be either `libraries/<name>.lua` (small library) or a directory package below `libraries/<name>/src/` (large library).                                                                                                      | US-BLD-01, US-CFG-03            |            |
+| **FR-CFG-104** | By default, external source modules MUST be located below `external/`.                                                                                                                                                                            | US-BLD-01                       |            |
+| **FR-CFG-105** | Repository-level configuration MUST allow the library and external category roots to be overridden (`library_search_path` and `external_search_path` respectively).                                                                               | US-BLD-02                       |            |
+| **FR-CFG-106** | The default logical module prefixes MUST be `lib.` for shared libraries, `external.` for external code, and `test.` for test modules.                                                                                                             | US-BLD-02                       |            |
+| **FR-CFG-107** | Module prefixes, category search paths, and the project `source_root` (default `src/`) and `test_source_root` (default `test/`) MUST be configurable.                                                                                             | US-BLD-02                       |            |
+| **FR-CFG-108** | The build configuration MUST allow specific files or modules to be excluded from the main bundle using the `preserved` list.                                                                                                                      | US-BLD-15                       |            |
+| **FR-CFG-109** | Build configuration MUST support inheritance in the order: Repository → Category → Package/Project → Target → Build Type. Scalars MUST override inherited values, and maps MUST merge by key with the more-specific value winning.                | US-CFG-01, US-BLD-17            |            |
+| **FR-CFG-110** | A project, large library, or large external package configuration MUST be named `build_config.yaml` and reside at that entity's root. A configurable small package MUST use the sidecar form `<name>.build_config.yaml` within its category root. | US-CFG-03, US-CFG-07            |            |
+| **FR-CFG-111** | The category configurations `/projects/build_config.yaml`, `/libraries/build_config.yaml`, and `/external/build_config.yaml` MUST apply to entries in their respective categories.                                                                | US-CFG-01                       |            |
+| **FR-CFG-112** | Inherited list values MUST append by default. A list configuration MAY use `mode: replace` with items to replace inherited values, or `mode: clear` without items to clear them.                                                                  | US-CFG-06, US-BLD-17            |            |
+| **FR-CFG-113** | Project build targets MUST be defined as entries of a `targets` map. Target, project, and group names MUST match `^[A-Za-z0-9](?:[A-Za-z0-9_]*[A-Za-z0-9])?$`.                                                                                    | US-CFG-02, US-BLD-11, US-BLD-24 |            |
+| **FR-CFG-114** | If a project has no explicit targets, the system MUST create an implicit default target. A library or external package without targets MUST be treated as a manifest and MUST NOT produce an artifact.                                            | US-CFG-02, US-DEP-01            |            |
+| **FR-CFG-115** | `entry_point` and `preserved` values MUST be interpreted relative to the active source root. Unknown or invalid configuration fields MUST be reported as warnings and ignored; duplicate targets and invalid required values MUST be errors.      | US-CFG-04, US-BLD-05, US-BLD-16 |            |
+| **FR-CFG-116** | A target version MUST be a Semantic Versioning value. It MUST be required for Release builds and SHOULD produce a warning when absent from Development or Test builds.                                                                            | US-CFG-05, US-DEP-13, US-DEP-14 |            |
+| **FR-CFG-117** | `artifact_base_url` MUST be configurable only at the repository level.                                                                                                                                                                            | US-CFG-05, US-DEP-15            |            |
+
+### 2.2. Deployment Configuration
+
+| ID             | Requirement                                                                                                                                                                   |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **FR-CFG-201** | The configuration system MUST support a `deployments` map at repository, project, and build-target levels.                                                                    |
+| **FR-CFG-202** | Deployment configuration MUST inherit hierarchically using existing configuration inheritance rules.                                                                          |
+| **FR-CFG-203** | Each deployment entry MUST have a unique Deployment Target name within its scope.                                                                                             |
+| **FR-CFG-204** | Deployment Target names MUST follow the same naming rules as build target names.                                                                                              |
+| **FR-CFG-205** | A Deployment Target MUST support `method` with values `development` or `release`.                                                                                             |
+| **FR-CFG-206** | A Deployment Target MUST support `destination`.                                                                                                                               |
+| **FR-CFG-207** | Initial destinations MUST include `local_filesystem` and `git_repository`.                                                                                                    |
+| **FR-CFG-208** | A Deployment Target MUST support `build_type` identifying the artifact to deploy.                                                                                             |
+| **FR-CFG-209** | The configuration system MUST allow all combinations of supported deployment methods and build types; it MUST NOT impose `method == build_type` as a general validation rule. |
+| **FR-CFG-210** | Deployment collections MUST support `append`, `clear`, and `replace` semantics consistently with existing inherited collections.                                              |
+| **FR-CFG-211** | Omitted collection merge mode MUST retain the existing append behavior.                                                                                                       |
+
+## 2.3. Installer-related target configuration
+
+| ID             | Requirement                                                                                                             |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **FR-CFG-301** | A build target MAY define an installer script path.                                                                     |
+| **FR-CFG-302** | A build target MAY define a uninstaller script path.                                                                    |
+| **FR-CFG-303** | Installer and uninstaller paths MUST be relative to the target source root unless a more specific path rule is defined. |
+| **FR-CFG-304** | The build MUST validate configured installer/uninstaller paths when producing the artifact.                             |
+| **FR-CFG-305** | Configured installer/uninstaller paths MUST be recorded in artifact metadata.                                           |
+| **FR-CFG-306** | Installer/uninstaller settings MUST participate in the normal target/build configuration model.                         |
+
+## 2.4. Installer and discovery settings
+
+| ID             | Requirement                                                                                                         |
+| -------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **FR-CFG-301** | The system MUST provide a configurable way to identify the root repository metadata location used by the installer. |
+| **FR-CFG-302** | A common installer default SHOULD avoid requiring the root metadata location to be repeated in every artifact.      |
+| **FR-CFG-303** | Artifact-level dynamic-module repository information MUST be recorded in artifact metadata when configured.         |
 
 ---
 
@@ -425,6 +463,8 @@ ID structure: `<type>-<scope>-<topic_number><number>`
 | **FR-CHG-602** | A target MAY select a target-specific changelog using `changelog_path`.                                                  | Existing architecture |            |
 | **FR-CHG-603** | Unless a target-specific changelog is configured, the default changelog behavior MUST apply to the default build target. | Existing architecture |            |
 
+---
+
 ## 8. Deployment
 
 ### 8.1. Deployment Model
@@ -524,9 +564,139 @@ Development deployment has no Release-specific version or changelog precondition
 | **NFR-DPL-702** | A Git Release deployment SHOULD use the presence of `metadata.lua` as the final publication marker rather than requiring a separate deployment-state file.           | US-DPL-08 |            |
 | **NFR-DPL-703** | Deployment diagnostics MUST identify the deployment target, project, build target, deployment method, and failure cause.                                             | US-DPL-11 |            |
 
+### 8.8. Root discovery metadata
+
+| ID             | Requirement                                                                                                                                         |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **FR-DPL-241** | A Git deployment repository MUST maintain a root-level `metadata.lua` discovery registry.                                                           |
+| **FR-DPL-242** | The registry MUST identify each program by `name` and `display_name`.                                                                               |
+| **FR-DPL-243** | The registry MUST advertise available artifact types for each program.                                                                              |
+| **FR-DPL-244** | The registry MUST advertise available versions.                                                                                                     |
+| **FR-DPL-245** | Deployment MUST update the registry whenever the available artifact set changes.                                                                    |
+| **FR-DPL-246** | The registry update MUST be committed together with the artifact changes causing it.                                                                |
+| **FR-DPL-247** | The registry MUST be treated as discovery data; artifact `metadata.lua` remains authoritative for files, checksums, and artifact-specific metadata. |
+| **FR-DPL-248** | Root discovery metadata MUST remain separate from immutable artifact metadata.                                                                      |
+
+Conceptual format:
+
+```lua
+return {
+    programs = {
+        {
+            display_name = "Program 1",
+            name = "program1",
+            types = { "release", "development" },
+            versions = { "2.0.0", "1.1.1", "1.1.0", "1.0.0" }
+        }
+    }
+}
+```
+
+
 ---
 
-## 9. Non-Functional Requirements Established So Far
+## 9. Installation
+
+### 9.1. Bootstrap and artifact discovery
+
+| ID             | Requirement                                                                                                                                        | Reference |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| **FR-INS-101** | The system MUST provide a generic root installer as a single Lua file that runs in ComputerCraft without a separately installed installer package. | US-INS-01 |
+| **FR-INS-102** | The root installer MUST support execution through ComputerCraft `wget run`.                                                                        | US-INS-01 |
+| **FR-INS-103** | The root installer MUST accept program name and optional version and build type parameters.                                                        | US-INS-02 |
+| **FR-INS-104** | The root installer MUST provide an interactive interface for selection and management.                                                             | US-INS-02 |
+| **FR-INS-105** | If no version is specified, the installer MUST select the newest version advertised by root metadata.                                              | US-INS-03 |
+| **FR-INS-106** | If no build type is specified, the installer MUST default to Release.                                                                              | US-INS-04 |
+| **FR-INS-107** | Before downloading program files, the installer MUST allow installation-location selection and MUST provide a program-name-based default.          | US-INS-05 |
+| **FR-INS-108** | The installer MUST download the selected artifact's `metadata.lua` before downloading its files.                                                   | US-INS-06 |
+| **FR-INS-109** | The installer MUST verify every downloaded artifact file against its SHA-256 checksum in `FILES`.                                                  | US-INS-06 |
+| **FR-INS-110** | The installer MUST display download progress.                                                                                                      | US-INS-07 |
+
+### 9.2. Installed-program registry
+
+| ID             | Requirement                                                                                                                                                                                             | Reference |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| **FR-INS-201** | The installer MUST maintain a hidden root-level `.installed.lua` containing installed-program records.                                                                                                  | US-INS-08 |
+| **FR-INS-202** | The registry MUST use a map keyed by program name. A complete record MUST contain `location`, `version`, and `displayName`.                                                                             | US-INS-08 |
+| **FR-INS-203** | Different programs MUST be allowed to use different installation locations.                                                                                                                             | US-INS-09 |
+| **FR-INS-204** | Program removal MUST be available through the interactive interface and CLI.                                                                                                                            | US-INS-10 |
+| **FR-INS-205** | Removal MUST run a configured custom uninstaller, when present, before deleting generic artifact files, and MUST then remove the registry entry.                                                        | US-INS-10 |
+| **FR-INS-206** | Program update MUST be available through the interactive interface and CLI.                                                                                                                             | US-INS-11 |
+| **FR-INS-207** | Update MUST remove all files listed by the old `FILES` manifest and old `metadata.lua` before downloading the new artifact metadata and files.                                                          | US-INS-11 |
+| **FR-INS-208** | Before installation starts, the installer MUST create a registry entry without a `version`.                                                                                                             | US-INS-12 |
+| **FR-INS-209** | A registry entry without `version` MUST be treated as an interrupted installation; the user MUST be offered retry, deletion of the broken installation and entry, or continuation to normal management. | US-INS-12 |
+
+Registry form:
+
+```lua
+return {
+    ["program1"] = {
+        location = "/programs/program1",
+        version = "1.0.0",
+        displayName = "Program 1"
+    }
+}
+```
+
+### 9.3. Custom installers and uninstallers
+
+| ID             | Requirement                                                                                               | Reference |
+| -------------- | --------------------------------------------------------------------------------------------------------- | --------- |
+| **FR-INS-301** | A build target MAY define a custom installer script.                                                      | US-INS-13 |
+| **FR-INS-302** | When defined, its relative path MUST be recorded in artifact metadata.                                    | US-INS-13 |
+| **FR-INS-303** | A build target MAY define a custom uninstaller script.                                                    | US-INS-14 |
+| **FR-INS-304** | When defined, its relative path MUST be recorded in artifact metadata.                                    | US-INS-14 |
+| **FR-INS-305** | During an update, the root installer MUST invoke the custom installer with an explicit update indication. | US-INS-15 |
+
+The exact argument encoding is intentionally left unspecified for now.
+
+### 9.4. Dynamic modules
+
+| ID             | Requirement                                                                                                                                        | Reference |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| **FR-INS-401** | Artifact metadata MAY identify a mutable dynamic-module repository.                                                                                | US-INS-16 |
+| **FR-INS-402** | During initial installation, the installer MUST offer dynamic-module installation when such a repository is available.                             | US-INS-17 |
+| **FR-INS-403** | The installer MUST inform the user that dynamic modules can later be managed by rerunning the installer.                                           | US-INS-17 |
+| **FR-INS-404** | The installer MUST support installing, updating, and removing dynamic modules.                                                                     | US-INS-18 |
+| **FR-INS-405** | Dynamic-module management MUST be available through both interactive and CLI interfaces.                                                           | US-INS-18 |
+| **FR-INS-406** | Each program installation MUST maintain a hidden `.installed.lua` keyed by module name; complete records MUST contain `version` and `displayName`. | US-INS-19 |
+
+Per-program registry:
+
+```lua
+return {
+    ["plugin1"] = {
+        version = "1.0.1",
+        displayName = "Plugin 1"
+    }
+}
+```
+
+### 9.5. Startup
+
+| ID             | Requirement                                                                                             | Reference |
+| -------------- | ------------------------------------------------------------------------------------------------------- | --------- |
+| **FR-INS-501** | Installation MUST offer adding the program to ComputerCraft startup.                                    | US-INS-20 |
+| **FR-INS-502** | If selected, the installer MUST create a startup launcher for the installed program.                    | US-INS-20 |
+| **FR-INS-503** | Installation MUST offer automatic updates before startup.                                               | US-INS-21 |
+| **FR-INS-504** | If selected, the startup launcher MUST invoke the installer in update mode before starting the program. | US-INS-21 |
+| **FR-INS-505** | If a startup file exists, the installer MUST ask before replacing it.                                   | US-INS-22 |
+| **FR-INS-506** | The root installer MUST manage at most one program through startup integration.                         | US-INS-23 |
+
+When both options are selected, startup behavior is `installer update -> program`.
+
+### 9.6. Interfaces and diagnostics
+
+| ID             | Requirement                                                                                                                        | Reference |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| **FR-INS-601** | The installer MUST provide an interactive management interface.                                                                    | US-INS-24 |
+| **FR-INS-602** | The installer MUST provide CLI operations for installation, update, removal, and dynamic-module management.                        | US-INS-25 |
+| **FR-INS-603** | User-facing errors MUST explain the failed operation, relevant cause when known, and possible corrective actions where meaningful. | US-INS-26 |
+| **FR-INS-604** | CLI and interactive interfaces MUST use the same underlying lifecycle operations.                                                  | US-INS-27 |
+
+---
+
+## 10. Non-Functional Requirements Established So Far
 
 These requirements apply across both areas.
 
@@ -548,3 +718,6 @@ These requirements apply across both areas.
 | **NFR-14** | Deployment operations SHOULD avoid leaving a destination in an intentionally empty state when replacement of an existing Development artifact fails partway through.      |
 | **NFR-15** | A Git Release deployment SHOULD use the presence of `metadata.lua` as the final publication marker rather than requiring a separate deployment-state file.                |
 | **NFR-16** | Deployment diagnostics MUST identify the deployment target, project, build target, deployment method, and failure cause.                                                  |
+| **NFR-17** | The root installer SHOULD remain self-contained and bootstrap-friendly.                                                                                                   |
+| **NFR-18** | A checksum mismatch SHOULD prevent the affected file from being reported as successfully installed.                                                                       |
+| **NFR-19** | Registry writes SHOULD preserve the distinction between incomplete and completed installation.                                                                            |

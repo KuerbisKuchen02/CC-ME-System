@@ -2,21 +2,22 @@
 
 > **Document status:** Draft
 >
-> **Scope:** Consolidated user stories for dependency management, build and artifact management, and software testing.
+> **Scope:** Consolidated user stories for dependency management, build and artifact management, installation and software testing.
 >
 >**Last updated:** 2026-08-26
 
 ID structure: `US-<scope>-<number>`
 Scopes:
 
-* **XFN**: Cross functional (no specific scope)
-* **CFG**: Build Configuration
-* **DEP**: Dependency Management
-* **BLD**: Build and Artifact Management
-* **TST**: Software Testing
-* **MET**: Build Metadata
-* **CHG**: Changelog Management
-* **DPL**: Deployment
+- **XFN**: Cross functional (no specific scope)
+- **CFG**: Build Configuration
+- **DEP**: Dependency Management
+- **BLD**: Build and Artifact Management
+- **TST**: Software Testing
+- **MET**: Build Metadata
+- **CHG**: Changelog Management
+- **DPL**: Deployment
+- **INS**: Installer
 
 User-story structure: *As [persona], I want [software goal], so that [result].*
 
@@ -32,15 +33,15 @@ User-story structure: *As [persona], I want [software goal], so that [result].*
 
 ## 2. Build Configuration
 
-| ID            | Title                         | User Story                                                                                                                                                                   | Derived Requirements             |
-| ------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| **US-CFG-01** | Hierarchical configuration    | As a developer, I want configuration to inherit from repository through category, package/project, target, and build type, so shared defaults are defined once.              | FR-CFG-09, FR-CFG-11             |
-| **US-CFG-02** | Explicit targets map          | As a developer, I want named targets to be defined in an explicit target map, so configuration fields and target names cannot be confused.                                   | FR-CFG-13, FR-CFG-14             |
-| **US-CFG-03** | Package configuration         | As a library developer, I want both directory and single-file packages to have an appropriate configuration location, so dependencies remain declarative.                    | FR-CFG-10, FR-DEP-110            |
-| **US-CFG-04** | Predictable configuration     | As a developer, I want invalid configuration to be diagnosed without preventing unrelated targets from building, so configuration problems are actionable.                   | FR-CFG-15, FR-BLD-801            |
-| **US-CFG-05** | Release identity              | As a release manager, I want Release builds to require a version, immutable source revision, clean worktree, and artifact base URL, so deployable artifacts are traceable.   | FR-CFG-16, FR-CFG-17, FR-BLD-910 |
-| **US-CFG-06** | List clearing and replacement | As a developer, I want to clear or replace inherited list values in child configurations, so that I can override inherited list-based configurations instead of appending.   | FR-CFG-12                        |
-| **US-CFG-07** | Sidecar configuration         | As a developer, I want small libraries to have sidecar configuration files, so that I can declare their static dependencies without converting them into directory packages. | FR-CFG-10, FR-DEP-110            |
+| ID            | Title                         | User Story                                                                                                                                                                   | Derived Requirements               |
+| ------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| **US-CFG-01** | Hierarchical configuration    | As a developer, I want configuration to inherit from repository through category, package/project, target, and build type, so shared defaults are defined once.              | FR-CFG-109, FR-CFG-111             |
+| **US-CFG-02** | Explicit targets map          | As a developer, I want named targets to be defined in an explicit target map, so configuration fields and target names cannot be confused.                                   | FR-CFG-113, FR-CFG-114             |
+| **US-CFG-03** | Package configuration         | As a library developer, I want both directory and single-file packages to have an appropriate configuration location, so dependencies remain declarative.                    | FR-CFG-110, FR-DEP-110             |
+| **US-CFG-04** | Predictable configuration     | As a developer, I want invalid configuration to be diagnosed without preventing unrelated targets from building, so configuration problems are actionable.                   | FR-CFG-115, FR-BLD-801             |
+| **US-CFG-05** | Release identity              | As a release manager, I want Release builds to require a version, immutable source revision, clean worktree, and artifact base URL, so deployable artifacts are traceable.   | FR-CFG-116, FR-CFG-117, FR-BLD-910 |
+| **US-CFG-06** | List clearing and replacement | As a developer, I want to clear or replace inherited list values in child configurations, so that I can override inherited list-based configurations instead of appending.   | FR-CFG-112                         |
+| **US-CFG-07** | Sidecar configuration         | As a developer, I want small libraries to have sidecar configuration files, so that I can declare their static dependencies without converting them into directory packages. | FR-CFG-110, FR-DEP-110             |
 
 ---
 
@@ -49,7 +50,7 @@ User-story structure: *As [persona], I want [software goal], so that [result].*
 | ID            | Title                           | User Story                                                                                                                                                                                                             | Derived Requirements                                     |
 | ------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
 | **US-DEP-01** | Shared libraries                | As a developer, I want to create shared libraries that can be automatically included in projects, so that common functionality does not have to be duplicated.                                                         | FR-DEP-101                                               |
-| **US-DEP-02** | Explicit dependencies           | As a developer, I want to explicitly declare project and library dependencies in a build configuration, so that the intended dependency graph is clear and reproducible.                                               | FR-CFG-10, FR-DEP-102, FR-DEP-103                        |
+| **US-DEP-02** | Explicit dependencies           | As a developer, I want to explicitly declare project and library dependencies in a build configuration, so that the intended dependency graph is clear and reproducible.                                               | FR-CFG-110, FR-DEP-102, FR-DEP-103                       |
 | **US-DEP-03** | Dependency usage validation     | As a developer, I want the build system to compare declared dependencies with actual static require() usage, so that unused declared dependencies are reported as warnings.                                            | FR-DEP-104, FR-DEP-205                                   |
 | **US-DEP-04** | Undeclared dependencies         | As a developer, I want the build system to report an error when source code uses an undeclared dependency, so that dependencies cannot be introduced accidentally.                                                     | FR-DEP-206                                               |
 | **US-DEP-05** | Transitive dependencies         | As a developer, I want dependencies of libraries to be resolved automatically, so that I do not have to manually declare every transitive dependency in an application.                                                | FR-DEP-301, FR-DEP-308                                   |
@@ -76,8 +77,8 @@ User-story structure: *As [persona], I want [software goal], so that [result].*
 
 | ID            | Title                             | User Story                                                                                                                                                                                                                                                     | Derived Requirements                                                               |
 | ------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| **US-BLD-01** | Conventional repository structure | As a developer, I want a conventional repository structure for projects, libraries, external code, documentation, build output, and infrastructure, so that I can work with minimal configuration.                                                             | FR-CFG-01, FR-CFG-02, FR-CFG-03, FR-CFG-04, FR-BLD-907                             |
-| **US-BLD-02** | Configurable source roots         | As a developer, I want repository source roots and module prefixes to be configurable, so that I can adapt the build system when the conventional structure does not fit my project.                                                                           | FR-CFG-05, FR-CFG-06, FR-CFG-07                                                    |
+| **US-BLD-01** | Conventional repository structure | As a developer, I want a conventional repository structure for projects, libraries, external code, documentation, build output, and infrastructure, so that I can work with minimal configuration.                                                             | FR-CFG-101, FR-CFG-102, FR-CFG-103, FR-CFG-104, FR-BLD-907                         |
+| **US-BLD-02** | Configurable source roots         | As a developer, I want repository source roots and module prefixes to be configurable, so that I can adapt the build system when the conventional structure does not fit my project.                                                                           | FR-CFG-105, FR-CFG-106, FR-CFG-107                                                 |
 | **US-BLD-03** | Logical module identity           | As a developer, I want modules to have stable logical names independent of their repository locations, so that repository organization and runtime layout can differ.                                                                                          | FR-DEP-601, FR-DEP-602                                                             |
 | **US-BLD-04** | Module namespaces                 | As a developer, I want project, shared-library, and external modules to have distinguishable namespaces, so that module ownership and resolution remain unambiguous.                                                                                           | FR-DEP-303, FR-DEP-603, FR-DEP-604                                                 |
 | **US-BLD-05** | Define build targets              | As a developer, I want to define named build targets with an entry point and build configuration, so that the build system knows what source belongs to an independently buildable artifact.                                                                   | FR-BLD-102, FR-BLD-103, FR-BLD-104, FR-BLD-105                                     |
@@ -92,7 +93,7 @@ User-story structure: *As [persona], I want [software goal], so that [result].*
 | **US-BLD-14** | Development artifacts             | As a developer, I want development artifacts to preserve the resolved module structure without bundling or minification, so that the running program remains easy to inspect and debug.                                                                        | FR-BLD-902                                                                         |
 | ~~US-BLD-15~~ | ~~Release artifacts~~             | ~~As a developer, I want release artifacts to bundle and minify the application into a single main Lua file, so that ComputerCraft storage constraints are respected.~~                                                                                        |                                                                                    |
 | **US-BLD-16** | Preserved files                   | As a developer, I want to mark files as preserved, so that they are excluded from bundling and minification and remain available as separate files with their source-relative directory structure.                                                             | FR-BLD-401, FR-BLD-402, FR-BLD-403, FR-BLD-404, FR-BLD-405, FR-BLD-406, FR-BLD-908 |
-| **US-BLD-17** | Hierarchical configuration        | As a developer, I want repository, project/library, target, and build-type configuration to inherit from higher-level configuration, so that common defaults do not need to be repeated.                                                                       | FR-CFG-09                                                                          |
+| **US-BLD-17** | Hierarchical configuration        | As a developer, I want repository, project/library, target, and build-type configuration to inherit from higher-level configuration, so that common defaults do not need to be repeated.                                                                       | FR-CFG-109                                                                         |
 | **US-BLD-18** | Lua Language Server integration   | As a developer, I want the development environment to understand the same logical module mappings as the build system, so that Lua Language Server completion and documentation work with shared and external modules.                                         | FR-DEP-605                                                                         |
 | **US-BLD-19** | Build pipeline                    | As a developer, I want the build process to consist of clearly separated stages such as dependency resolution, validation, bundling, minification, and artifact creation, so that each stage has a clear responsibility and can report meaningful diagnostics. | FR-BLD-601, FR-BLD-602, FR-BLD-603, FR-BLD-604, FR-BLD-605, FR-BLD-606             |
 | **US-BLD-20** | Source-change detection           | As a developer, I want the build system to record hashes of relevant source files, so that it can determine whether an artifact needs rebuilding.                                                                                                              | FR-BLD-701, FR-BLD-702                                                             |
@@ -166,6 +167,8 @@ User-story structure: *As [persona], I want [software goal], so that [result].*
 | **US-CHG-07** | Machine-readable references       | As a tooling developer, I want changelog version links to use standardized Markdown reference definitions, so that release tooling can parse and update them reliably.                               |                      |
 | **US-CHG-08** | Guided changelog release          | As a release developer, I want the release process to generate the released changelog section and references from the current repository state, so that repetitive release bookkeeping is automated. |                      |
 
+---
+
 ## 8. Deployment
 
 | ID            | Title                            | User Story                                                                                                                                                                                                                | Derived Requirements                           |
@@ -184,3 +187,37 @@ User-story structure: *As [persona], I want [software goal], so that [result].*
 | **US-DPL-12** | Changelog finalization           | As a release manager, I want the changelog to be updated and committed after a successful release deployment, so that the release is recorded without changing the source revision embedded in the deployed artifact.     | FR-DPL-405, FR-DPL-406                         |
 | **US-DPL-13** | Post-deployment failure handling | As a release manager, I want a changelog commit failure after deployment to be reported without removing the already published release, so that an immutable release is not rolled back because of documentation failure. | FR-DPL-407                                     |
 | **US-DPL-14** | Optional build and test stages   | As a developer, I want deployment to optionally skip build or test stages when explicitly selected, so that I can deploy an already available artifact or use a deliberate workflow override.                             | FR-DPL-408                                     |
+
+---
+
+## 9. Installer
+
+| ID        | Title                       | User Story                                                                                                                                                                      | Derived Requirements   |
+| --------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| US-INS-01 | Bootstrap installer         | As a ComputerCraft user, I want a generic root installer that can be started with `wget run`, so that I can install programs without first installing framework infrastructure. | FR-INS-101, FR-INS-102 |
+| US-INS-02 | Program selection           | As a user, I want to select a program, version, and build type through parameters or an interactive interface, so that I can install what I need.                               | FR-INS-103, FR-INS-104 |
+| US-INS-03 | Latest version              | As a user, I want the newest available version selected when I omit the version, so that normal installation requires minimal input.                                            | FR-INS-105             |
+| US-INS-04 | Build type                  | As a user, I want Release to be the default artifact type while being able to select Development, so that I can choose a development installation when needed.                  | FR-INS-106             |
+| US-INS-05 | Installation location       | As a user, I want to choose the installation location with a sensible program-name default, so that I can control the computer's file layout.                                   | FR-INS-107             |
+| US-INS-06 | Verified download           | As a user, I want downloaded files verified against artifact metadata, so that corrupted or incomplete downloads are detected.                                                  | FR-INS-108, FR-INS-109 |
+| US-INS-07 | Download progress           | As a user, I want visible installation progress, so that I know whether installation is still running.                                                                          | FR-INS-110             |
+| US-INS-08 | Installation registry       | As a user, I want installed programs recorded centrally, so that the installer can find them for update and removal.                                                            | FR-INS-201, FR-INS-202 |
+| US-INS-09 | Multiple installations      | As a user, I want programs to use different installation locations, so that programs can coexist.                                                                               | FR-INS-203             |
+| US-INS-10 | Program removal             | As a user, I want to remove an installed program, so that managed files and registry state can be cleaned up.                                                                   | FR-INS-204, FR-INS-205 |
+| US-INS-11 | Program update              | As a user, I want to update an installed program, so that obsolete files are removed and the complete new artifact is installed.                                                | FR-INS-206, FR-INS-207 |
+| US-INS-12 | Interrupted installation    | As a user, I want interrupted installations detected and recoverable, so that I can retry or remove them.                                                                       | FR-INS-208, FR-INS-209 |
+| US-INS-13 | Custom installer            | As a developer, I want a target to define a custom installer script, so that target-specific setup can run after generic installation.                                          | FR-INS-301, FR-INS-302 |
+| US-INS-14 | Custom uninstaller          | As a developer, I want a target to define a custom uninstaller script, so that target-specific cleanup can run before generic removal.                                          | FR-INS-303, FR-INS-304 |
+| US-INS-15 | Update-aware installer      | As a developer, I want the custom installer to receive an update indication, so that migrations can be performed during updates.                                                | FR-INS-305             |
+| US-INS-16 | Dynamic module repository   | As a developer, I want a program to identify a mutable dynamic-module repository, so that runtime modules can be distributed separately from immutable artifacts.               | FR-INS-401             |
+| US-INS-17 | Dynamic module installation | As a user, I want to select dynamic modules during installation, so that a program can be ready for use immediately.                                                            | FR-INS-402, FR-INS-403 |
+| US-INS-18 | Dynamic module management   | As a user, I want to install, update, and remove dynamic modules later, so that optional runtime functionality can be managed independently.                                    | FR-INS-404, FR-INS-405 |
+| US-INS-19 | Dynamic module registry     | As a user, I want installed dynamic modules recorded per program, so that their versions and identities are known.                                                              | FR-INS-406             |
+| US-INS-20 | Startup integration         | As a user, I want to optionally add the installed program to startup, so that it starts automatically.                                                                          | FR-INS-501, FR-INS-502 |
+| US-INS-21 | Automatic updates           | As a user, I want startup to optionally update the program before launching it, so that it stays current.                                                                       | FR-INS-503, FR-INS-504 |
+| US-INS-22 | Startup conflict            | As a user, I want to be asked before an existing startup file is replaced, so that unrelated startup configuration is not silently lost.                                        | FR-INS-505             |
+| US-INS-23 | Single startup program      | As a user, I want the installer to manage only one startup program, so that startup behavior remains predictable.                                                               | FR-INS-506             |
+| US-INS-24 | Interactive interface       | As a user, I want an interactive installer interface, so that I can manage installations without memorizing commands.                                                           | FR-INS-601             |
+| US-INS-25 | CLI interface               | As an advanced user, I want installation, update, removal, and module management through the CLI, so that operations can be scripted.                                           | FR-INS-602             |
+| US-INS-26 | Clear errors                | As a user, I want errors to explain the problem and possible fixes, so that I can recover without expert knowledge.                                                             | FR-INS-603             |
+| US-INS-27 | Shared operations           | As a developer, I want CLI and interactive interfaces to use the same installer operations, so that behavior remains consistent.                                                | FR-INS-604             |

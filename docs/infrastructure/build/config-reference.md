@@ -75,6 +75,17 @@ Below is the complete catalog of all valid configuration keys, organized by logi
       version: "1.0.0"
   ```
 
+#### `display_name`
+
+- **Level of Definition**: Build Target Level Only
+- **Data Type**: String
+- **Description**: Specifies the name is displayed to the user inside the installer.
+- **Example**:
+
+  ```yaml
+  name: "My super cool Program"
+  ```
+
 #### `entry_point`
 
 - **Level of Definition**: All levels (Repository, Category, Package, Target, Build Type)
@@ -124,6 +135,28 @@ Below is the complete catalog of all valid configuration keys, organized by logi
   groups:
     - "plugins"
     - "utilities"
+  ```
+
+#### `installer_path`
+
+- **Level of Definition**: Build Target Level Only
+- **Data Type**: String (File path relative to the active source)
+- **Description**: The path to a custom installer. The installer is invoked after the root installer has successfully downloaded all required files.
+- **Example**:
+
+  ```yaml
+  installer_path: "installer.lua"
+  ```
+
+#### `uninstaller_path`
+
+- **Level of Definition**: Build Target Level Only
+- **Data Type**: String (File path relative to the active source)
+- **Description**: The path to a custom uninstaller. The uninstaller is invoked before the root installer deletes all artifact files.
+- **Example**:
+
+  ```yaml
+  uninstaller_path: "uninstaller.lua"
   ```
 
 ---

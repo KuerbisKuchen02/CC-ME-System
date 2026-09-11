@@ -492,3 +492,180 @@ Build → Test → Deployment
 ```
 
 Build and test stages may be explicitly skipped by the deployment invocation. The deployment rules remain unchanged.
+
+## 10. Installer
+
+### 10.1. Boundary
+
+The installer consumes deployed artifacts; it does not build source code.
+
+```text
+Repository -> Build -> Artifact -> Deployment -> Artifact Repository
+                                                    |
+                                                    v
+                                               Root Installer
+                                                    |
+                                                    v
+                                             ComputerCraft
+```
+
+### 10.2. Metadata model
+
+The installer uses three persistent metadata layers.
+
+#### 10.2.1 Root repository metadata
+
+A root-level `metadata.lua` in a Git deployment repository is discovery data containing available programs, types, and versions.
+
+```lua
+return {
+    programs = {
+        {
+            display_name = "Program 1",
+            name = "program1",
+            types = { "release", "development" },
+            versions = { "2.0.0", "1.1.1", "1.1.0", "1.0.0" }
+        }
+    }
+}
+```
+
+The root installer obtains this file from a configurable URL. It is discovery data; artifact metadata remains authoritative.
+
+#### 10.2.2 Artifact metadata
+
+Every artifact contains `metadata.lua`, including its `FILES` list and SHA-256 checksums.
+
+```lua
+return {
+    NAME = "target_name",
+    VERSION = "1.2.3",
+    SOURCE_REVISION = "<full Git SHA>",
+    BASE_URL = "<artifact directory URL>",
+    FILES = {
+        { path = "main.lua", sha256 = "<hash>" }
+    }
+}
+```
+
+It may additionally identify custom installer/uninstaller scripts and a dynamic-module repository.
+
+#### 10.2.3 Installed-program metadata
+
+The computer root contains hidden `.installed.lua`:
+
+```lua
+return {
+    ["program1"] = {
+        location = "/programs/program1",
+        version = "1.0.0",
+        displayName = "Program 1"
+    }
+}
+```
+
+The program installation contains another hidden `.installed.lua` for dynamic modules:
+
+```lua
+return {
+    ["plugin1"] = {
+        version = "1.0.1",
+        displayName = "Plugin 1"
+    }
+}
+```
+
+### 10.3. Installation process
+
+```text
+Read root metadata
+ -> select program/version/type
+ -> download artifact metadata
+ -> select installation location
+ -> create registry entry without version
+ -> download and verify files
+ -> run custom installer
+ -> optionally manage dynamic modules
+ -> optionally configure startup
+ -> write version to registry
+```
+
+The version is written only when installation is complete.
+
+### 10.4. Interrupted installation
+
+An incomplete installation has:
+
+```lua
+["program1"] = {
+    location = "/programs/program1",
+    displayName = "Program 1"
+}
+```
+
+A subsequent installer run detects the missing version and offers retry, deletion, or continuation to normal management.
+
+### 10.5. Update process
+
+```text
+Read installed program
+ -> read old artifact metadata
+ -> remove old FILES and old metadata.lua
+ -> download new artifact metadata
+ -> download and verify new FILES
+ -> run custom installer with update indication
+ -> update installed-program version
+```
+
+The old `FILES` list defines which artifact files the generic installer owns. Runtime/configuration files created after installation are outside that guarantee and require target-specific migration behavior.
+
+### 10.6. Removal process
+
+```text
+Read installed program
+ -> read artifact metadata
+ -> run custom uninstaller
+ -> delete FILES
+ -> delete artifact metadata
+ -> remove dynamic-module registry
+ -> remove program registry entry
+```
+
+### 10.7. Dynamic modules
+
+Dynamic modules are separate from immutable artifacts. If artifact metadata identifies a mutable module repository, the installer can query it and provide install/update/remove operations.
+
+The per-program module registry is stored inside the program installation (`.installed.lua`). It records only modules installed for that program.
+
+### 10.8. Startup
+
+The root installer manages one startup integration. The two independent choices are:
+
+- update before startup.
+- add program to startup;
+
+Possible behavior:
+
+```text
+startup disabled: no modification
+startup enabled: program
+startup + auto-update: installer update -> program
+```
+
+An existing startup file requires explicit user confirmation before replacement.
+
+### 10.9. Deployment relationship
+
+Git deployment publishes artifacts under:
+
+```text
+<project>/<build-target>/<version>/<type>
+```
+
+and maintains the root discovery metadata. Artifact metadata is the authoritative per-artifact manifest; root metadata is the mutable discovery registry.
+
+### 10.11. Error handling
+
+Errors are written for the user and therefore should provide useful data for the user. Error code can be included as additional information but should not be the main focus.
+
+Error messages should easily convey the reason for the error and list possible solutions.
