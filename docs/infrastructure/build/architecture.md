@@ -56,7 +56,7 @@ F --> G@{shape: stop}
 └── build/                               # Write-only build output directory (ignored)
 ```
 
-### 3. Artifact Structure
+## 3. Artifact Structure
 
 Every build target produces exactly one logical build artifact, whose output files are structured based on the active build type.
 
@@ -134,9 +134,9 @@ Build-target names, project names, and group names use `^[A-Za-z0-9](?:[A-Za-z0-
 The logical module name serves as a module's stable identity within the Lua ecosystem, mapping physical repository paths to import namespaces:
 
 - **Namespaces and Prefixes**: Project modules have no prefix. Shared libraries use a `lib.` prefix (e.g., `lib.logging`). External modules use an `external.` prefix (e.g., `external.json`). Test modules use a `test.` prefix (e.g., `test.user_management.TestRegister`).
-- **Source Roots**: Defaults are `source_root: src/` and `test_source_root: test/`, configured relative to the package root. All entry points and preserved paths are interpreted relative to the active source root.
+- **Source Roots**: Defaults are `source_root: src/` and `test_source_root: test/`
 - **Package Shapes**: Shared libraries and external packages exist in two shapes beneath their category roots (configured by `library_search_path` and `external_search_path`, which default to `libraries/` and `external/` respectively):
-  1. *Small Package*: A single file located at `libraries/<name>.lua` or `external/<name>.lua`. Small packages that require static dependencies utilize a sidecar configuration file (`libraries/<name>.build_config.yaml` or `external/<name>.build_config.yaml`).
+  1. *Small Package*: A single file located at `libraries/<name>.lua` or `external/<name>.lua`. Small packages that require static dependencies utilize a sidecar configuration file (`libraries/<name>.build_config.yaml` or `external/<name>.build_config.yaml`
   2. *Large Package*: A package directory located at `libraries/<name>/` or `external/<name>/` containing `build_config.yaml` at its root, with its sources inside a `src/` directory.
 - **Name Collisions**: A same-name small-file package and directory package within the same category (e.g., `libraries/logging.lua` and `libraries/logging/`) is a build-time resolution error.
 - **Public Interfaces**: An `init.lua` file defines a public interface for its package subtree. External consumers outside the package are restricted to require *only* the public interface (e.g., `require("lib.logging")`) and are forbidden from importing internal descendants recursively. Code inside the package itself is caller-aware and is permitted to import its internal modules (e.g., `require("lib.logging.internal_module")`).
@@ -175,7 +175,7 @@ return {
 }
 ```
 
-# 5. Dependency Scope and Type
+## 5. Dependency Scope and Type
 
 Dependency scope and dependency type are deliberately separate concepts.
 
@@ -203,15 +203,15 @@ The repository uses a test architecture based on the xUnit architecture.
 Test cases are organized into test suites. A suite is therefore a collection of logically connected test cases.
 A test case is divided into four phases: setup, execution, verification and teardown. In the first phase all necessary prerequisites for the test are established and the test fixture is prepared. The test fixture encompasses the set of all preconditions, test data and initialization steps required to execute a test case. The second phase involves the actual execution of the test against the system under test (SUT). The SUT refers to the software unit whose behavior is being verified in the specific test case. For example, a class, a method, a module, or an entire system. Subsequently, the next phase verifies whether the expected result has occurred. To perform the verification the test system provides a set of assertion functions. In the final phase, any persistent data is cleaned up to restore the initial state that existed prior to the test. In automatic execution, all test cases are run by a test runner. The runner can automatically discover test cases using a test discovery mechanism.
 
-A test suite is defined as a class starting with the prefix `Test` and extending the class `TestSuite` from the `testing` library. Usually a test suite SHOULD be named the same and preserve it relative location as the source file or class being tested. For example if you want to test the class `user_management/Register` you create a test class named `TestRegister` inside a `user_management` folder. A test suite file MUST only contain a single test suite and return the suite at the end.
+A test suite is defined as a class starting with the prefix `Test` and extending the class `TestSuite` from the `testing` library. Usually a test suite SHOULD be named the same and preserve it relative location as the source file or class being tested. For example if you want to test the class `user_management/Register` you create a test class named `TestRegister` inside a \`user\_
 
 A test suite can contain multiple test cases, setup and teardown methods for the suite and the test cases.
 
-A test case is defined as a method that starts with the prefix `test_`. For example `function TestRegister:test_new_user_with_malformed_mail_should_throw()`. A test case should follow the perviously discussed structure. First prepare the SUT, then execute the function you want to test, verify the results and clean everything up.
+A test case is defined as a method that starts with the prefix `test_`. For example \`function TestRegister:test\_
 
 If you have multiple test that require the same setup procedure you can add a `setup()` method to the test suite class. This class is run before every test case inside this suite. The same applies to the `teardown()` method. This method is run after each test case. For initialization that needs to be executed only once for the hole test suite you can add a `setupTestSuite()` method. This method is executed before the first test case is executed. The method `teardownTestSuite()` is executed after all test cases of the suite have been executed.
 
-If you have a test case that you want to exclude from automatic execution (for example test cases that broke because of a change and still need to be updated) you can exclude them by prefixing the test case with `DISABLED_`. The same principle can be applied to a test suite. For example `function TestRegister:DISABLED_test_new_user_with_malformed_mail_should_throw()` or `DISABLED_TestRegister = class.class(testing.TestSuite)`.
+If you have a test case that you want to exclude from automatic execution (for example test cases that broke because of a change and still need to be updated) you can exclude them by prefixing the test case with `DISABLED_`. The same principle can be applied to a test suite. For example \`function TestRegister:DISABLED\_
 
 Disabling a broken test case SHOULD be preferred over commenting out a test case since disabled test cases will still be found by the test runner and are listed inside the test result as skipped test cases. This is a clear reminder that you still have to fix a test case.
 
@@ -283,6 +283,9 @@ The deployment system does not define installer behavior.
 
 ### 9.2. Deployment Concepts
 
+> \[!NOTE]
+> Method and build\_type are independent configuration values. The system MUST NOT require them to have the same value.
+
 #### Deployment Method
 
 The deployment method identifies which build artifact type is being deployed:
@@ -292,7 +295,7 @@ The deployment method identifies which build artifact type is being deployed:
 
 Test artifacts are not deployable.
 
-#### Deployment Target
+#### Deployment Destination
 
 A deployment target identifies where an artifact is published.
 
@@ -305,7 +308,7 @@ The deployment method and deployment target are independent dimensions. All comb
 
 ### 9.3. Deployment Operation
 
-A deployment operation handles exactly one build artifact and one deployment target.
+A deployment operation handles exactly one build artifact and one deployment destination.
 
 When several targets are selected, the deployment orchestrator creates independent operations. A failed deployment stops only that operation. It does not roll back or cancel other targets, which continue to be processed and are reported independently.
 
@@ -360,7 +363,7 @@ Commit A
 
 If the final changelog commit fails, the already deployed Release remains deployed. No rollback is attempted.
 
-### 9.5. Local Filesystem Target
+### 9.5. Local Filesystem Destination
 
 The `local_filesystem` target publishes the artifact directly to a configured filesystem location.
 
@@ -376,7 +379,7 @@ If a Release directory contains `metadata.lua`, it is considered complete and de
 
 If the directory exists without `metadata.lua`, it is considered incomplete and may be removed and replaced.
 
-### 9.6. Git Repository Target
+### 9.6. Git Repository Destination
 
 Git deployment uses a dedicated deployment branch and a separate local deployment workspace.
 
@@ -669,3 +672,196 @@ and maintains the root discovery metadata. Artifact metadata is the authoritativ
 Errors are written for the user and therefore should provide useful data for the user. Error code can be included as additional information but should not be the main focus.
 
 Error messages should easily convey the reason for the error and list possible solutions.
+
+## 11. CLI
+
+### 11.1. Command Layer
+
+Parses and validates:
+
+command
+selector
+filters
+
+and creates an internal command request.
+
+### 11.2. Selection Layer
+
+Resolves the selector, applies command-specific filters, sorts the resulting entries alphabetically, and returns the concrete selection.
+
+```txt
+Selector
+   ↓
+Initial source-unit set
+   ↓
+Command filters
+   ↓
+Concrete selection
+   ↓
+Alphabetical ordering
+```
+
+The selection layer does not execute operations.
+
+### 11.3. Selection Presentation
+
+The CLI displays the complete selection before execution.
+
+Example:
+
+```txt
+Selection:
+  project1 / default
+  project1 / plugin-a
+  project2 / default
+```
+
+For an empty selection:
+
+```txt
+Selection:
+  No entries matched the selector and filters.
+
+Nothing to execute.
+Check that the selector and filters are defined as expected.
+```
+
+### 11.4. Operation Layer
+
+Receives the already-resolved selection and executes one operation per entry sequentially.
+
+```txt
+operation(selection[1])
+operation(selection[2])
+...
+operation(selection[n])
+```
+
+### 11.5. Result Collection and Summary
+
+Each operation produces an individual result. The CLI retains these results and produces a final summary without hiding individual failures.
+
+Example:
+
+```txt
+Build summary:
+  project1 / default   ✓
+  project1 / plugin-a ✓
+  project2 / default  ✗
+
+Result:
+  2 builds successful
+  1 build failed
+```
+
+### 11.6. Build Flow
+
+```txt
+cc build <selector> [filters]
+        ↓
+   resolve selection
+        ↓
+   sort alphabetically
+        ↓
+   display selection
+        ↓
+   build each target sequentially
+        ↓
+   display build summary
+```
+
+Defaults:
+
+```txt
+type   = development
+target = default
+```
+
+### 11.7. Test Flow
+
+```txt
+cc test <selector> [filters]
+        ↓
+   resolve Build Targets
+        ↓
+   apply test filter
+        ↓
+   sort selection
+        ↓
+   display selection
+        ↓
+   execute tests sequentially
+        ↓
+   display test summary
+```
+
+### 11.8. Deploy Flow
+
+```txt
+cc deploy <selector> [--deployment-target <name>]
+        ↓
+   resolve source selection
+        ↓
+   resolve Deployment Target
+        ↓
+   display selection
+        ↓
+   execute deployments sequentially
+        ↓
+   display deployment summary
+```
+
+The Deployment Target supplies method, destination, and build type.
+
+### 11.9. Verify Flow
+
+```txt
+cc verify <selector> [filters]
+        ↓
+   resolve selected workflow
+        ↓
+   display selection/workflow
+        ↓
+   perform dry-run operations
+        ↓
+   display verify summary
+```
+
+Verification does not perform the side effects of the corresponding workflow.
+
+### 11.10. Examples
+
+```bash
+# Default Development build
+cc build project1
+
+# Release build
+cc build project1 --type release
+
+# Build matching targets
+cc build project1 --target plugin-*
+
+# Build all libraries
+cc build lib.all
+
+# Run tests
+cc test project1
+
+# Run selected tests
+cc test project1 --test-filter "TestMath.testAdd:TestString.*"
+
+# Run everything except slow tests
+cc test project1 --test-filter "-*.testSlow"
+
+# Deploy using the default Deployment Target
+cc deploy project1
+
+# Deploy using a named Deployment Target
+cc deploy project1 --deployment-target release-git
+
+# Verify a Release build
+cc verify project1 --build-type release
+
+# Verify a deployment workflow
+cc verify project1 --deployment-target release-git
+```

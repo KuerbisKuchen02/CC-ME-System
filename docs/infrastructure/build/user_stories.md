@@ -39,7 +39,7 @@ User-story structure: *As [persona], I want [software goal], so that [result].*
 | **US-CFG-02** | Explicit targets map          | As a developer, I want named targets to be defined in an explicit target map, so configuration fields and target names cannot be confused.                                   | FR-CFG-113, FR-CFG-114             |
 | **US-CFG-03** | Package configuration         | As a library developer, I want both directory and single-file packages to have an appropriate configuration location, so dependencies remain declarative.                    | FR-CFG-110, FR-DEP-110             |
 | **US-CFG-04** | Predictable configuration     | As a developer, I want invalid configuration to be diagnosed without preventing unrelated targets from building, so configuration problems are actionable.                   | FR-CFG-115, FR-BLD-801             |
-| **US-CFG-05** | Release identity              | As a release manager, I want Release builds to require a version, immutable source revision, clean worktree, and artifact base URL, so deployable artifacts are traceable.   | FR-CFG-116, FR-CFG-117, FR-BLD-910 |
+| **US-CFG-05** | Release identity              | As a release manager, I want Release builds to require a version, immutable source revision, clean worktree, and artifact base URL, so deployable artifacts are traceable.   | FR-CFG-116, FR-CFG-117 |
 | **US-CFG-06** | List clearing and replacement | As a developer, I want to clear or replace inherited list values in child configurations, so that I can override inherited list-based configurations instead of appending.   | FR-CFG-112                         |
 | **US-CFG-07** | Sidecar configuration         | As a developer, I want small libraries to have sidecar configuration files, so that I can declare their static dependencies without converting them into directory packages. | FR-CFG-110, FR-DEP-110             |
 
@@ -221,3 +221,22 @@ User-story structure: *As [persona], I want [software goal], so that [result].*
 | US-INS-25 | CLI interface               | As an advanced user, I want installation, update, removal, and module management through the CLI, so that operations can be scripted.                                           | FR-INS-602             |
 | US-INS-26 | Clear errors                | As a user, I want errors to explain the problem and possible fixes, so that I can recover without expert knowledge.                                                             | FR-INS-603             |
 | US-INS-27 | Shared operations           | As a developer, I want CLI and interactive interfaces to use the same installer operations, so that behavior remains consistent.                                                | FR-INS-604             |
+
+---
+
+## 10. CLI
+
+| ID         | Title                   | User Story                                                                                                                                            | Derived Requirements |
+| ---------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| US-CLI-001 | Build                   | As a developer, I want to build a selected project or library so that I can produce its requested artifact.                                           |                      |
+| US-CLI-002 | Select build type       | As a developer, I want to choose Development, Test, or Release builds so that I can produce the appropriate artifact type.                            |                      |
+| US-CLI-003 | Narrow build selection  | As a developer, I want to narrow a selector using target or group filters so that I can build exactly the intended Build Targets.                     |                      |
+| US-CLI-004 | Run tests               | As a developer, I want to run tests belonging to selected Build Targets so that I can verify their behavior.                                          |                      |
+| US-CLI-005 | Filter tests            | As a developer, I want to filter test suites and cases with a compact expression so that I can run only relevant tests.                               |                      |
+| US-CLI-006 | Deploy                  | As a developer, I want to deploy a selected source unit using a configured Deployment Target so deployment behavior remains defined in configuration. |                      |
+| US-CLI-007 | Dry run                 | As a developer, I want to verify a workflow without performing its side effects so that I can inspect whether the requested workflow can be executed. |                      |
+| US-CLI-008 | Inspect selection       | As a developer, I want the CLI to show the concrete selection before execution so that I can confirm what will be operated on.                        |                      |
+| US-CLI-009 | Handle empty selection  | As a developer, I want an empty selection to be reported clearly without being treated as a command error.                                            |                      |
+| US-CLI-010 | Deterministic execution | As a developer, I want multiple selected operations to execute sequentially in a deterministic order.                                                 |                      |
+| US-CLI-011 | Review results          | As a developer, I want a final summary containing every operation's result and an aggregate result.                                                   |                      |
+| US-CLI-012 | Get help                | As a developer, I want invalid command usage to display relevant help so that I can correct the invocation.                                           |                      |

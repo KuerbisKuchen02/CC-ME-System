@@ -14,6 +14,7 @@
 
 Normative text describes one or both of the following kinds of elements:
 
+
 - Vital elements of the specification.
 - Elements that contain the conformance language key words as defined by IETF RFC 2119, “Key words for use in RFCs to Indicate Requirement Levels”.
 
@@ -24,7 +25,7 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 
 ### 0.2. Controlled Terminology
 
-ID structure: `<type>-<scope>-<topic_number><number>`  
+ID structure: `<type>-<scope>-<topic_number><number>`\
 *Example FR-DEP-102*: Second functional requirement from the scope Dependency Management topic 1 (dependency declaration).
 
 **Types:**
@@ -49,13 +50,13 @@ ID structure: `<type>-<scope>-<topic_number><number>`
 
 | ID            | Requirement                                                                                                                          | Reference                       | Dependency |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------- | ---------- |
-| **FR-XFN-01** | The build system MUST support managing and building multiple projects within one repository.                                         | US-XFN-01                       |            |
-| **FR-XFN-02** | A build artifact MUST be traceable to the repository source revision from which it was generated.                                    | US-DEP-15                       |            |
-| **FR-XFN-03** | Independently releasable applications SHOULD have an explicit application version.                                                   | US-DEP-14                       |            |
-| **FR-XFN-04** | Application and plugin versions MUST NOT replace repository source revisions as the mechanism for reproducing an exact source state. | US-DEP-13, US-DEP-14, US-DEP-15 |            |
-| **FR-XFN-06** | The build system diagnostics MUST clearly identify the diagnostic category, affected project/target/module, and cause.               | US-DEP-18                       |            |
-| **FR-XFN-07** | Each build system component/stage MUST use consistent naming conventions and use unique diagnostic codes.                            | US-DEP-18                       |            |
-| **FR-XFN-08** | A build performed from a specific repository revision MUST resolve in-repository dependencies from that same revision.               | US-DEP-15                       |            |
+| **FR-XFN-01** | The build system MUST support managing and building multiple projects within one repository.                                         | US-XFN-01                       |      |
+| **FR-XFN-02** | A build artifact MUST be traceable to the repository source revision from which it was generated.                                    | US-DEP-15                       |      |
+| **FR-XFN-03** | Independently releasable applications SHOULD have an explicit application version.                                                   | US-DEP-14                       |      |
+| **FR-XFN-04** | Application and plugin versions MUST NOT replace repository source revisions as the mechanism for reproducing an exact source state. | US-DEP-13, US-DEP-14, US-DEP-15 |      |
+| **FR-XFN-06** | The build system diagnostics MUST clearly identify the diagnostic category, affected project/target/module, and cause.               | US-DEP-18                       |      |
+| **FR-XFN-07** | Each build system component/stage MUST use consistent naming conventions and use unique diagnostic codes.                            | US-DEP-18                       |      |
+| **FR-XFN-08** | A build performed from a specific repository revision MUST resolve in-repository dependencies from that same revision.               | US-DEP-15                       |      |
 
 ---
 
@@ -65,23 +66,23 @@ ID structure: `<type>-<scope>-<topic_number><number>`
 
 | ID             | Requirement                                                                                                                                                                                                                                       | Reference                       | Dependency |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- | ---------- |
-| **FR-CFG-101** | The default repository structure MUST distinguish `projects/`, `libraries/`, and `external/` source categories.                                                                                                                                   | US-BLD-01                       |            |
-| **FR-CFG-102** | By default, project source modules MUST be located below `projects/<project>/src/`.                                                                                                                                                               | US-BLD-01                       |            |
-| **FR-CFG-103** | A shared library MUST be either `libraries/<name>.lua` (small library) or a directory package below `libraries/<name>/src/` (large library).                                                                                                      | US-BLD-01, US-CFG-03            |            |
-| **FR-CFG-104** | By default, external source modules MUST be located below `external/`.                                                                                                                                                                            | US-BLD-01                       |            |
-| **FR-CFG-105** | Repository-level configuration MUST allow the library and external category roots to be overridden (`library_search_path` and `external_search_path` respectively).                                                                               | US-BLD-02                       |            |
-| **FR-CFG-106** | The default logical module prefixes MUST be `lib.` for shared libraries, `external.` for external code, and `test.` for test modules.                                                                                                             | US-BLD-02                       |            |
-| **FR-CFG-107** | Module prefixes, category search paths, and the project `source_root` (default `src/`) and `test_source_root` (default `test/`) MUST be configurable.                                                                                             | US-BLD-02                       |            |
-| **FR-CFG-108** | The build configuration MUST allow specific files or modules to be excluded from the main bundle using the `preserved` list.                                                                                                                      | US-BLD-15                       |            |
-| **FR-CFG-109** | Build configuration MUST support inheritance in the order: Repository → Category → Package/Project → Target → Build Type. Scalars MUST override inherited values, and maps MUST merge by key with the more-specific value winning.                | US-CFG-01, US-BLD-17            |            |
-| **FR-CFG-110** | A project, large library, or large external package configuration MUST be named `build_config.yaml` and reside at that entity's root. A configurable small package MUST use the sidecar form `<name>.build_config.yaml` within its category root. | US-CFG-03, US-CFG-07            |            |
-| **FR-CFG-111** | The category configurations `/projects/build_config.yaml`, `/libraries/build_config.yaml`, and `/external/build_config.yaml` MUST apply to entries in their respective categories.                                                                | US-CFG-01                       |            |
-| **FR-CFG-112** | Inherited list values MUST append by default. A list configuration MAY use `mode: replace` with items to replace inherited values, or `mode: clear` without items to clear them.                                                                  | US-CFG-06, US-BLD-17            |            |
-| **FR-CFG-113** | Project build targets MUST be defined as entries of a `targets` map. Target, project, and group names MUST match `^[A-Za-z0-9](?:[A-Za-z0-9_]*[A-Za-z0-9])?$`.                                                                                    | US-CFG-02, US-BLD-11, US-BLD-24 |            |
-| **FR-CFG-114** | If a project has no explicit targets, the system MUST create an implicit default target. A library or external package without targets MUST be treated as a manifest and MUST NOT produce an artifact.                                            | US-CFG-02, US-DEP-01            |            |
-| **FR-CFG-115** | `entry_point` and `preserved` values MUST be interpreted relative to the active source root. Unknown or invalid configuration fields MUST be reported as warnings and ignored; duplicate targets and invalid required values MUST be errors.      | US-CFG-04, US-BLD-05, US-BLD-16 |            |
-| **FR-CFG-116** | A target version MUST be a Semantic Versioning value. It MUST be required for Release builds and SHOULD produce a warning when absent from Development or Test builds.                                                                            | US-CFG-05, US-DEP-13, US-DEP-14 |            |
-| **FR-CFG-117** | `artifact_base_url` MUST be configurable only at the repository level.                                                                                                                                                                            | US-CFG-05, US-DEP-15            |            |
+| **FR-CFG-101** | The default repository structure MUST distinguish `projects/`, `libraries/`, and `external/` source categories.                                                                                                                                   | US-BLD-01                       |      |
+| **FR-CFG-102** | By default, project source modules MUST be located below `projects/<project>/src/`.                                                                                                                                                               | US-BLD-01                       |      |
+| **FR-CFG-103** | A shared library MUST be either `libraries/<name>.lua` (small library) or a directory package below `libraries/<name>/src/` (large library).                                                                                                      | US-BLD-01, US-CFG-03            |      |
+| **FR-CFG-104** | By default, external source modules MUST be located below `external/`.                                                                                                                                                                            | US-BLD-01                       |      |
+| **FR-CFG-105** | Repository-level configuration MUST allow the library and external category roots to be overridden (`library_search_path` and `external_search_path` respectively).                                                                               | US-BLD-02                       |      |
+| **FR-CFG-106** | The default logical module prefixes MUST be `lib.` for shared libraries, `external.` for external code, and `test.` for test modules.                                                                                                             | US-BLD-02                       |      |
+| **FR-CFG-107** | Module prefixes, category search paths, and the project `source_root` (default `src/`) and `test_source_root` (default `test/`) MUST be configurable.                                                                                             | US-BLD-02                       |      |
+| **FR-CFG-108** | The build configuration MUST allow specific files or modules to be excluded from the main bundle using the `preserved` list.                                                                                                                      | US-BLD-15                       |      |
+| **FR-CFG-109** | Build configuration MUST support inheritance in the order: Repository → Category → Package/Project → Target → Build Type. Scalars MUST override inherited values, and maps MUST merge by key with the more-specific value winning.                | US-CFG-01, US-BLD-17            |      |
+| **FR-CFG-110** | A project, large library, or large external package configuration MUST be named `build_config.yaml` and reside at that entity's root. A configurable small package MUST use the sidecar form `<name>.build_config.yaml` within its category root. | US-CFG-03, US-CFG-07            |      |
+| **FR-CFG-111** | The category configurations `/projects/build_config.yaml`, `/libraries/build_config.yaml`, and `/external/build_config.yaml` MUST apply to entries in their respective categories.                                                                | US-CFG-01                       |      |
+| **FR-CFG-112** | Inherited list values MUST append by default. A list configuration MAY use `mode: replace` with items to replace inherited values, or `mode: clear` without items to clear them.                                                                  | US-CFG-06, US-BLD-17            |      |
+| **FR-CFG-113** | Project build targets MUST be defined as entries of a `targets` map. Target, project, and group names MUST match `^[A-Za-z0-9](?:[A-Za-z0-9_]*[A-Za-z0-9])?$`.                                                                                    | US-CFG-02, US-BLD-11, US-BLD-24 |      |
+| **FR-CFG-114** | If a project has no explicit targets, the system MUST create an implicit default target. A library or external package without targets MUST be treated as a manifest and MUST NOT produce an artifact.                                            | US-CFG-02, US-DEP-01            |      |
+| **FR-CFG-115** | `entry_point` and `preserved` values MUST be interpreted relative to the active source root. Unknown or invalid configuration fields MUST be reported as warnings and ignored; duplicate targets and invalid required values MUST be errors.      | US-CFG-04, US-BLD-05, US-BLD-16 |      |
+| **FR-CFG-116** | A target version MUST be a Semantic Versioning value. It MUST be required for Release builds and SHOULD produce a warning when absent from Development or Test builds.                                                                            | US-CFG-05, US-DEP-13, US-DEP-14 |      |
+| **FR-CFG-117** | `artifact_base_url` MUST be configurable only at the repository level.                                                                                                                                                                            | US-CFG-05, US-DEP-15            |      |
 
 ### 2.2. Deployment Configuration
 
@@ -126,71 +127,71 @@ ID structure: `<type>-<scope>-<topic_number><number>`
 
 | ID             | Requirement                                                                                                                                                                                                                                                              | Reference                       | Dependency |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------- | ---------- |
-| **FR-DEP-101** | The build system MUST support shared libraries that can be consumed by multiple projects.                                                                                                                                                                                | US-DEP-01                       |            |
-| **FR-DEP-102** | Each project or library that has dependencies MUST declare those dependencies in its build configuration.                                                                                                                                                                | US-DEP-02                       |            |
-| **FR-DEP-103** | The build configuration MUST describe the dependency graph, while `require()` statements MUST describe module usage.                                                                                                                                                     | US-DEP-02                       |            |
-| **FR-DEP-104** | The build system MUST distinguish between declared dependencies and dependencies actually referenced by source code.                                                                                                                                                     | US-DEP-03                       |            |
-| **FR-DEP-105** | The build system MUST distinguish static and dynamic dependencies.                                                                                                                                                                                                       | US-DEP-07                       |            |
-| **FR-DEP-106** | Static dependencies MUST use `require()` statements with string literals for the module name.                                                                                                                                                                            | US-DEP-07                       |            |
-| **FR-DEP-107** | Dynamic dependencies MUST NOT use `require()` statements with string literals for the module name.                                                                                                                                                                       | US-DEP-08                       |            |
-| **FR-DEP-108** | Dependencies MUST be source packages within the repository's `libraries/` or `external/` categories; arbitrary filesystem paths and URLs MUST NOT be valid dependency declarations.                                                                                      | US-DEP-20                       |            |
-| **FR-DEP-109** | A dependency declaration MUST name a complete package. An unprefixed name MUST search libraries before external packages; `lib.` and `external.` prefixes MUST select their category explicitly.                                                                         | US-DEP-02                       |            |
-| **FR-DEP-110** | A single-file package without configuration MUST NOT contain static dependencies. A package that contains static dependencies MUST declare them in its applicable configuration (such as a sidecar config).                                                              | US-DEP-02, US-DEP-04, US-CFG-07 |            |
-| **FR-DEP-111** | An `init.lua` module MUST define the public interface of its package subtree. Callers outside that package MUST NOT require descendants of that interface module; callers inside the package itself (or sibling submodules internally) MAY require its internal modules. | US-DEP-16, US-DEP-21            |            |
+| **FR-DEP-101** | The build system MUST support shared libraries that can be consumed by multiple projects.                                                                                                                                                                                | US-DEP-01                       |      |
+| **FR-DEP-102** | Each project or library that has dependencies MUST declare those dependencies in its build configuration.                                                                                                                                                                | US-DEP-02                       |      |
+| **FR-DEP-103** | The build configuration MUST describe the dependency graph, while `require()` statements MUST describe module usage.                                                                                                                                                     | US-DEP-02                       |      |
+| **FR-DEP-104** | The build system MUST distinguish between declared dependencies and dependencies actually referenced by source code.                                                                                                                                                     | US-DEP-03                       |      |
+| **FR-DEP-105** | The build system MUST distinguish static and dynamic dependencies.                                                                                                                                                                                                       | US-DEP-07                       |      |
+| **FR-DEP-106** | Static dependencies MUST use `require()` statements with string literals for the module name.                                                                                                                                                                            | US-DEP-07                       |      |
+| **FR-DEP-107** | Dynamic dependencies MUST NOT use `require()` statements with string literals for the module name.                                                                                                                                                                       | US-DEP-08                       |      |
+| **FR-DEP-108** | Dependencies MUST be source packages within the repository's `libraries/` or `external/` categories; arbitrary filesystem paths and URLs MUST NOT be valid dependency declarations.                                                                                      | US-DEP-20                       |      |
+| **FR-DEP-109** | A dependency declaration MUST name a complete package. An unprefixed name MUST search libraries before external packages; `lib.` and `external.` prefixes MUST select their category explicitly.                                                                         | US-DEP-02                       |      |
+| **FR-DEP-110** | A single-file package without configuration MUST NOT contain static dependencies. A package that contains static dependencies MUST declare them in its applicable configuration (such as a sidecar config).                                                              | US-DEP-02, US-DEP-04, US-CFG-07 |      |
+| **FR-DEP-111** | An `init.lua` module MUST define the public interface of its package subtree. Callers outside that package MUST NOT require descendants of that interface module; callers inside the package itself (or sibling submodules internally) MAY require its internal modules. | US-DEP-16, US-DEP-21            |      |
 
 ### 3.2. Dependency Validation
 
 | ID             | Requirement                                                                                                                 | Reference | Dependency |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| **FR-DEP-205** | The build system MUST report a warning when a dependency is declared but is not used by the relevant source tree.           | US-DEP-03 |            |
-| **FR-DEP-206** | The build system MUST report an error when statically resolvable source code uses a dependency that has not been declared.  | US-DEP-04 |            |
-| **FR-DEP-207** | Dependency diagnostics MUST identify the affected dependency and the source/configuration location relevant to the problem. | US-DEP-18 |            |
-| **FR-DEP-208** | Dependency diagnostics SHOULD provide actionable information describing how the problem can be corrected.                   | US-DEP-18 |            |
-| **FR-DEP-209** | Dependency diagnostics MUST be distinguishable from build, bundling, minification, deployment, and other error categories.  | US-DEP-18 |            |
+| **FR-DEP-205** | The build system MUST report a warning when a dependency is declared but is not used by the relevant source tree.           | US-DEP-03 |      |
+| **FR-DEP-206** | The build system MUST report an error when statically resolvable source code uses a dependency that has not been declared.  | US-DEP-04 |      |
+| **FR-DEP-207** | Dependency diagnostics MUST identify the affected dependency and the source/configuration location relevant to the problem. | US-DEP-18 |      |
+| **FR-DEP-208** | Dependency diagnostics SHOULD provide actionable information describing how the problem can be corrected.                   | US-DEP-18 |      |
+| **FR-DEP-209** | Dependency diagnostics MUST be distinguishable from build, bundling, minification, deployment, and other error categories.  | US-DEP-18 |      |
 
 ### 3.3. Dependency Resolution
 
 | ID             | Requirement                                                                                                                                                                                                                     | Reference            | Dependency |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- |
-| **FR-DEP-301** | The build system MUST resolve transitive dependencies of declared libraries.                                                                                                                                                    | US-DEP-05            |            |
-| **FR-DEP-302** | When multiple modules require the same static dependency, the bundler MUST include the dependency only once in a bundled artifact.                                                                                              | US-DEP-17            |            |
-| **FR-DEP-303** | The build system MUST distinguish application-local modules, project libraries, and external source libraries during module resolution.                                                                                         | US-BLD-04            |            |
-| **FR-DEP-304** | Dependencies MUST support target-level scope and build-type-level scope. Target-level dependencies MUST be available to all build types of the target; build-type-level dependencies MUST only be available to that build type. | US-DEP-06            |            |
-| **FR-DEP-305** | Static dependencies MUST be eligible for dependency resolution and bundling according to the selected build type.                                                                                                               | US-DEP-07            |            |
-| **FR-DEP-306** | Dynamic dependencies MUST NOT be statically resolved or bundled into the referencing artifact.                                                                                                                                  | US-DEP-08            |            |
-| **FR-DEP-307** | A `require()` whose argument is a string literal MUST be treated as statically resolvable, while a `require()` whose argument is not a string literal MUST be treated as dynamic.                                               | US-DEP-07, US-DEP-09 |            |
-| **FR-DEP-308** | Dependency resolution MUST start at the configured entry point of the current build target. The system then MUST recursively search all required modules for dependencies.                                                      | US-DEP-05            |            |
-| **FR-DEP-309** | The resolver MUST report a static dependency cycle as an error, print the exact dependency path representing the loop, and abort the build of the affected target.                                                              | US-DEP-18            |            |
-| **FR-DEP-310** | A same-name single-file and directory package within a category (e.g., `logging.lua` and `logging/` inside `libraries/`) MUST be rejected during resolution as an error.                                                        | US-BLD-04            |            |
+| **FR-DEP-301** | The build system MUST resolve transitive dependencies of declared libraries.                                                                                                                                                    | US-DEP-05            |      |
+| **FR-DEP-302** | When multiple modules require the same static dependency, the bundler MUST include the dependency only once in a bundled artifact.                                                                                              | US-DEP-17            |      |
+| **FR-DEP-303** | The build system MUST distinguish application-local modules, project libraries, and external source libraries during module resolution.                                                                                         | US-BLD-04            |      |
+| **FR-DEP-304** | Dependencies MUST support target-level scope and build-type-level scope. Target-level dependencies MUST be available to all build types of the target; build-type-level dependencies MUST only be available to that build type. | US-DEP-06            |      |
+| **FR-DEP-305** | Static dependencies MUST be eligible for dependency resolution and bundling according to the selected build type.                                                                                                               | US-DEP-07            |      |
+| **FR-DEP-306** | Dynamic dependencies MUST NOT be statically resolved or bundled into the referencing artifact.                                                                                                                                  | US-DEP-08            |      |
+| **FR-DEP-307** | A `require()` whose argument is a string literal MUST be treated as statically resolvable, while a `require()` whose argument is not a string literal MUST be treated as dynamic.                                               | US-DEP-07, US-DEP-09 |      |
+| **FR-DEP-308** | Dependency resolution MUST start at the configured entry point of the current build target. The system then MUST recursively search all required modules for dependencies.                                                      | US-DEP-05            |      |
+| **FR-DEP-309** | The resolver MUST report a static dependency cycle as an error, print the exact dependency path representing the loop, and abort the build of the affected target.                                                              | US-DEP-18            |      |
+| **FR-DEP-310** | A same-name single-file and directory package within a category (e.g., `logging.lua` and `logging/` inside `libraries/`) MUST be rejected during resolution as an error.                                                        | US-BLD-04            |      |
 
 ### 3.4. Dynamic Dependencies and Plugins
 
 | ID             | Requirement                                                                                                                                                     | Reference | Dependency |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| **FR-DEP-401** | Dynamic module references MUST remain available for runtime resolution.                                                                                         | US-DEP-08 |            |
-| **FR-DEP-402** | The build system MUST support independently buildable plugin components that are not bundled into the main application artifact.                                | US-DEP-11 |            |
-| **FR-DEP-403** | A plugin MUST be buildable independently from the main application.                                                                                             | US-DEP-12 |            |
-| **FR-DEP-404** | The system MUST support a simple plugin registry describing plugins available for runtime discovery, generated automatically based on build configuration data. | US-DEP-10 |            |
-| **FR-DEP-405** | The plugin registry MUST NOT require the build system to resolve every available plugin as a dependency of the main application.                                | US-DEP-10 |            |
+| **FR-DEP-401** | Dynamic module references MUST remain available for runtime resolution.                                                                                         | US-DEP-08 |      |
+| **FR-DEP-402** | The build system MUST support independently buildable plugin components that are not bundled into the main application artifact.                                | US-DEP-11 |      |
+| **FR-DEP-403** | A plugin MUST be buildable independently from the main application.                                                                                             | US-DEP-12 |      |
+| **FR-DEP-404** | The system MUST support a simple plugin registry describing plugins available for runtime discovery, generated automatically based on build configuration data. | US-DEP-10 |      |
+| **FR-DEP-405** | The plugin registry MUST NOT require the build system to resolve every available plugin as a dependency of the main application.                                | US-DEP-10 |      |
 
 ### 3.5. Dependency Graph Inspection
 
 | ID             | Requirement                                                                                                       | Reference | Dependency |
 | -------------- | ----------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| **FR-DEP-501** | The build system MUST provide a mechanism to inspect the resolved dependency graph.                               | US-DEP-19 |            |
-| **FR-DEP-502** | Dependency graph output SHOULD be suitable for consumption by documentation tooling.                              | US-DEP-19 |            |
-| **FR-DEP-503** | The dependency graph representation SHOULD support generation of a visual representation such as a Mermaid graph. | US-DEP-19 |            |
+| **FR-DEP-501** | The build system MUST provide a mechanism to inspect the resolved dependency graph.                               | US-DEP-19 |      |
+| **FR-DEP-502** | Dependency graph output SHOULD be suitable for consumption by documentation tooling.                              | US-DEP-19 |      |
+| **FR-DEP-503** | The dependency graph representation SHOULD support generation of a visual representation such as a Mermaid graph. | US-DEP-19 |      |
 
 ### 3.6. Module Mapping
 
 | ID             | Requirement                                                                                                                                                                                                                                           | Reference            | Dependency |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- |
-| **FR-DEP-601** | The build system MUST treat the logical module name as the module's identity and MUST NOT require the logical module name to equal its repository path.                                                                                               | US-BLD-03            |            |
-| **FR-DEP-602** | For project modules, the default logical module name MUST be derived from the configured project module source root and the configured prefix.                                                                                                        | US-BLD-03            |            |
-| **FR-DEP-603** | For shared-library modules, the default logical module name MUST be derived from the configured library source root and the configured prefix.                                                                                                        | US-BLD-04            |            |
-| **FR-DEP-604** | For external modules, the default logical module name MUST be derived from the configured external source root and the configured prefix.                                                                                                             | US-BLD-04            |            |
-| **FR-DEP-605** | The development tooling SHOULD expose the build system's module mappings to Lua Language Server. If Lua Language Server cannot resolve the mappings through generated/configured workspace information, source annotations MAY be used as a fallback. | US-BLD-18            |            |
-| **FR-DEP-606** | Test modules MUST derive their module name from `test_source_root` and `test_prefix` (default `test.`), and MUST be emitted below a separate `test/` folder namespace in unbundled artifacts to prevent colliding with production modules.            | US-TST-02, US-BLD-27 |            |
+| **FR-DEP-601** | The build system MUST treat the logical module name as the module's identity and MUST NOT require the logical module name to equal its repository path.                                                                                               | US-BLD-03            |      |
+| **FR-DEP-602** | For project modules, the default logical module name MUST be derived from the configured project module source root and the configured prefix.                                                                                                        | US-BLD-03            |      |
+| **FR-DEP-603** | For shared-library modules, the default logical module name MUST be derived from the configured library source root and the configured prefix.                                                                                                        | US-BLD-04            |      |
+| **FR-DEP-604** | For external modules, the default logical module name MUST be derived from the configured external source root and the configured prefix.                                                                                                             | US-BLD-04            |      |
+| **FR-DEP-605** | The development tooling SHOULD expose the build system's module mappings to Lua Language Server. If Lua Language Server cannot resolve the mappings through generated/configured workspace information, source annotations MAY be used as a fallback. | US-BLD-18            |      |
+| **FR-DEP-606** | Test modules MUST derive their module name from `test_source_root` and `test_prefix` (default `test.`), and MUST be emitted below a separate `test/` folder namespace in unbundled artifacts to prevent colliding with production modules.            | US-TST-02, US-BLD-27 |      |
 
 ---
 
@@ -200,115 +201,114 @@ ID structure: `<type>-<scope>-<topic_number><number>`
 
 | ID             | Requirement                                                                                                                                           | Reference | Dependency |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| **FR-BLD-101** | A project MUST be able to define multiple build targets.                                                                                              | US-BLD-06 |            |
-| **FR-BLD-102** | Each build target MUST have a unique name within its project.                                                                                         | US-BLD-05 |            |
-| **FR-BLD-103** | Each artifact-producing build target MUST have an effective entry point. A library or external package manifest without targets MUST NOT require one. | US-BLD-05 |            |
-| **FR-BLD-104** | The entry point MUST serve as the root of static dependency resolution for the target.                                                                | US-BLD-05 |            |
-| **FR-BLD-105** | A build target MAY define additional source files or modules required by its build process.                                                           | US-BLD-05 |            |
-| **FR-BLD-106** | Each build target MUST produce one logical build artifact.                                                                                            | US-BLD-09 |            |
-| **FR-BLD-107** | A build artifact MAY contain multiple output files.                                                                                                   | US-BLD-10 |            |
-| **FR-BLD-108** | Each build target MUST have a stable identity (the format `<project>/<target>`) that can be used by the build system and associated tooling.          | US-BLD-24 |            |
+| **FR-BLD-101** | A project MUST be able to define multiple build targets.                                                                                              | US-BLD-06 |      |
+| **FR-BLD-102** | Each build target MUST have a unique name within its project.                                                                                         | US-BLD-05 |      |
+| **FR-BLD-103** | Each artifact-producing build target MUST have an effective entry point. A library or external package manifest without targets MUST NOT require one. | US-BLD-05 |      |
+| **FR-BLD-104** | The entry point MUST serve as the root of static dependency resolution for the target.                                                                | US-BLD-05 |      |
+| **FR-BLD-105** | A build target MAY define additional source files or modules required by its build process.                                                           | US-BLD-05 |      |
+| **FR-BLD-106** | Each build target MUST produce one logical build artifact.                                                                                            | US-BLD-09 |      |
+| **FR-BLD-107** | A build artifact MAY contain multiple output files.                                                                                                   | US-BLD-10 |      |
+| **FR-BLD-108** | Each build target MUST have a stable identity (the format `<project>/<target>`) that can be used by the build system and associated tooling.          | US-BLD-24 |      |
 
 ### 4.2. Build Types
 
 | ID             | Requirement                                                                                                                                                                                                                       | Reference            | Dependency |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- |
-| **FR-BLD-201** | Each build target MUST support the predefined Development, Test, and Release build types.                                                                                                                                         | US-BLD-07            |            |
-| **FR-BLD-202** | Development builds MUST be available without requiring target-specific test or release configuration.                                                                                                                             | US-BLD-07            |            |
-| **FR-BLD-203** | Test builds MUST discover `Test*.lua` (CamelCase class-definition files) below `test_source_root` and treat every discovered suite, plus the test environment and the effective test entry point, as dependency-resolution roots. | US-BLD-08, US-TST-02 |            |
-| **FR-BLD-204** | A target MAY define a separate test entry point for Test builds.                                                                                                                                                                  | US-BLD-08            |            |
+| **FR-BLD-201** | Each build target MUST support the predefined Development, Test, and Release build types.                                                                                                                                         | US-BLD-07            |      |
+| **FR-BLD-202** | Development builds MUST be available without requiring target-specific test or release configuration.                                                                                                                             | US-BLD-07            |      |
+| **FR-BLD-203** | Test builds MUST discover `Test*.lua` (CamelCase class-definition files) below `test_source_root` and treat every discovered suite, plus the test environment and the effective test entry point, as dependency-resolution roots. | US-BLD-08, US-TST-02 |      |
+| **FR-BLD-204** | A target MAY define a separate test entry point for Test builds.                                                                                                                                                                  | US-BLD-08            |      |
 
 ### 4.3. Bundling and Minification
 
 | ID             | Requirement                                                                                                                                                                                                 | Reference            | Dependency |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- |
-| **FR-BLD-301** | A Release artifact MUST bundle the target entry point and all eligible modules in its static dependency closure into a single main Lua artifact.                                                            | US-BLD-28            |            |
-| **FR-BLD-302** | A Release artifact MUST provide runtime resolution for bundled modules using their logical module names.                                                                                                    | US-BLD-29            |            |
-| **FR-BLD-303** | Bundled modules MUST execute in isolated module scopes such that local variables and declarations from one module cannot collide with or leak into another module.                                          | US-BLD-30            |            |
-| **FR-BLD-304** | The Release artifact's module loader MUST attempt to resolve a requested module from the bundled module registry before delegating unresolved modules to the ComputerCraft host `require()` implementation. | US-BLD-31            |            |
-| **FR-BLD-305** | The bundled module loader MUST cache successfully loaded bundled modules so that subsequent requests for the same module return the same module instance according to Lua `require()` semantics.            | US-BLD-29            |            |
-| **FR-BLD-306** | The build system MUST NOT require a statically bundled module to remain available as a separate physical file in the Release artifact.                                                                      | US-BLD-28, US-BLD-29 |            |
-| **FR-BLD-307** | Release main Lua artifacts MUST be minified.                                                                                                                                                                | US-BLD-33            |            |
-| **FR-BLD-308** | Minification MUST preserve program semantics and execution behavior.                                                                                                                                        | US-BLD-33, US-BLD-36 |            |
-| **FR-BLD-309** | Minification MUST remove comments and unnecessary horizontal source representation where doing so does not change program behavior.                                                                         | US-BLD-33            |            |
-| **FR-BLD-310** | Minification MUST preserve line breaks such that source line numbers remain aligned with corresponding unminified source lines.                                                                             | US-BLD-34            |            |
-| **FR-BLD-312** | The minifier MUST rename eligible local variables and local functions using lexical-scope-aware analysis.                                                                                                   | US-BLD-35            |            |
-| **FR-BLD-313** | Global variables and global functions MUST NOT be renamed by local-variable minification.                                                                                                                   | US-BLD-36            |            |
-| **FR-BLD-314** | Lua standard libraries and ComputerCraft APIs used as globals MUST NOT be renamed.                                                                                                                          | US-BLD-36            |            |
-| **FR-BLD-315** | Identifiers occurring inside string literals MUST NOT be interpreted as renameable identifiers.                                                                                                             | US-BLD-36            |            |
-| **FR-BLD-316** | Literal string keys in tables MUST NOT be changed by local-variable renaming.                                                                                                                               | US-BLD-36            |            |
-| **FR-BLD-317** | Long string literals and long-string comments MUST be excluded from lexical identifier rewriting.                                                                                                           | US-BLD-36            |            |
-| **FR-BLD-318** | Preserved files MUST NOT be processed by the Release minification step.                                                                                                                                     | US-BLD-16            |            |
-| **FR-BLD-319** | The build system MUST provide the resolved Release module set and applicable preservation exclusions to the bundling/minification implementation.                                                           | US-BLD-28, US-BLD-32 |            |
-| **FR-BLD-320** | The build system SHOULD use Shale or an equivalent implementation capable of providing the required bundling, module loading, preservation, and minification behavior.                                      | US-BLD-28–36         |            |
-| **FR-BLD-321** | Bundling and minification MUST occur after dependency resolution and validation.                                                                                                                            | US-BLD-19            |            |
+| **FR-BLD-301** | A Release artifact MUST bundle the target entry point and all eligible modules in its static dependency closure into a single main Lua artifact.                                                            | US-BLD-28            |      |
+| **FR-BLD-302** | A Release artifact MUST provide runtime resolution for bundled modules using their logical module names.                                                                                                    | US-BLD-29            |      |
+| **FR-BLD-303** | Bundled modules MUST execute in isolated module scopes such that local variables and declarations from one module cannot collide with or leak into another module.                                          | US-BLD-30            |      |
+| **FR-BLD-304** | The Release artifact's module loader MUST attempt to resolve a requested module from the bundled module registry before delegating unresolved modules to the ComputerCraft host `require()` implementation. | US-BLD-31            |      |
+| **FR-BLD-305** | The bundled module loader MUST cache successfully loaded bundled modules so that subsequent requests for the same module return the same module instance according to Lua `require()` semantics.            | US-BLD-29            |      |
+| **FR-BLD-306** | The build system MUST NOT require a statically bundled module to remain available as a separate physical file in the Release artifact.                                                                      | US-BLD-28, US-BLD-29 |      |
+| **FR-BLD-307** | Release main Lua artifacts MUST be minified.                                                                                                                                                                | US-BLD-33            |      |
+| **FR-BLD-308** | Minification MUST preserve program semantics and execution behavior.                                                                                                                                        | US-BLD-33, US-BLD-36 |      |
+| **FR-BLD-309** | Minification MUST remove comments and unnecessary horizontal source representation where doing so does not change program behavior.                                                                         | US-BLD-33            |      |
+| **FR-BLD-310** | Minification MUST preserve line breaks such that source line numbers remain aligned with corresponding unminified source lines.                                                                             | US-BLD-34            |      |
+| **FR-BLD-312** | The minifier MUST rename eligible local variables and local functions using lexical-scope-aware analysis.                                                                                                   | US-BLD-35            |      |
+| **FR-BLD-313** | Global variables and global functions MUST NOT be renamed by local-variable minification.                                                                                                                   | US-BLD-36            |      |
+| **FR-BLD-314** | Lua standard libraries and ComputerCraft APIs used as globals MUST NOT be renamed.                                                                                                                          | US-BLD-36            |      |
+| **FR-BLD-315** | Identifiers occurring inside string literals MUST NOT be interpreted as renameable identifiers.                                                                                                             | US-BLD-36            |      |
+| **FR-BLD-316** | Literal string keys in tables MUST NOT be changed by local-variable renaming.                                                                                                                               | US-BLD-36            |      |
+| **FR-BLD-317** | Long string literals and long-string comments MUST be excluded from lexical identifier rewriting.                                                                                                           | US-BLD-36            |      |
+| **FR-BLD-318** | Preserved files MUST NOT be processed by the Release minification step.                                                                                                                                     | US-BLD-16            |      |
+| **FR-BLD-319** | The build system MUST provide the resolved Release module set and applicable preservation exclusions to the bundling/minification implementation.                                                           | US-BLD-28, US-BLD-32 |      |
+| **FR-BLD-320** | The build system SHOULD use Shale or an equivalent implementation capable of providing the required bundling, module loading, preservation, and minification behavior.                                      | US-BLD-28–36         |      |
+| **FR-BLD-321** | Bundling and minification MUST occur after dependency resolution and validation.                                                                                                                            | US-BLD-19            |      |
 
 ### 4.4. Preserved Files
 
 | ID             | Requirement                                                                                                | Reference | Dependency |
 | -------------- | ---------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| **FR-BLD-401** | A preserved file MUST be excluded from Release bundling and minification.                                  | US-BLD-16 |            |
-| **FR-BLD-402** | A preserved module MUST remain available as a separate physical file in the Release artifact.              | US-BLD-31 |            |
-| **FR-BLD-403** | The build system MUST NOT rewrite `require()` statements belonging to or targeting preserved modules.      | US-BLD-31 |            |
-| **FR-BLD-404** | When a module is preserved, every module in its complete static dependency closure MUST also be preserved. | US-BLD-32 |            |
-| **FR-BLD-405** | Preservation MUST take precedence over otherwise eligible bundling.                                        | US-BLD-32 |            |
-| **FR-BLD-406** | A preserved module MUST NOT depend on a module that exists only inside the Release bundle.                 | US-BLD-32 |            |
+| **FR-BLD-401** | A preserved file MUST be excluded from Release bundling and minification.                                  | US-BLD-16 |      |
+| **FR-BLD-402** | A preserved module MUST remain available as a separate physical file in the Release artifact.              | US-BLD-31 |      |
+| **FR-BLD-403** | The build system MUST NOT rewrite `require()` statements belonging to or targeting preserved modules.      | US-BLD-31 |      |
+| **FR-BLD-404** | When a module is preserved, every module in its complete static dependency closure MUST also be preserved. | US-BLD-32 |      |
+| **FR-BLD-405** | Preservation MUST take precedence over otherwise eligible bundling.                                        | US-BLD-32 |      |
+| **FR-BLD-406** | A preserved module MUST NOT depend on a module that exists only inside the Release bundle.                 | US-BLD-32 |      |
 
 ### 4.5. Build Groups and Selection Scopes
 
 | ID             | Requirement                                                                                                                              | Reference | Dependency |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| **FR-BLD-501** | Build targets MUST be assignable to user-defined build groups configured only at the target level.                                       | US-BLD-11 |            |
-| **FR-BLD-502** | A build group MUST represent a selectable collection of build targets.                                                                   | US-BLD-11 |            |
-| **FR-BLD-503** | The build system MUST support building an individual build target.                                                                       | US-BLD-12 |            |
-| **FR-BLD-504** | The build system MUST support building all build targets belonging to a project.                                                         | US-BLD-12 |            |
-| **FR-BLD-505** | The build system MUST support building all build targets belonging to a user-defined build group.                                        | US-BLD-12 |            |
-| **FR-BLD-506** | The build system MUST support building all applicable build targets in the repository.                                                   | US-BLD-12 |            |
-| **FR-BLD-507** | Project-wide and repository-wide build selection MUST NOT require the user to manually create groups containing every applicable target. | US-BLD-12 |            |
+| **FR-BLD-501** | Build targets MUST be assignable to user-defined build groups configured only at the target level.                                       | US-BLD-11 |      |
+| **FR-BLD-502** | A build group MUST represent a selectable collection of build targets.                                                                   | US-BLD-11 |      |
+| **FR-BLD-503** | The build system MUST support building an individual build target.                                                                       | US-BLD-12 |      |
+| **FR-BLD-504** | The build system MUST support building all build targets belonging to a project.                                                         | US-BLD-12 |      |
+| **FR-BLD-505** | The build system MUST support building all build targets belonging to a user-defined build group.                                        | US-BLD-12 |      |
+| **FR-BLD-506** | The build system MUST support building all applicable build targets in the repository.                                                   | US-BLD-12 |      |
+| **FR-BLD-507** | Project-wide and repository-wide build selection MUST NOT require the user to manually create groups containing every applicable target. | US-BLD-12 |      |
 
 ### 4.6. Build Pipeline
 
 | ID             | Requirement                                                                                                   | Reference | Dependency |
 | -------------- | ------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| **FR-BLD-601** | The build process MUST consist of clearly defined processing stages.                                          | US-BLD-19 |            |
-| **FR-BLD-602** | Dependency resolution MUST occur before dependency-dependent bundling decisions are made.                     | US-BLD-19 |            |
-| **FR-BLD-603** | Dependency validation MUST occur before producing an artifact that depends on the validated dependency graph. | US-BLD-19 |            |
-| **FR-BLD-604** | Bundling MUST operate only on components selected for inclusion in the artifact.                              | US-BLD-19 |            |
-| **FR-BLD-605** | Minification MUST operate only on source selected for minification.                                           | US-BLD-19 |            |
-| **FR-BLD-606** | Artifact creation MUST combine the generated bundled output with applicable preserved/generated files.        | US-BLD-19 |            |
+| **FR-BLD-601** | The build process MUST consist of clearly defined processing stages.                                          | US-BLD-19 |      |
+| **FR-BLD-602** | Dependency resolution MUST occur before dependency-dependent bundling decisions are made.                     | US-BLD-19 |      |
+| **FR-BLD-603** | Dependency validation MUST occur before producing an artifact that depends on the validated dependency graph. | US-BLD-19 |      |
+| **FR-BLD-604** | Bundling MUST operate only on components selected for inclusion in the artifact.                              | US-BLD-19 |      |
+| **FR-BLD-605** | Minification MUST operate only on source selected for minification.                                           | US-BLD-19 |      |
+| **FR-BLD-606** | Artifact creation MUST combine the generated bundled output with applicable preserved/generated files.        | US-BLD-19 |      |
 
 ### 4.7. Incremental Builds
 
 | ID             | Requirement                                                                                                                                                   | Reference            | Dependency |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- |
-| **FR-BLD-701** | The build system MUST record deterministic SHA-256 hashes for source files relevant to a target so it can determine whether the artifact requires rebuilding. | US-BLD-20            |            |
-| **FR-BLD-702** | Full incremental caching and intermediate-result caching of dependency/bundle blocks are deferred; the initial implementation MUST NOT require them.          | US-BLD-20, US-BLD-21 |            |
+| **FR-BLD-701** | The build system MUST record deterministic SHA-256 hashes for source files relevant to a target so it can determine whether the artifact requires rebuilding. | US-BLD-20            |      |
+| **FR-BLD-702** | Full incremental caching and intermediate-result caching of dependency/bundle blocks are deferred; the initial implementation MUST NOT require them.          | US-BLD-20, US-BLD-21 |      |
 
 ### 4.8. Build Failure Handling
 
 | ID             | Requirement                                                                                                                           | Reference            | Dependency |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- |
-| **FR-BLD-801** | A failure in one independent build target MUST NOT prevent unrelated build targets from being attempted (lazy per-target validation). | US-BLD-22, US-CFG-04 |            |
-| **FR-BLD-802** | A dependency failure MUST prevent targets that require the failed dependency from producing a successful artifact.                    | US-BLD-22            |            |
-| **FR-BLD-803** | Independent dependency branches SHOULD continue to be processed after an error in another branch.                                     | US-BLD-22            |            |
-| **FR-BLD-804** | The build system MUST report informational messages, warnings, and errors as processing progresses.                                   | US-BLD-23            |            |
-| **FR-BLD-805** | After completing all possible build work, the build system MUST provide a summary of successful, failed, and skipped work.            | US-BLD-23            |            |
-| **FR-BLD-806** | The final build summary MUST include all errors and warnings encountered during the build operation.                                  | US-BLD-23            |            |
+| **FR-BLD-801** | A failure in one independent build target MUST NOT prevent unrelated build targets from being attempted (lazy per-target validation). | US-BLD-22, US-CFG-04 |      |
+| **FR-BLD-802** | A dependency failure MUST prevent targets that require the failed dependency from producing a successful artifact.                    | US-BLD-22            |      |
+| **FR-BLD-803** | Independent dependency branches SHOULD continue to be processed after an error in another branch.                                     | US-BLD-22            |      |
+| **FR-BLD-804** | The build system MUST report informational messages, warnings, and errors as processing progresses.                                   | US-BLD-23            |      |
+| **FR-BLD-805** | After completing all possible build work, the build system MUST provide a summary of successful, failed, and skipped work.            | US-BLD-23            |      |
+| **FR-BLD-806** | The final build summary MUST include all errors and warnings encountered during the build operation.                                  | US-BLD-23            |      |
 
 ### 4.9. Build Output
 
 | ID             | Requirement                                                                                                                                                                                                                                                                                                                | Reference                       | Dependency |
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- | ---------- |
-| **FR-BLD-901** | Unbundled artifact paths MUST correspond to the logical module hierarchy so that statically resolved `require()` calls remain valid without changing their module names.                                                                                                                                                   | US-BLD-13                       |            |
-| **FR-BLD-902** | Development artifacts MUST emit only the static dependency closure of the effective normal entry point as unbundled, unminified modules.                                                                                                                                                                                   | US-BLD-14                       |            |
-| **FR-BLD-903** | Test artifacts MUST emit the combined static dependency closure of the discovered suites and test roots as unbundled, unminified modules.                                                                                                                                                                                  | US-BLD-25                       |            |
-| **FR-BLD-904** | Release artifacts MUST bundle all eligible static modules into a single main Lua artifact.                                                                                                                                                                                                                                 | US-BLD-15                       |            |
-| **FR-BLD-905** | Release artifacts MUST minify the bundled main Lua artifact.                                                                                                                                                                                                                                                               | US-BLD-15                       |            |
-| **FR-BLD-906** | Every artifact MUST contain metadata (`metadata.lua` returning a Lua table) identifying its `NAME`, `VERSION` (optional for Dev/Test, mandatory for Release), `SOURCE_REVISION` (full git commit SHA), `BASE_URL`, and a `FILES` list of objects containing the artifact-relative `path` and the file's `sha256` checksum. | US-BLD-24, US-DEP-15, US-BLD-26 |            |
-| **FR-BLD-907** | The build system SHOULD keep generated build output separate from editable project source.                                                                                                                                                                                                                                 | US-BLD-01                       |            |
-| **FR-BLD-908** | Preserved files MUST retain their relative directory structure below the applicable project's `src/` directory in unbundled/deployed output.                                                                                                                                                                               | US-BLD-16                       |            |
-| **FR-BLD-909** | Artifacts MUST be written below `build/<project>/artifacts/<artifact-name>/<build-type>/`, and rebuilding locally MAY overwrite that artifact directory.                                                                                                                                                                   | US-BLD-24                       |            |
-| **FR-BLD-910** | A Release build MUST require a clean worktree, configured repository-level `artifact_base_url` in `/build_config.yaml`, full source commit SHA, and an effective target version.                                                                                                                                           | US-DEP-15, US-CFG-05            |            |
+| **FR-BLD-901** | Unbundled artifact paths MUST correspond to the logical module hierarchy so that statically resolved `require()` calls remain valid without changing their module names.                                                                                                                                                   | US-BLD-13                       |      |
+| **FR-BLD-902** | Development artifacts MUST emit only the static dependency closure of the effective normal entry point as unbundled, unminified modules.                                                                                                                                                                                   | US-BLD-14                       |      |
+| **FR-BLD-903** | Test artifacts MUST emit the combined static dependency closure of the discovered suites and test roots as unbundled, unminified modules.                                                                                                                                                                                  | US-BLD-25                       |      |
+| **FR-BLD-904** | Release artifacts MUST bundle all eligible static modules into a single main Lua artifact.                                                                                                                                                                                                                                 | US-BLD-15                       |      |
+| **FR-BLD-905** | Release artifacts MUST minify the bundled main Lua artifact.                                                                                                                                                                                                                                                               | US-BLD-15                       |      |
+| **FR-BLD-906** | Every artifact MUST contain metadata (`metadata.lua` returning a Lua table) identifying its `NAME`, `VERSION` (optional for Dev/Test, mandatory for Release), `SOURCE_REVISION` (full git commit SHA), `BASE_URL`, and a `FILES` list of objects containing the artifact-relative `path` and the file's `sha256` checksum. | US-BLD-24, US-DEP-15, US-BLD-26 |      |
+| **FR-BLD-907** | The build system SHOULD keep generated build output separate from editable project source.                                                                                                                                                                                                                                 | US-BLD-01                       |      |
+| **FR-BLD-908** | Preserved files MUST retain their relative directory structure below the applicable project's `src/` directory in unbundled/deployed output.                                                                                                                                                                               | US-BLD-16                       |      |
+| **FR-BLD-909** | Artifacts MUST be written below `build/<project>/artifacts/<artifact-name>/<build-type>/`, and rebuilding locally MAY overwrite that artifact directory.                                                                                                                                                                   | US-BLD-24                       |      |
 
 ---
 
@@ -318,71 +318,72 @@ ID structure: `<type>-<scope>-<topic_number><number>`
 
 | ID             | Requirement                                                                                                                                                            | Reference            | Dependency |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- |
-| **FR-TST-101** | The test framework MUST organize tests into test suites represented by classes inheriting from a generic `TestSuite` base class from the testing library.              | US-TST-01            |            |
-| **FR-TST-102** | A Lua file whose name matches `Test*.lua` (CamelCase) and which returns a class inheriting from the generic `TestSuite` base class MUST be recognized as a test suite. | US-TST-02, US-TST-13 |            |
-| **FR-TST-103** | Each discovered test file MUST contain exactly one test suite.                                                                                                         | US-TST-02            |            |
-| **FR-TST-104** | Test cases MUST be discovered automatically from test-suite methods whose names begin with `test_`. No explicit test registration or decorator mechanism is required.  | US-TST-03            |            |
+| **FR-TST-101** | The test framework MUST organize tests into test suites represented by classes inheriting from a generic `TestSuite` base class from the testing library.              | US-TST-01            |      |
+| **FR-TST-102** | A Lua file whose name matches `Test*.lua` (CamelCase) and which returns a class inheriting from the generic `TestSuite` base class MUST be recognized as a test suite. | US-TST-02, US-TST-13 |      |
+| **FR-TST-103** | Each discovered test file MUST contain exactly one test suite.                                                                                                         | US-TST-02            |      |
+| **FR-TST-104** | Test cases MUST be discovered automatically from test-suite methods whose names begin with `test_`. No explicit test registration or decorator mechanism is required.  | US-TST-03            |      |
+| **FR-TST-105** | Test discovery MUST treat filename matching as case-sensitive.                                                                                                         | US-TST-02            |      |
 
 ### 5.2. Test Lifecycle and Failure Handling
 
 | ID             | Requirement                                                                                                                                                                                                                                                                                                                                                                                                                         | Reference | Dependency |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| **FR-TST-201** | Each test suite MUST execute using a fresh test-suite instance to guarantee fixture isolation. Class members MAY be used as shared fixture state for the test cases in that suite.                                                                                                                                                                                                                                                  | US-TST-04 |            |
-| **FR-TST-202** | `setup()` MUST be executed before every test case in the suite.                                                                                                                                                                                                                                                                                                                                                                     | US-TST-05 |            |
-| **FR-TST-203** | `teardown()` MUST be executed after every test case in the suite.                                                                                                                                                                                                                                                                                                                                                                   | US-TST-05 |            |
-| **FR-TST-204** | `setupTestSuite()` MUST be executed once before the first test case of the suite.                                                                                                                                                                                                                                                                                                                                                   | US-TST-05 |            |
-| **FR-TST-205** | `teardownTestSuite()` MUST be executed once after the last test case of the suite.                                                                                                                                                                                                                                                                                                                                                  | US-TST-05 |            |
-| **FR-TST-206** | The test runner MUST provide environment setup and environment teardown around the complete test execution.                                                                                                                                                                                                                                                                                                                         | US-TST-05 |            |
-| **FR-TST-207** | A `setup()` failure MUST fail its test case and prevent that test method from executing. A `teardown()` failure MUST fail its test case even if the test method passed. A `setupTestSuite()` failure MUST cause all test cases in the affected suite to fail or not execute, while allowing the runner to continue with the next suite. A `teardownTestSuite()` failure MUST cause the suite to fail even if all test cases passed. | US-TST-10 |            |
-| **FR-TST-208** | Test methods, lifecycle methods, and runner operations MUST be executed using protected calls (`pcall`) so that failures do not terminate the complete test run.                                                                                                                                                                                                                                                                    | US-TST-10 |            |
+| **FR-TST-201** | Each test suite MUST execute using a fresh test-suite instance to guarantee fixture isolation. Class members MAY be used as shared fixture state for the test cases in that suite.                                                                                                                                                                                                                                                  | US-TST-04 |      |
+| **FR-TST-202** | `setup()` MUST be executed before every test case in the suite.                                                                                                                                                                                                                                                                                                                                                                     | US-TST-05 |      |
+| **FR-TST-203** | `teardown()` MUST be executed after every test case in the suite.                                                                                                                                                                                                                                                                                                                                                                   | US-TST-05 |      |
+| **FR-TST-204** | `setupTestSuite()` MUST be executed once before the first test case of the suite.                                                                                                                                                                                                                                                                                                                                                   | US-TST-05 |      |
+| **FR-TST-205** | `teardownTestSuite()` MUST be executed once after the last test case of the suite.                                                                                                                                                                                                                                                                                                                                                  | US-TST-05 |      |
+| **FR-TST-206** | The test runner MUST provide environment setup and environment teardown around the complete test execution.                                                                                                                                                                                                                                                                                                                         | US-TST-05 |      |
+| **FR-TST-207** | A `setup()` failure MUST fail its test case and prevent that test method from executing. A `teardown()` failure MUST fail its test case even if the test method passed. A `setupTestSuite()` failure MUST cause all test cases in the affected suite to fail or not execute, while allowing the runner to continue with the next suite. A `teardownTestSuite()` failure MUST cause the suite to fail even if all test cases passed. | US-TST-10 |      |
+| **FR-TST-208** | Test methods, lifecycle methods, and runner operations MUST be executed using protected calls (`pcall`) so that failures do not terminate the complete test run.                                                                                                                                                                                                                                                                    | US-TST-10 |      |
 
 ### 5.3. Test Execution and Assertions
 
 | ID             | Requirement                                                                                                                                                    | Reference | Dependency |
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| **FR-TST-301** | The framework MUST provide `assertTrue`, `assertFalse`, `assertEquals`, `assertNotEquals`, `assertNil`, `assertThrows`, `assertDeepEquals`, and `assertDelta`. | US-TST-06 |            |
-| **FR-TST-302** | Test suites and test cases MUST execute in alphabetical order by default.                                                                                      | US-TST-07 |            |
-| **FR-TST-303** | The test runner MUST support an optional shuffle mode that randomizes test execution order.                                                                    | US-TST-08 |            |
-| **FR-TST-304** | A shuffled test run MUST use and report an explicit seed so that the exact execution order of a failed randomized run can be reproduced.                       | US-TST-09 |            |
+| **FR-TST-301** | The framework MUST provide `assertTrue`, `assertFalse`, `assertEquals`, `assertNotEquals`, `assertNil`, `assertThrows`, `assertDeepEquals`, and `assertDelta`. | US-TST-06 |      |
+| **FR-TST-302** | Test suites and test cases MUST execute in alphabetical order by default.                                                                                      | US-TST-07 |      |
+| **FR-TST-303** | The test runner MUST support an optional shuffle mode that randomizes test execution order.                                                                    | US-TST-08 |      |
+| **FR-TST-304** | A shuffled test run MUST use and report an explicit seed so that the exact execution order of a failed randomized run can be reproduced.                       | US-TST-09 |      |
 
 ### 5.4. Test Reporting and Observability
 
 | ID             | Requirement                                                                                                                                        | Reference | Dependency |
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| **FR-TST-401** | The test framework MUST provide a mechanism to register callbacks or listeners for environment, suite, and test-case lifecycle events.             | US-TST-11 |            |
-| **FR-TST-402** | Failures in test listeners MUST be isolated and MUST NOT terminate or otherwise invalidate the test execution itself.                              | US-TST-12 |            |
-| **FR-TST-403** | A test method whose name begins with `DISABLED_` MUST be reported as `SKIPPED` and MUST NOT be executed.                                           | US-TST-13 |            |
-| **FR-TST-404** | A test suite whose name begins with `DISABLED_` MUST be reported as skipped and its test cases MUST NOT be executed.                               | US-TST-13 |            |
-| **FR-TST-405** | Every test case MUST result in exactly one of `PASS`, `FAIL`, or `SKIPPED`.                                                                        | US-TST-14 |            |
-| **FR-TST-406** | A failed test case MUST report the project, test suite, test case, and reason for failure.                                                         | US-TST-14 |            |
-| **FR-TST-407** | The test runner MUST report test results during execution and MUST provide a final summary containing counts of passed, failed, and skipped tests. | US-TST-15 |            |
+| **FR-TST-401** | The test framework MUST provide a mechanism to register callbacks or listeners for environment, suite, and test-case lifecycle events.             | US-TST-11 |      |
+| **FR-TST-402** | Failures in test listeners MUST be isolated and MUST NOT terminate or otherwise invalidate the test execution itself.                              | US-TST-12 |      |
+| **FR-TST-403** | A test method whose name begins with `DISABLED_` MUST be reported as `SKIPPED` and MUST NOT be executed.                                           | US-TST-13 |      |
+| **FR-TST-404** | A test suite whose name begins with `DISABLED_` MUST be reported as skipped and its test cases MUST NOT be executed.                               | US-TST-13 |      |
+| **FR-TST-405** | Every test case MUST result in exactly one of `PASS`, `FAIL`, or `SKIPPED`.                                                                        | US-TST-14 |      |
+| **FR-TST-406** | A failed test case MUST report the project, test suite, test case, and reason for failure.                                                         | US-TST-14 |      |
+| **FR-TST-407** | The test runner MUST report test results during execution and MUST provide a final summary containing counts of passed, failed, and skipped tests. | US-TST-15 |      |
 
 ### 5.5. Repository-Level Test Execution
 
 | ID             | Requirement                                                                                                                                          | Reference | Dependency |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| **FR-TST-501** | The build system MUST provide a repository-level test runner capable of discovering and executing test-enabled projects.                             | US-TST-16 |            |
-| **FR-TST-502** | The repository-level test runner MUST support selecting projects using the same build-group concept used for repository and project build selection. | US-TST-16 |            |
-| **FR-TST-503** | Each project MUST be executed using a fresh test-runner instance so that project-level test state does not leak between projects.                    | US-TST-16 |            |
-| **FR-TST-504** | If any test case in a suite fails, the complete suite MUST be considered failed.                                                                     | US-TST-17 |            |
-| **FR-TST-505** | If any suite in a project fails, the complete project MUST be considered failed.                                                                     | US-TST-17 |            |
-| **FR-TST-506** | If any project fails, the complete repository-level test run MUST be considered failed.                                                              | US-TST-17 |            |
-| **FR-TST-507** | The repository-level test runner MUST continue executing other suites and projects after failures whenever they can still be executed.               | US-TST-18 |            |
-| **FR-TST-508** | The repository-level test runner MUST report results for each project and then provide an overall repository result.                                 | US-TST-16 |            |
+| **FR-TST-501** | The build system MUST provide a repository-level test runner capable of discovering and executing test-enabled projects.                             | US-TST-16 |      |
+| **FR-TST-502** | The repository-level test runner MUST support selecting projects using the same build-group concept used for repository and project build selection. | US-TST-16 |      |
+| **FR-TST-503** | Each project MUST be executed using a fresh test-runner instance so that project-level test state does not leak between projects.                    | US-TST-16 |      |
+| **FR-TST-504** | If any test case in a suite fails, the complete suite MUST be considered failed.                                                                     | US-TST-17 |      |
+| **FR-TST-505** | If any suite in a project fails, the complete project MUST be considered failed.                                                                     | US-TST-17 |      |
+| **FR-TST-506** | If any project fails, the complete repository-level test run MUST be considered failed.                                                              | US-TST-17 |      |
+| **FR-TST-507** | The repository-level test runner MUST continue executing other suites and projects after failures whenever they can still be executed.               | US-TST-18 |      |
+| **FR-TST-508** | The repository-level test runner MUST report results for each project and then provide an overall repository result.                                 | US-TST-16 |      |
 
 ### 5.6. Test Environment and Artifacts
 
 | ID             | Requirement                                                                                                 | Reference | Dependency |
 | -------------- | ----------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| **FR-TST-601** | The test build type MUST execute in the development environment rather than inside a ComputerCraft runtime. | US-TST-19 |            |
-| **FR-TST-602** | ComputerCraft APIs used by tests MUST be mocked or replaced by the test developer when required.            | US-TST-20 |            |
-| **FR-TST-603** | The test system MUST NOT require or prescribe a specific ComputerCraft API mocking framework.               | US-TST-20 |            |
+| **FR-TST-601** | The test build type MUST execute in the development environment rather than inside a ComputerCraft runtime. | US-TST-19 |      |
+| **FR-TST-602** | ComputerCraft APIs used by tests MUST be mocked or replaced by the test developer when required.            | US-TST-20 |      |
+| **FR-TST-603** | The test system MUST NOT require or prescribe a specific ComputerCraft API mocking framework.               | US-TST-20 |      |
 
 ### 5.7. Test Quality Attributes
 
 | ID              | Requirement                                                                                                                                                   | Reference | Dependency |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| **NFR-TST-701** | The test framework MUST NOT be responsible for isolating system resources such as the filesystem. Such isolation is the responsibility of the test developer. | US-TST-20 |            |
+| **NFR-TST-701** | The test framework MUST NOT be responsible for isolating system resources such as the filesystem. Such isolation is the responsibility of the test developer. | US-TST-20 |      |
 
 ---
 
@@ -390,18 +391,18 @@ ID structure: `<type>-<scope>-<topic_number><number>`
 
 | ID             | Requirement                                                                                                                                   | Reference            | Dependency |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- |
-| **FR-MET-101** | Every build artifact MUST contain a file named `metadata.lua` at the artifact root.                                                           | US-MET-01, US-MET-05 |            |
-| **FR-MET-102** | `metadata.lua` MUST be a valid executable Lua file that returns a table.                                                                      | US-MET-01            |            |
-| **FR-MET-103** | The metadata table MUST contain a `NAME` field identifying the artifact.                                                                      | US-MET-02            |            |
-| **FR-MET-104** | The metadata table MUST contain a `SOURCE_REVISION` field containing the full immutable Git commit SHA from which the artifact was generated. | US-MET-02            |            |
-| **FR-MET-105** | The metadata table MUST contain a `BASE_URL` field containing the configured artifact base URL.                                               | US-MET-04            |            |
-| **FR-MET-106** | The metadata table MUST contain a `FILES` list.                                                                                               | US-MET-03            |            |
-| **FR-MET-107** | Each `FILES` entry MUST contain an artifact-relative `path` and the corresponding file's SHA-256 checksum in a `sha256` field.                | US-MET-03            |            |
-| **FR-MET-108** | `metadata.lua` MUST NOT need to list itself in `FILES`. Its location and filename are fixed and MUST be known to deployment tooling.          | US-MET-05            |            |
-| **FR-MET-109** | `VERSION` MUST be present for Release artifacts and MAY be omitted for Development and Test artifacts.                                        | US-MET-02            |            |
-| **FR-MET-201** | Every file represented by `FILES` MUST have a checksum calculated from the exact file content emitted into the artifact.                      | US-MET-03            |            |
-| **FR-MET-202** | Artifact file paths in `FILES` MUST be relative to the artifact root.                                                                         | US-MET-03            |            |
-| **FR-MET-203** | SHA-256 values in `FILES` MUST be represented as hexadecimal checksums.                                                                       | US-MET-03            |            |
+| **FR-MET-101** | Every build artifact MUST contain a file named `metadata.lua` at the artifact root.                                                           | US-MET-01, US-MET-05 |      |
+| **FR-MET-102** | `metadata.lua` MUST be a valid executable Lua file that returns a table.                                                                      | US-MET-01            |      |
+| **FR-MET-103** | The metadata table MUST contain a `NAME` field identifying the artifact.                                                                      | US-MET-02            |      |
+| **FR-MET-104** | The metadata table MUST contain a `SOURCE_REVISION` field containing the full immutable Git commit SHA from which the artifact was generated. | US-MET-02            |      |
+| **FR-MET-105** | The metadata table MUST contain a `BASE_URL` field containing the configured artifact base URL. BASE_URL is always present in artifact metadata, but only has externally meaningful distribution semantics when the artifact is deployed.                                              | US-MET-04            |      |
+| **FR-MET-106** | The metadata table MUST contain a `FILES` list.                                                                                               | US-MET-03            |      |
+| **FR-MET-107** | Each `FILES` entry MUST contain an artifact-relative `path` and the corresponding file's SHA-256 checksum in a `sha256` field.                | US-MET-03            |      |
+| **FR-MET-108** | `metadata.lua` MUST NOT need to list itself in `FILES`. Its location and filename are fixed and MUST be known to deployment tooling.          | US-MET-05            |      |
+| **FR-MET-109** | `VERSION` MUST be present for Release artifacts and MAY be omitted for Development and Test artifacts.                                        | US-MET-02            |      |
+| **FR-MET-201** | Every file represented by `FILES` MUST have a checksum calculated from the exact file content emitted into the artifact.                      | US-MET-03            |      |
+| **FR-MET-202** | Artifact file paths in `FILES` MUST be relative to the artifact root.                                                                         | US-MET-03            |      |
+| **FR-MET-203** | SHA-256 values in `FILES` MUST be represented as hexadecimal checksums.                                                                       | US-MET-03            |      |
 
 ---
 
@@ -411,57 +412,57 @@ ID structure: `<type>-<scope>-<topic_number><number>`
 
 | ID             | Requirement                                                                                                         | Reference | Dependency |
 | -------------- | ------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| **FR-CHG-101** | Each changelog MUST use the Keep a Changelog convention as its structural standard.                                 | US-CHG-01 |            |
-| **FR-CHG-102** | Each changelog MUST begin with the Markdown heading `# Changelog`.                                                  | US-CHG-01 |            |
-| **FR-CHG-103** | Each changelog MUST contain an `[Unreleased]` section.                                                              | US-CHG-02 |            |
-| **FR-CHG-104** | The `Unreleased` section MUST occur before all released version sections.                                           | US-CHG-02 |            |
-| **FR-CHG-105** | A changelog MAY contain the change categories `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, and `Security`. | US-CHG-03 |            |
-| **FR-CHG-106** | The contents of an individual change-category section are otherwise developer-defined.                              | US-CHG-03 |            |
+| **FR-CHG-101** | Each changelog MUST use the Keep a Changelog convention as its structural standard.                                 | US-CHG-01 |      |
+| **FR-CHG-102** | Each changelog MUST begin with the Markdown heading `# Changelog`.                                                  | US-CHG-01 |      |
+| **FR-CHG-103** | Each changelog MUST contain an `[Unreleased]` section.                                                              | US-CHG-02 |      |
+| **FR-CHG-104** | The `Unreleased` section MUST occur before all released version sections.                                           | US-CHG-02 |      |
+| **FR-CHG-105** | A changelog MAY contain the change categories `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, and `Security`. | US-CHG-03 |      |
+| **FR-CHG-106** | The contents of an individual change-category section are otherwise developer-defined.                              | US-CHG-03 |      |
 
 ### 7.2 Unreleased Content
 
 | ID             | Requirement                                                                                                                                                                                                       | Reference | Dependency |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| **FR-CHG-201** | A changelog MUST be considered non-empty when its `Unreleased` section contains at least one supported change-category subheading with at least one paragraph or bullet point of content beneath that subheading. | US-CHG-04 |            |
-| **FR-CHG-202** | Release tooling MUST be able to determine whether the `Unreleased` section is empty according to **FR-CHG-201**.                                                                                                  | US-CHG-04 |            |
-| **FR-CHG-203** | Release tooling MUST NOT attempt to determine whether a documented change is factually correct or complete.                                                                                                       | US-CHG-04 |            |
+| **FR-CHG-201** | A changelog MUST be considered non-empty when its `Unreleased` section contains at least one supported change-category subheading with at least one paragraph or bullet point of content beneath that subheading. | US-CHG-04 |      |
+| **FR-CHG-202** | Release tooling MUST be able to determine whether the `Unreleased` section is empty according to **FR-CHG-201**.                                                                                                  | US-CHG-04 |      |
+| **FR-CHG-203** | Release tooling MUST NOT attempt to determine whether a documented change is factually correct or complete.                                                                                                       | US-CHG-04 |      |
 
 ### 7.3 Released Versions
 
 | ID             | Requirement                                                                                                                                                            | Reference | Dependency |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| **FR-CHG-301** | A released version section MUST use the heading format `[<semantic_version>] - <date>`.                                                                                | US-CHG-05 |            |
-| **FR-CHG-302** | Release dates MUST use the `YYYY-MM-DD` ISO date format.                                                                                                               | US-CHG-05 |            |
-| **FR-CHG-303** | The version in a released version heading MUST be a Semantic Versioning value.                                                                                         | US-CHG-05 |            |
-| **FR-CHG-304** | The first released version reference MUST identify the Git revision associated with that initial release.                                                              | US-CHG-06 |            |
-| **FR-CHG-305** | Every subsequent released version reference MUST compare the previous release revision with the current release revision.                                              | US-CHG-06 |            |
-| **FR-CHG-306** | The `Unreleased` comparison reference MUST compare the previous release revision with `HEAD`.                                                                          | US-CHG-06 |            |
-| **FR-CHG-307** | The release revision used for a changelog reference MUST represent the source commit before the changelog release commit is created, preventing a circular comparison. | US-CHG-06 |            |
+| **FR-CHG-301** | A released version section MUST use the heading format `[<semantic_version>] - <date>`.                                                                                | US-CHG-05 |      |
+| **FR-CHG-302** | Release dates MUST use the `YYYY-MM-DD` ISO date format.                                                                                                               | US-CHG-05 |      |
+| **FR-CHG-303** | The version in a released version heading MUST be a Semantic Versioning value.                                                                                         | US-CHG-05 |      |
+| **FR-CHG-304** | The first released version reference MUST identify the Git revision associated with that initial release.                                                              | US-CHG-06 |      |
+| **FR-CHG-305** | Every subsequent released version reference MUST compare the previous release revision with the current release revision.                                              | US-CHG-06 |      |
+| **FR-CHG-306** | The `Unreleased` comparison reference MUST compare the previous release revision with `HEAD`.                                                                          | US-CHG-06 |      |
+| **FR-CHG-307** | The release revision used for a changelog reference MUST represent the source commit before the changelog release commit is created, preventing a circular comparison. | US-CHG-06 |      |
 
 ### 7.4 Markdown Reference Links
 
 | ID             | Requirement                                                                                                                                     | Reference            | Dependency |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- |
-| **FR-CHG-401** | Changelog version identifiers MUST use Markdown reference links.                                                                                | US-CHG-07            |            |
-| **FR-CHG-402** | The `[Unreleased]` reference and every released version reference MUST be defined in the reference-link section at the bottom of the changelog. | US-CHG-07            |            |
-| **FR-CHG-403** | Reference definitions MUST identify the corresponding Git comparison or release location according to the release state.                        | US-CHG-06, US-CHG-07 |            |
+| **FR-CHG-401** | Changelog version identifiers MUST use Markdown reference links.                                                                                | US-CHG-07            |      |
+| **FR-CHG-402** | The `[Unreleased]` reference and every released version reference MUST be defined in the reference-link section at the bottom of the changelog. | US-CHG-07            |      |
+| **FR-CHG-403** | Reference definitions MUST identify the corresponding Git comparison or release location according to the release state.                        | US-CHG-06, US-CHG-07 |      |
 
 ### 7.5 Release Workflow
 
 | ID             | Requirement                                                                                                                                                  | Reference            | Dependency |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------- | ---------- |
-| **FR-CHG-501** | The release workflow SHOULD generate the released version section and its reference link from the selected release version, release date, and Git revisions. | US-CHG-08            |            |
-| **FR-CHG-502** | The release workflow SHOULD preserve developer-authored change descriptions when generating a release entry.                                                 | US-CHG-08            |            |
-| **FR-CHG-503** | A project or target requiring a changelog MUST NOT be considered ready for release when its `Unreleased` section is empty according to **FR-CHG-201**.       | US-CHG-04, US-CHG-08 |            |
-| **FR-CHG-504** | Changelog validation MUST report structural violations separately from build, dependency, bundling, and deployment errors.                                   | US-CHG-04            |            |
+| **FR-CHG-501** | The release workflow SHOULD generate the released version section and its reference link from the selected release version, release date, and Git revisions. | US-CHG-08            |      |
+| **FR-CHG-502** | The release workflow SHOULD preserve developer-authored change descriptions when generating a release entry.                                                 | US-CHG-08            |      |
+| **FR-CHG-503** | A project or target requiring a changelog MUST NOT be considered ready for release when its `Unreleased` section is empty according to **FR-CHG-201**.       | US-CHG-04, US-CHG-08 |      |
+| **FR-CHG-504** | Changelog validation MUST report structural violations separately from build, dependency, bundling, and deployment errors.                                   | US-CHG-04            |      |
 
 ### 7.6 Scope
 
 | ID             | Requirement                                                                                                              | Reference             | Dependency |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------- | ---------- |
-| **FR-CHG-601** | A changelog MAY be associated with a project or library.                                                                 | Existing architecture |            |
-| **FR-CHG-602** | A target MAY select a target-specific changelog using `changelog_path`.                                                  | Existing architecture |            |
-| **FR-CHG-603** | Unless a target-specific changelog is configured, the default changelog behavior MUST apply to the default build target. | Existing architecture |            |
+| **FR-CHG-601** | A changelog MAY be associated with a project or library.                                                                 | Existing architecture |      |
+| **FR-CHG-602** | A target MAY select a target-specific changelog using `changelog_path`.                                                  | Existing architecture |      |
+| **FR-CHG-603** | Unless a target-specific changelog is configured, the default changelog behavior MUST apply to the default build target. | Existing architecture |      |
 
 ---
 
@@ -472,36 +473,36 @@ ID structure: `<type>-<scope>-<topic_number><number>`
 | ID             | Requirement                                                                                                                                       | Reference            | Dependency     |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | -------------- |
 | **FR-DPL-101** | The deployment system MUST deploy a build artifact produced for a configured build target to a configured deployment target.                      | US-DPL-01            | Build system   |
-| **FR-DPL-102** | A deployment MUST operate on one build artifact and one deployment target as an independently contained operation.                                | US-DPL-01, US-DPL-10 |                |
+| **FR-DPL-102** | A deployment MUST operate on one build artifact and one deployment target as an independently contained operation.                                | US-DPL-01, US-DPL-10 |          |
 | **FR-DPL-103** | The deployment system MUST support Development and Release deployment methods corresponding to Development and Release build artifacts.           | US-DPL-02            | Build types    |
-| **FR-DPL-104** | Test artifacts MUST NOT be treated as a deployment method.                                                                                        | US-DPL-02            |                |
-| **FR-DPL-105** | A completed Release deployment MUST be immutable and MUST NOT overwrite an existing completed release with the same project, target, and version. | US-DPL-06            |                |
+| **FR-DPL-104** | Test artifacts MUST NOT be treated as a deployment method.                                                                                        | US-DPL-02            |          |
+| **FR-DPL-105** | A completed Release deployment MUST be immutable and MUST NOT overwrite an existing completed release with the same project, target, and version. | US-DPL-06            |          |
 | **FR-DPL-106** | A Release deployment MUST publish the artifact such that `metadata.lua` is the completion marker for the deployment.                              | US-DPL-08            | Build metadata |
 
 ### 8.2. Local Filesystem Deployment
 
 | ID             | Requirement                                                                                                                                                | Reference            | Dependency |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- |
-| **FR-DPL-201** | The `local_filesystem` deployment target MUST support deployment of Development artifacts.                                                                 | US-DPL-03            |            |
-| **FR-DPL-202** | The `local_filesystem` deployment target MUST support deployment of Release artifacts.                                                                     | US-DPL-03            |            |
-| **FR-DPL-203** | Development deployments to a local filesystem MUST replace the existing Development artifact when one exists.                                              | US-DPL-02, US-DPL-03 |            |
-| **FR-DPL-204** | Release deployments to a local filesystem MUST reject an existing completed release with the same project, target, and version.                            | US-DPL-06            |            |
-| **FR-DPL-205** | An incomplete Release deployment at a local filesystem destination, identified by a release directory without `metadata.lua`, MAY be removed and replaced. | US-DPL-06            |            |
+| **FR-DPL-201** | The `local_filesystem` deployment target MUST support deployment of Development artifacts.                                                                 | US-DPL-03            |      |
+| **FR-DPL-202** | The `local_filesystem` deployment target MUST support deployment of Release artifacts.                                                                     | US-DPL-03            |      |
+| **FR-DPL-203** | Development deployments to a local filesystem MUST replace the existing Development artifact when one exists.                                              | US-DPL-02, US-DPL-03 |      |
+| **FR-DPL-204** | Release deployments to a local filesystem MUST reject an existing completed release with the same project, target, and version.                            | US-DPL-06            |      |
+| **FR-DPL-205** | An incomplete Release deployment at a local filesystem destination, identified by a release directory without `metadata.lua`, MAY be removed and replaced. | US-DPL-06            |      |
 
 ### 8.3. Git Repository Deployment
 
 | ID             | Requirement                                                                                                                                                                                                 | Reference            | Dependency |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- |
 | **FR-DPL-301** | The `git_repository` deployment target MUST publish artifacts to a configured deployment branch in a Git repository.                                                                                        | US-DPL-04            | Git        |
-| **FR-DPL-302** | A Git deployment MUST use the deployment layout `<project>/<build-target>/<version>/` for Release artifacts.                                                                                                | US-DPL-04            |            |
+| **FR-DPL-302** | A Git deployment MUST use the deployment layout `<project>/<build-target>/<version>/` for Release artifacts.                                                                                                | US-DPL-04            |      |
 | **FR-DPL-303** | Before a Git deployment starts modifying its deployment workspace, the system MUST fetch the configured remote.                                                                                             | US-DPL-05            | Git        |
 | **FR-DPL-304** | Before inspecting or creating a deployment, the system MUST reset the deployment workspace to the fetched remote deployment branch and remove untracked files and directories created by previous attempts. | US-DPL-05            | Git        |
-| **FR-DPL-305** | The Git deployment process MUST inspect the synchronized local deployment workspace to determine whether the requested Release version already exists and is complete.                                      | US-DPL-06            |            |
-| **FR-DPL-306** | A Release directory that exists without `metadata.lua` MUST be treated as incomplete.                                                                                                                       | US-DPL-07            |            |
-| **FR-DPL-307** | An incomplete Release directory in the Git deployment workspace MUST be removed before the replacement artifact is copied.                                                                                  | US-DPL-07            |            |
-| **FR-DPL-308** | A Git Release deployment MUST copy the artifact files into the release directory, create a Git commit, and push the commit to the configured remote.                                                        | US-DPL-04, US-DPL-08 |            |
-| **FR-DPL-309** | A Git Release deployment MUST make `metadata.lua` available only after all other artifact files have been copied successfully, so that its presence represents a complete published artifact.               | US-DPL-08            |            |
-| **FR-DPL-310** | A Git deployment MUST fail if the remote cannot be fetched, the deployment branch cannot be synchronized, the artifact cannot be copied, the commit cannot be created, or the push cannot be completed.     | US-DPL-04, US-DPL-05 |            |
+| **FR-DPL-305** | The Git deployment process MUST inspect the synchronized local deployment workspace to determine whether the requested Release version already exists and is complete.                                      | US-DPL-06            |      |
+| **FR-DPL-306** | A Release directory that exists without `metadata.lua` MUST be treated as incomplete.                                                                                                                       | US-DPL-07            |      |
+| **FR-DPL-307** | An incomplete Release directory in the Git deployment workspace MUST be removed before the replacement artifact is copied.                                                                                  | US-DPL-07            |      |
+| **FR-DPL-308** | A Git Release deployment MUST copy the artifact files into the release directory, create a Git commit, and push the commit to the configured remote.                                                        | US-DPL-04, US-DPL-08 |      |
+| **FR-DPL-309** | A Git Release deployment MUST make `metadata.lua` available only after all other artifact files have been copied successfully, so that its presence represents a complete published artifact.               | US-DPL-08            |      |
+| **FR-DPL-310** | A Git deployment MUST fail if the remote cannot be fetched, the deployment branch cannot be synchronized, the artifact cannot be copied, the commit cannot be created, or the push cannot be completed.     | US-DPL-04, US-DPL-05 |      |
 
 ### 8.4. Release Preconditions and Workflow
 
@@ -513,17 +514,17 @@ ID structure: `<type>-<scope>-<topic_number><number>`
 | **FR-DPL-404** | If tests exist and testing is selected for the deployment, all required tests MUST pass before the Release artifact is published.                                                                                          | US-DPL-09 | Test system   |
 | **FR-DPL-405** | After a successful Release deployment, the deployment process MUST convert the current `Unreleased` changelog section into the released version section with the release date and create a new empty `Unreleased` section. | US-DPL-12 | Changelog     |
 | **FR-DPL-406** | The changelog update MUST be committed after the Release artifact has been built and successfully deployed.                                                                                                                | US-DPL-12 | Git           |
-| **FR-DPL-407** | Failure to create or commit the post-deployment changelog update MUST be reported as a post-deployment error and MUST NOT remove or roll back the successfully deployed Release artifact.                                  | US-DPL-13 |               |
-| **FR-DPL-408** | Build and test stages MAY be skipped only when explicitly selected by the deployment invocation; skipping a stage MUST NOT change the artifact or deployment rules themselves.                                             | US-DPL-14 |               |
+| **FR-DPL-407** | Failure to create or commit the post-deployment changelog update MUST be reported as a post-deployment error and MUST NOT remove or roll back the successfully deployed Release artifact.                                  | US-DPL-13 |         |
+| **FR-DPL-408** | Build and test stages MAY be skipped only when explicitly selected by the deployment invocation; skipping a stage MUST NOT change the artifact or deployment rules themselves.                                             | US-DPL-14 |         |
 
 ### 8.5. Independent Target Processing
 
 | ID             | Requirement                                                                                                                                                                | Reference | Dependency |
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| **FR-DPL-501** | When multiple deployment targets are selected, each target MUST be processed as an independent deployment operation.                                                       | US-DPL-10 |            |
-| **FR-DPL-502** | Failure of one deployment target MUST stop only that deployment operation and MUST NOT roll back, cancel, or otherwise invalidate successful deployments to other targets. | US-DPL-10 |            |
-| **FR-DPL-503** | After processing all selected deployment targets, the deployment system MUST report the result of each target individually.                                                | US-DPL-11 |            |
-| **FR-DPL-504** | A deployment operation MUST preserve successfully deployed artifacts even when another selected target fails.                                                              | US-DPL-10 |            |
+| **FR-DPL-501** | When multiple deployment targets are selected, each target MUST be processed as an independent deployment operation.                                                       | US-DPL-10 |      |
+| **FR-DPL-502** | Failure of one deployment target MUST stop only that deployment operation and MUST NOT roll back, cancel, or otherwise invalidate successful deployments to other targets. | US-DPL-10 |      |
+| **FR-DPL-503** | After processing all selected deployment targets, the deployment system MUST report the result of each target individually.                                                | US-DPL-11 |      |
+| **FR-DPL-504** | A deployment operation MUST preserve successfully deployed artifacts even when another selected target fails.                                                              | US-DPL-10 |      |
 
 ### 8.6. Deployment Workflow
 
@@ -556,13 +557,17 @@ For each selected deployment target:
 
 Development deployment has no Release-specific version or changelog preconditions.
 
+`BASE_URL` is always present in artifact metadata, but only has no meaningful distribution in development mode.
+
+Since a development build can have a dirty work tree the `SOURCE_REVISION` specified inside the artifact's metadata could be not representative if the work tree contains uncommitted changes.
+
 ### 8.7. Deployment Atomicity
 
 | ID              | Requirement                                                                                                                                                          | Reference | Dependency |
 | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| **NFR-DPL-701** | Deployment operations SHOULD avoid leaving a destination in an intentionally empty state when replacement of an existing Development artifact fails partway through. | US-DPL-03 |            |
-| **NFR-DPL-702** | A Git Release deployment SHOULD use the presence of `metadata.lua` as the final publication marker rather than requiring a separate deployment-state file.           | US-DPL-08 |            |
-| **NFR-DPL-703** | Deployment diagnostics MUST identify the deployment target, project, build target, deployment method, and failure cause.                                             | US-DPL-11 |            |
+| **NFR-DPL-701** | Deployment operations SHOULD avoid leaving a destination in an intentionally empty state when replacement of an existing Development artifact fails partway through. | US-DPL-03 |      |
+| **NFR-DPL-702** | A Git Release deployment SHOULD use the presence of `metadata.lua` as the final publication marker rather than requiring a separate deployment-state file.           | US-DPL-08 |      |
+| **NFR-DPL-703** | Deployment diagnostics MUST identify the deployment target, project, build target, deployment method, and failure cause.                                             | US-DPL-11 |      |
 
 ### 8.8. Root discovery metadata
 
@@ -591,7 +596,6 @@ return {
     }
 }
 ```
-
 
 ---
 
@@ -696,7 +700,114 @@ When both options are selected, startup behavior is `installer update -> program
 
 ---
 
-## 10. Non-Functional Requirements Established So Far
+## 10. CLI
+
+### 10.1. Command Structure
+
+| ID             | Requirement                                                                                           |
+| -------------- | ----------------------------------------------------------------------------------------------------- |
+| **FR-CLI-101** | The CLI SHALL use `cc <command> <selector> [filters]`.                                                |
+| **FR-CLI-102** | Supported commands SHALL be build, test, deploy, and verify.                                          |
+| **FR-CLI-103** | The selector SHALL be mandatory for operational commands.                                             |
+| **FR-CLI-104** | `cc` without a command SHALL be invalid and SHALL display help.                                       |
+| **FR-CLI-105** | An operational command without its selector SHALL be invalid and SHALL display command-specific help. |
+
+### 10.2. Selectors
+
+| ID             | Requirement                                                                                                                         |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| **FR-CLI-201** | Supported selectors SHALL be: `all`, `lib.all`, `external.all`, `<project-name>`, `lib.<library-name>`, `external.<external-name>`. |
+| **FR-CLI-202** | A selector SHALL identify only a project, shared library, external library, or a collection of such source units.                   |
+| **FR-CLI-203** | A Build Target SHALL NOT be directly addressable as a selector.                                                                     |
+| **FR-CLI-204** | Build Targets SHALL be narrowed through command-specific filters.                                                                   |
+| **FR-CLI-205** | `all` SHALL select all projects.                                                                                                    |
+| **FR-CLI-206** | `lib.all` SHALL select all shared libraries.                                                                                        |
+| **FR-CLI-207** | `external.all` SHALL select all external libraries.                                                                                 |
+
+### 10.3. Selection
+
+| ID             | Requirement                                                                                            |
+| -------------- | ------------------------------------------------------------------------------------------------------ |
+| **FR-CLI-301** | The CLI SHALL resolve the selector and filters before beginning operations.                            |
+| **FR-CLI-302** | The CLI SHALL display the complete concrete selection before performing operations.                    |
+| **FR-CLI-303** | An empty selection SHALL NOT be treated as an execution error.                                         |
+| **FR-CLI-304** | For an empty selection, the CLI SHALL state that nothing matched and SHALL perform zero operations.    |
+| **FR-CLI-305** | Multiple selected entries SHALL result in one operation per entry, executed sequentially.              |
+| **FR-CLI-306** | The concrete selection SHALL be sorted alphabetically by fully qualified identifier before execution.  |
+| **FR-CLI-307** | Selection order SHALL therefore be deterministic for the same repository state, selector, and filters. |
+
+### 10.4. Results and Summary
+
+| ID             | Requirement                                                                         |
+| -------------- | ----------------------------------------------------------------------------------- |
+| **FR-CLI-401** | The CLI SHALL report the result of every individual operation.                      |
+| **FR-CLI-402** | The CLI SHALL provide a final summary after all selected operations have completed. |
+| **FR-CLI-403** | The summary SHALL contain the status of all individual operations.                  |
+| **FR-CLI-404** | The summary SHALL contain an aggregate result appropriate to the command.           |
+
+### 10.5. Build
+
+| ID             | Requirement                                                                                                                                         |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **FR-CLI-501** | Build syntax SHALL be:<br>`cc build <selector>`<br>    `[--type <development\|test\|release>]`<br>    `[--target <glob>]`<br>    `[--group <glob>]` |
+| **FR-CLI-502** | The default build type SHALL be development.                                                                                                        |
+| **FR-CLI-503** | The default Build Target SHALL be default.                                                                                                          |
+| **FR-CLI-504** | `--type` SHALL accept only development, test, or release.                                                                                           |
+| **FR-CLI-505** | `--type` SHALL NOT support glob matching.                                                                                                           |
+| **FR-CLI-506** | Build Target name filters MAY contain glob patterns.                                                                                                |
+| **FR-CLI-507** | Build Group name filters MAY contain glob patterns.                                                                                                 |
+
+### 10.6. Test
+
+| ID             | Requirement                                                                                                                                                                          |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **FR-CLI-601** | Test syntax SHALL be:<br>`cc test <selector>`<br>    `[--target <glob>]`<br>    `[--group <glob>]`<br>    `[--test-filter <filter-expression>]`                                      |
+| **FR-CLI-602** | The test command SHALL operate on the Test build type.                                                                                                                               |
+| **FR-CLI-603** | The test command SHALL NOT expose a build-type option.                                                                                                                               |
+| **FR-CLI-604** | The default Build Target SHALL be default.                                                                                                                                           |
+| **FR-CLI-605** | `--target` MAY contain glob patterns.                                                                                                                                                |
+| **FR-CLI-606** | `--group` MAY contain glob patterns.                                                                                                                                                 |
+| **FR-CLI-607** | `--test-filter` SHALL use:<br>`<positive-expr>[:<positive-expr>...][-<negative-expr>[:<negative-expr>...]]`<br>where each expression is `<suite>.<case>` and both parts support `*`. |
+| **FR-CLI-608** | If no positive expression is provided, all tests SHALL be selected before negative expressions are applied.                                                                          |
+| **FR-CLI-609** | The test command SHALL NOT accept deployment parameters.                                                                                                                             |
+
+### 10.7. Deploy
+
+| ID             | Requirement                                                                                                                                                                                             |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **FR-CLI-701** | Deploy syntax SHALL be:<br>`cc deploy <selector>`<br>    `[--deployment-target <name>]`                                                                                                                 |
+| **FR-CLI-702** | The default Deployment Target SHALL be default.                                                                                                                                                         |
+| **FR-CLI-703** | `--deployment-target` SHALL select exactly one configured Deployment Target by name.                                                                                                                    |
+| **FR-CLI-704** | Deployment Target names SHALL NOT support glob matching.                                                                                                                                                |
+| **FR-CLI-705** | The selected Deployment Target SHALL define deployment method, destination, and build type.                                                                                                             |
+| **FR-CLI-706** | Deploy SHALL NOT require separate command-line parameters for method, destination, or build type.                                                                                                       |
+| **FR-CLI-707** | If no Deployment Target named `default` exists when the default is required, the CLI SHALL report an error and explain that the developer can create `default` or explicitly use `--deployment-target`. |
+
+### 10.8. Verify
+
+| ID             | Requirement                                                                                                                                                                                                   |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **FR-CLI-801** | Verify SHALL perform a dry run of the selected workflow.                                                                                                                                                      |
+| **FR-CLI-802** | Verify syntax SHALL be:<br>`cc verify <selector>`<br>    `[--build-type <development\|test\|release>]`<br>    `[--build-target <glob>]`<br>    `[--build-group <glob>]`<br>    `[--deployment-target <name>]` |
+| **FR-CLI-803** | Verify SHALL use explicit long parameter names and SHALL NOT use the build-only short forms `--type`, `--target`, or `--group`.                                                                               |
+| **FR-CLI-804** | `--build-type` SHALL accept only development, test, or release.                                                                                                                                               |
+| **FR-CLI-805** | `--build-type` SHALL NOT support glob matching.                                                                                                                                                               |
+| **FR-CLI-806** | `--build-target` and `--build-group` MAY contain glob patterns.                                                                                                                                               |
+| **FR-CLI-807** | `--deployment-target` SHALL use an exact name and SHALL NOT support glob matching.                                                                                                                            |
+| **FR-CLI-808** | Verify SHALL NOT silently infer a workflow when no workflow-defining option is supplied.                                                                                                                      |
+| **FR-CLI-809** | If no build workflow or Deployment Target is specified, the CLI SHALL report an error and explain how to use `--build-type` or `--deployment-target`.                                                         |
+
+### 10.9. Validation and Help
+
+| ID             | Requirement                                                                                              |
+| -------------- | -------------------------------------------------------------------------------------------------------- |
+| **FR-CLI-901** | The CLI SHALL validate command names, selectors, filters, and option values before executing operations. |
+| **FR-CLI-902** | Invalid syntax or option values SHALL prevent operation execution.                                       |
+| **FR-CLI-903** | The CLI SHALL provide command-specific help for invalid invocations where applicable.                    |
+
+---
+
+## 11. Non-Functional Requirements Established So Far
 
 These requirements apply across both areas.
 
@@ -721,3 +832,11 @@ These requirements apply across both areas.
 | **NFR-17** | The root installer SHOULD remain self-contained and bootstrap-friendly.                                                                                                   |
 | **NFR-18** | A checksum mismatch SHOULD prevent the affected file from being reported as successfully installed.                                                                       |
 | **NFR-19** | Registry writes SHOULD preserve the distinction between incomplete and completed installation.                                                                            |
+| **NFR-18** | A checksum mismatch SHOULD prevent the affected file from being reported as successfully installed.                                                                       |
+| **NFR-19** | Registry writes SHOULD preserve the distinction between incomplete and completed installation.                                                                            |
+| **NFR-20** | Selection ordering SHALL be deterministic.                                                                                                                                |
+| **NFR-21** | The same selector and filters applied to the same repository state SHALL produce the same selection ordering.                                                             |
+| **NFR-22** | The CLI SHALL display the concrete selection before execution.                                                                                                            |
+| **NFR-23** | The CLI SHALL make an empty selection explicit.                                                                                                                           |
+| **NFR-24** | All operational commands SHALL use the same selector, filter, selection, operation, and summary concepts.                                                                 |
+| **NFR-25** | All operational commands SHALL provide a final operation summary.                                                                                                         |

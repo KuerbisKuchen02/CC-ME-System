@@ -121,6 +121,7 @@ Below is the complete catalog of all valid configuration keys, organized by logi
   preserved:
     - "config/default.json"
     - "plugins/*.lua"
+    - "module/moduleb/"
   ```
 
 #### `groups`
@@ -358,7 +359,7 @@ method: development
 - **Level of Definition**: Deployment Destination only
 - **Data Type**: Object/ Map
 - **Parameters**:
-  - **name**: always `git_repository`
+  - **name**: always `local_filesystem`
   - **path**: string (path to a local directory)
   - **mode**: string (optional); `copy` (copy files to destination), `link` (create soft links at destination) (default: copy)
 - **Description**: Deploy the artifact directly to a git repository
@@ -456,7 +457,7 @@ Path configurations are strictly parsed based on their starting characters to re
 
 1. **`./` (Leading dot-slash)**: Path is relative to the active source root (or test source root) of the current target.
 2. **`/` (Leading slash)**: Path is absolute relative to the repository root.
-3. **No leading character**: Path is interpreted as relative, where the starting base is defined by the specific configuration field's design.
+3. **No leading character**: Path is relative to the active source root (or test source root) of the current target.
 
 ---
 
